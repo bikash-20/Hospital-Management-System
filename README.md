@@ -10,6 +10,7 @@
 - Schema: production uses Flyway migrations and `ddl-auto=validate`.
 - CORS: set `CORS_ALLOWED_ORIGINS` to the exact Vercel URL.
 - Redis, multiple backend instances, and a reverse proxy are intentionally excluded from the demo.
+- CI/CD: `.github/workflows/ci-cd.yml` tests both applications on every pull request and deploys the backend to Fly.io after a successful push to `main`.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the free-tier design and the larger production architecture, and [LOAD_TESTING.md](LOAD_TESTING.md) for the local Docker benchmark.
 
@@ -464,7 +465,7 @@ Built to replace paper-based workflows with a unified digital system covering pa
 
 ```bash
 # Local PostgreSQL (zero config)
-docker compose up --build
+docker compose --env-file /dev/null up --build
 
 # With Supabase (add .env credentials)
 docker compose --profile supabase up --build
@@ -502,6 +503,53 @@ cd frontend && npm run dev
 | `DB_PASSWORD` | Yes (prod) | `postgres` | Database password |
 | `JWT_SECRET` | Optional | Built-in default | HS256 signing key (CHANGE IN PRODUCTION) |
 | `JWT_EXPIRATION_MS` | Optional | `86400000` (24h) | Token expiry in milliseconds |
+| `CORS_ALLOWED_ORIGINS` | Required (prod) | `http://localhost:5173` | Comma-separated frontend origins |
+
+### Automatic Deployments
+
+The repository includes [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+
+#### Fly.io backend
+
+1. Create the Fly application using `backend/fly.toml`, and change its `app` value to your unique Fly app name.
+2. Create a Fly deploy token:
+
+     ```bash
+     fly tokens create deploy -a YOUR_FLY_APP_NAME
+     ```
+
+3. In GitHub, open **Settings → Secrets and variables → Actions** and add:
+
+     - Secret `FLY_API_TOKEN`: the token from the previous command.
+     - Repository variable `FLY_APP_NAME`: your Fly app name.
+     - Optional environment `production`: recommended for approval rules and deployment protection.
+
+4. Store `DATABASE_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION_MS`, and `CORS_ALLOWED_ORIGINS` as Fly secrets:
+
+     ```bash
+     fly secrets set \
+       DATABASE_URL="jdbc:postgresql://YOUR_SUPABASE_HOST:5432/postgres?sslmode=require" \
+       DB_USERNAME="YOUR_DB_USERNAME" \
+       DB_PASSWORD="YOUR_DB_PASSWORD" \
+       JWT_SECRET="YOUR_LONG_RANDOM_SECRET" \
+       CORS_ALLOWED_ORIGINS="https://YOUR_VERCEL_DOMAIN"
+     ```
+
+Every push to `main` will then run frontend lint/build and backend tests. The Fly deployment runs only if both checks pass. Pull requests run checks but never deploy.
+
+#### Vercel frontend
+
+Connect the GitHub repository in Vercel once:
+
+- **Root Directory:** `frontend`
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Production branch:** `main`
+- Environment variable: `VITE_API_URL=https://YOUR_FLY_APP_NAME.fly.dev`
+
+Vercel's GitHub integration automatically creates preview deployments for pull requests and production deployments for successful pushes to `main`. Set the final Vercel URL in Fly's `CORS_ALLOWED_ORIGINS` secret.
+
+This setup intentionally uses Vercel's native Git integration rather than storing a Vercel token in GitHub Actions. It keeps the pipeline smaller and avoids duplicating deployment ownership.
 
 ---
 
@@ -509,7 +557,7 @@ cd frontend && npm run dev
 
 ### Prerequisites
 
-- Java 21+ (JDK for building, JRE for running)
+- Java 25 (the backend Maven project and Docker image target Java 25)
 - Node.js 22+
 - Maven 3.9+ (or use `./mvnw`)
 - Docker (optional, for containerized deployment)
