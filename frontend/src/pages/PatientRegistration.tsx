@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { registerPatientApi, getPatientsApi } from '@/api/api';
+import { useToast } from '@/context/ToastContext';
 import type { Patient, PatientGender } from '@/types';
 import {
   UserPlus,
@@ -14,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 
 export default function PatientRegistration() {
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -41,6 +43,7 @@ export default function PatientRegistration() {
       setShowForm(false);
       resetForm();
       queryClient.invalidateQueries({ queryKey: ['patients'] });
+      showToast(`Patient ${newPatient.uhid} registered successfully`, 'success');
       setTimeout(() => setFormSuccess(null), 5000);
     },
   });

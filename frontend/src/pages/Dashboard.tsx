@@ -169,7 +169,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : appointments?.length ? (
             <StaggerContainer className="space-y-2">
               {appointments?.slice(0, 5).map((apt) => (
                 <StaggerItem key={apt.id}>
@@ -196,6 +196,8 @@ export default function Dashboard() {
                 </StaggerItem>
               ))}
             </StaggerContainer>
+          ) : (
+            <EmptyDashboardState message="No appointments scheduled for today" />
           )}
         </motion.div>
 
@@ -235,7 +237,9 @@ export default function Dashboard() {
                 <BedStatRow label="Occupied" count={bedStats.occupied} total={bedStats.total} color="red" />
                 <BedStatRow label="Under Cleaning" count={bedStats.cleaning} total={bedStats.total} color="amber" />
               </div>
-            ) : null}
+            ) : (
+              <EmptyDashboardState message="Bed data is unavailable" />
+            )}
           </motion.div>
 
           {/* Quick Actions */}
@@ -294,6 +298,14 @@ function SkeletonStatCard() {
       </div>
       <div className="skeleton skeleton-heading w-16 mb-2" />
       <div className="skeleton skeleton-text w-24" />
+    </div>
+  );
+}
+
+function EmptyDashboardState({ message }: { message: string }) {
+  return (
+    <div className="rounded-xl border border-dashed border-surface-200 dark:border-[#2A2F38] px-4 py-8 text-center" role="status">
+      <p className="text-sm text-surface-500">{message}</p>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getUsersApi, createUserApi, updateUserApi, toggleUserEnabledApi, deleteUserApi } from '@/api/api';
 import type { ManagedUser, UserRole } from '@/types';
+import { useToast } from '@/context/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
@@ -34,6 +35,7 @@ const roleLabels: Record<string, string> = {
 
 export default function UserManagement() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
@@ -56,6 +58,7 @@ export default function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setShowCreateModal(false);
+      showToast('User created successfully', 'success');
     },
   });
 
@@ -65,6 +68,7 @@ export default function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setEditingUser(null);
+      showToast('User updated successfully', 'success');
     },
   });
 
@@ -72,6 +76,7 @@ export default function UserManagement() {
     mutationFn: toggleUserEnabledApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      showToast('User access updated', 'success');
     },
   });
 
@@ -80,6 +85,7 @@ export default function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setDeleteConfirm(null);
+      showToast('User deleted successfully', 'success');
     },
   });
 

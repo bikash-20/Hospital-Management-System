@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 public interface PatientRepository extends JpaRepository<Patient, UUID> {
     Optional<Patient> findByUhid(String uhid);
@@ -23,4 +24,6 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     java.util.List<Patient> findByMobileNumber(String mobileNumber);
 
     Page<Patient> findByFullNameContainingIgnoreCase(String name, Pageable pageable);
+
+    long countByCreatedDateBetween(LocalDateTime start, LocalDateTime end);
 }

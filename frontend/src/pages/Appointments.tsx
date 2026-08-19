@@ -6,6 +6,7 @@ import {
   getPatientsApi,
 } from '@/api/api';
 import type { AppointmentStatus } from '@/types';
+import { useToast } from '@/context/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
@@ -32,6 +33,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function Appointments() {
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | ''>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -56,6 +58,7 @@ export default function Appointments() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       setShowCreateModal(false);
+      showToast('Appointment created successfully', 'success');
     },
   });
 

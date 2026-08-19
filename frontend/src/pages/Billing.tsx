@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import PrintableInvoice from '@/components/PrintableInvoice';
+import { useToast } from '@/context/ToastContext';
 
 const statusConfig: Record<string, { color: string; bg: string; label: string; icon: typeof Check }> = {
   PAID: { color: 'text-green-500', bg: 'bg-green-500/10', label: 'Paid', icon: Check },
@@ -24,6 +25,7 @@ const statusConfig: Record<string, { color: string; bg: string; label: string; i
 };
 
 export default function Billing() {
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('');
   const [payingBill, setPayingBill] = useState<BillingType | null>(null);
@@ -42,6 +44,7 @@ export default function Billing() {
       queryClient.invalidateQueries({ queryKey: ['billings'] });
       setPayingBill(null);
       setPayAmount('');
+      showToast('Payment recorded successfully', 'success');
     },
   });
 

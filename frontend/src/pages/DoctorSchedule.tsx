@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDoctorScheduleApi, setDoctorScheduleApi } from '@/api/api';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
@@ -30,6 +31,7 @@ interface TimeSlot {
 
 export default function DoctorSchedule() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [schedule, setSchedule] = useState<Record<string, TimeSlot[]>>({});
   const [hasChanges, setHasChanges] = useState(false);
@@ -77,6 +79,7 @@ export default function DoctorSchedule() {
       queryClient.invalidateQueries({ queryKey: ['doctor-schedule', doctorId] });
       setHasChanges(false);
       setSuccessMessage(true);
+      showToast('Doctor schedule saved successfully', 'success');
       setTimeout(() => setSuccessMessage(false), 3000);
     },
   });

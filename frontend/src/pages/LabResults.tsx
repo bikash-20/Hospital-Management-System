@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getLabResultsApi, updateLabResultStatusApi } from '@/api/api';
 import type { LabResult } from '@/types';
+import { useToast } from '@/context/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
@@ -24,6 +25,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function LabResults() {
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,6 +48,7 @@ export default function LabResults() {
       updateLabResultStatusApi(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-results'] });
+      showToast('Lab result status updated', 'success');
     },
   });
 
@@ -56,6 +59,7 @@ export default function LabResults() {
       queryClient.invalidateQueries({ queryKey: ['lab-results'] });
       setSelectedResult(null);
       setResultValue('');
+      showToast('Lab result completed successfully', 'success');
     },
   });
 

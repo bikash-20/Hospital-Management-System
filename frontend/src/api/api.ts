@@ -318,31 +318,8 @@ export async function getDoctorsApi(): Promise<{ id: string; fullName: string; s
 
 // ===== Dashboard Stats (computed from real data) =====
 export async function getDashboardStatsApi(): Promise<DashboardStats> {
-  // Compute from real API data
-  const [patients, appointments, bedSummary, billings] = await Promise.all([
-    getPatientsApi(),
-    getAppointmentsApi(),
-    getBedSummaryApi(),
-    getBillingsApi(),
-  ]);
-
-  const today = new Date().toISOString().split('T')[0];
-  const todayAppts = appointments.filter((a) => a.appointmentDate.startsWith(today));
-
-  // Revenue = sum of paidAmount from all billing records
-  const revenue = billings.reduce((sum, b) => sum + b.paidAmount, 0);
-
-  // Pending bills = count of UNPAID or PARTIAL billings
-  const pendingBills = billings.filter((b) => b.status === 'UNPAID' || b.status === 'PARTIAL').length;
-
-  return {
-    patientsToday: patients.length,
-    appointmentsToday: todayAppts.length,
-    bedsAvailable: bedSummary.available,
-    bedsTotal: bedSummary.total,
-    revenue,
-    pendingBills,
-  };
+  const { data } = await api.get<DashboardStats>('/dashboard/stats');
+  return data;
 }
 
 // ===== Audit Logs API =====
