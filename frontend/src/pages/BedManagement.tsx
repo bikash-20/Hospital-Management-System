@@ -50,7 +50,7 @@ export default function BedManagement() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Bed Management</h1>
+        <h1 className="text-display text-surface-900 dark:text-white">Bed Management</h1>
         <p className="text-surface-500 dark:text-surface-400 mt-1">
           Monitor and manage bed availability across all wards
         </p>
@@ -58,7 +58,7 @@ export default function BedManagement() {
 
       {/* Stats */}
       {bedStats && (
-        <StaggerContainer className="grid grid-cols-4 gap-4">
+        <StaggerContainer className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <StaggerItem>
             <StatCard icon={LayoutGrid} label="Total Beds" value={bedStats.total} color="surface" />
           </StaggerItem>
@@ -97,7 +97,7 @@ export default function BedManagement() {
                     whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className={`bg-white dark:bg-surface-900 rounded-2xl border ${config.border} p-5 group relative overflow-hidden`}
+                    className={`bg-white dark:bg-[#1A1F26] rounded-2xl border ${config.border} p-4 sm:p-5 group relative overflow-hidden`}
                   >
                     {/* Subtle gradient accent */}
                     <div className={`absolute top-0 left-0 right-0 h-1 ${
@@ -169,7 +169,7 @@ export default function BedManagement() {
       )}
 
       {/* Legend */}
-      <div className="flex items-center gap-6 justify-center pt-4 border-t border-surface-100 dark:border-surface-800">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6 justify-center pt-4 border-t border-surface-100 dark:border-[#2A2F38]">
         <div className="flex items-center gap-2"><div className="w-3 h-3 bg-green-500 rounded-full" /><span className="text-xs text-surface-500">Available</span></div>
         <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full" /><span className="text-xs text-surface-500">Occupied</span></div>
         <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-500 rounded-full" /><span className="text-xs text-surface-500">Under Cleaning</span></div>
@@ -186,7 +186,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: typeof LayoutGrid
     amber: 'bg-amber-500/10 text-amber-500',
   };
   return (
-    <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-4 flex items-center gap-4">
+    <div className="card p-4 flex items-center gap-4">
       <div className={`p-3 rounded-xl ${colorMap[color]}`}><Icon className="w-5 h-5" /></div>
       <div>
         <p className={`text-2xl font-bold ${color === 'surface' ? 'text-surface-900 dark:text-white' : `text-${color}-500`}`}>{value}</p>

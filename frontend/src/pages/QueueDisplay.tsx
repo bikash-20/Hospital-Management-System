@@ -57,16 +57,16 @@ export default function QueueDisplay() {
   return (
     <div className={`space-y-6 max-w-7xl mx-auto ${isFullscreen ? 'p-8' : ''}`}>
       {!isFullscreen && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Live Queue Display</h1>
-            <p className="text-surface-500 dark:text-surface-400 mt-1">Real-time patient queue — auto-refreshes every 5 seconds</p>
+            <h1 className="text-display text-surface-900 dark:text-white">Live Queue Display</h1>
+            <p className="text-body text-surface-500 dark:text-surface-400 mt-1">Real-time patient queue — auto-refreshes every 5 seconds</p>
           </div>
           <div className="flex items-center gap-3">
             <select
               value={doctorId}
               onChange={(e) => setSelectedDoctor(e.target.value)}
-              className="px-4 py-2 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+              className="px-4 py-2.5 bg-white dark:bg-[#1A1F26] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring"
             >
               {doctors?.map((doc) => (
                 <option key={doc.fullName} value={doc.fullName}>{doc.fullName} — {doc.specialization}</option>
@@ -149,7 +149,7 @@ export default function QueueDisplay() {
           {/* Upcoming Queue */}
           <div>
             <p className="text-surface-400 text-sm uppercase tracking-widest mb-6 text-center">Up Next</p>
-            <div className="grid grid-cols-4 gap-4 max-w-3xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto">
               {upcoming.map((apt, i) => (
                 <motion.div
                   key={apt.id}
@@ -157,7 +157,7 @@ export default function QueueDisplay() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1, type: 'spring', stiffness: 200, damping: 20 }}
                   whileHover={{ y: -4, borderColor: 'rgba(8,145,178,0.3)' }}
-                  className="text-center p-5 bg-surface-800/50 rounded-2xl border border-surface-700/30 transition-colors"
+                  className="text-center p-4 sm:p-5 bg-[#1A1F26]/80 rounded-2xl border border-[#2A2F38]/50 transition-colors"
                 >
                   <div className="text-4xl font-bold text-white mb-2">#{apt.tokenNumber}</div>
                   <p className="text-sm text-surface-300 truncate">{apt.patient.fullName}</p>

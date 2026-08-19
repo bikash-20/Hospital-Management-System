@@ -4,8 +4,7 @@ import {
   getAppointmentsApi,
   getPrescriptionsByPatientApi,
   createPrescriptionApi,
-  getDoctorsApi,
-} from '@/api/mockApi';
+} from '@/api/api';
 import type { Appointment, Medicine, LabOrder } from '@/types';
 import {
   User,
@@ -33,18 +32,9 @@ export default function DoctorConsultation() {
   const [labInput, setLabInput] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const { data: doctors } = useQuery({
-    queryKey: ['doctors'],
-    queryFn: getDoctorsApi,
-  });
-
-  // Use the first doctor (Dr. Arif) for demo
-  const currentDoctor = doctors?.[0];
-
   const { data: appointments } = useQuery({
-    queryKey: ['today-appointments', currentDoctor?.id],
-    queryFn: () => getAppointmentsApi('2026-08-19', currentDoctor?.id),
-    enabled: !!currentDoctor,
+    queryKey: ['today-appointments'],
+    queryFn: () => getAppointmentsApi(),
   });
 
   const { data: patientPrescriptions } = useQuery({
@@ -67,15 +57,13 @@ export default function DoctorConsultation() {
   });
 
   const handleSavePrescription = () => {
-    if (!selectedAppointment || !currentDoctor || !diagnosis) return;
+    if (!selectedAppointment || !diagnosis) return;
     saveMutation.mutate({
-      appointment: selectedAppointment,
-      patient: selectedAppointment.patient,
-      doctor: currentDoctor,
+      appointmentId: selectedAppointment.id,
       diagnosis,
-      chiefComplaints: chiefComplaints.split('\n').filter(Boolean),
-      medicines: medicines.filter((m) => m.name),
-      labOrders,
+      chiefComplaints: chiefComplaints.split('\n').filter(Boolean).join(','),
+      medicines: JSON.stringify(medicines.filter((m) => m.name)),
+      labOrders: JSON.stringify(labOrders),
     });
   };
 
@@ -113,9 +101,9 @@ export default function DoctorConsultation() {
   };
 
   return (
-    <div className="h-[calc(100vh-112px)] flex gap-6 max-w-[1600px] mx-auto">
+    <div className="h-[calc(100vh-112px)] flex flex-col lg:flex-row gap-4 sm:gap-6 max-w-[1600px] mx-auto">
       {/* Left Pane - Patient History */}
-      <div className="w-[380px] flex flex-col bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 overflow-hidden shrink-0">
+      <div className="w-full lg:w-[340px] xl:w-[380px] flex flex-col card overflow-hidden shrink-0 max-h-[30vh] lg:max-h-none">
         <div className="p-4 border-b border-surface-100 dark:border-surface-700/50">
           <h2 className="text-sm font-semibold text-surface-900 dark:text-white flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary-400" />
@@ -140,14 +128,13 @@ export default function DoctorConsultation() {
                     #{apt.tokenNumber}
                   </span>
                   <span
-                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                      apt.status === 'IN_CONSULTATION'
-                        ? 'bg-blue-500/10 text-blue-500'
+                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full $        {apt.status === 'IN_CONSULTATION'
+                        ? 'bg-status-consulting-bg text-blue-500'
                         : apt.status === 'WAITING'
-                        ? 'bg-amber-500/10 text-amber-500'
+                        ? 'bg-status-waiting-bg text-amber-500'
                         : apt.status === 'COMPLETED'
-                        ? 'bg-green-500/10 text-green-500'
-                        : 'bg-red-500/10 text-red-500'
+                        ? 'bg-status-completed-bg text-emerald-500'
+                        : 'bg-status-cancelled-bg text-red-500'
                     }`}
                   >
                     {apt.status.replace('_', ' ')}
@@ -165,7 +152,7 @@ export default function DoctorConsultation() {
       </div>
 
       {/* Right Pane - Consultation / Prescription */}
-      <div className="flex-1 flex flex-col gap-6 min-w-0">
+      <div className="flex-1 flex flex-col gap-4 sm:gap-6 min-w-0">
         {selectedAppointment ? (
           <>
             {/* Patient Info Bar */}
@@ -198,12 +185,12 @@ export default function DoctorConsultation() {
               </div>
             </div>
 
-            <div className="flex-1 grid grid-cols-2 gap-6 min-h-0">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-h-0">
               {/* History */}
-              <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-surface-100 dark:border-surface-700/50">
+              <div className="card flex flex-col overflow-hidden">
+                <div className="p-4 border-b border-surface-100 dark:border-[#2A2F38]">
                   <h3 className="text-sm font-semibold text-surface-900 dark:text-white flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-400" />
+                    <FileText className="w-4 h-4 text-blue-400" aria-hidden="true" />
                     Medical History
                   </h3>
                 </div>
@@ -245,10 +232,10 @@ export default function DoctorConsultation() {
               </div>
 
               {/* Prescription Builder */}
-              <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-surface-100 dark:border-surface-700/50 flex items-center justify-between">
+              <div className="card flex flex-col overflow-hidden">
+                <div className="p-4 border-b border-surface-100 dark:border-[#2A2F38] flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-surface-900 dark:text-white flex items-center gap-2">
-                    <Stethoscope className="w-4 h-4 text-primary-400" />
+                    <Stethoscope className="w-4 h-4 text-primary-400" aria-hidden="true" />
                     New Prescription
                   </h3>
                   {saveSuccess && (
@@ -406,7 +393,7 @@ export default function DoctorConsultation() {
           </>
         ) : (
           /* Empty State */
-          <div className="flex-1 flex items-center justify-center bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50">
+          <div className="flex-1 flex items-center justify-center card">
             <div className="text-center">
               <Stethoscope className="w-16 h-16 text-surface-300 dark:text-surface-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-1">

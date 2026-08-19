@@ -17,17 +17,25 @@ export default function Prescriptions() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Prescriptions</h1>
-        <p className="text-surface-500 dark:text-surface-400 mt-1">
+        <h1 className="text-display text-surface-900 dark:text-white">Prescriptions</h1>
+        <p className="text-body text-surface-500 dark:text-surface-400 mt-1">
           View and manage patient prescriptions
         </p>
       </div>
 
+      {/* Empty state */}
+      {!prescriptions || prescriptions.length === 0 ? (
+        <div className="card p-12 text-center">
+          <FileText className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-3" />
+          <p className="text-sm font-medium text-surface-500">No prescriptions found</p>
+          <p className="text-xs text-surface-400 mt-1">Prescriptions will appear here after consultations</p>
+        </div>
+      ) : (
       <div className="space-y-4">
         {prescriptions.map((rx) => (
           <div
             key={rx.id}
-            className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-6 hover:shadow-lg transition-shadow"
+            className="card p-5 sm:p-6"
           >
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
@@ -77,19 +85,18 @@ export default function Prescriptions() {
             )}
 
             {/* Medicines */}
-            <div className="ml-[52px]">
+            <div className="sm:ml-[52px]">
               <p className="text-xs font-medium text-surface-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                <Pill className="w-3 h-3" />
+                <Pill className="w-3 h-3" aria-hidden="true" />
                 Medicines
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {rx.medicines.map((med, i) => (
                   <div
                     key={i}
                     className="flex items-center gap-3 p-2.5 bg-blue-500/5 rounded-xl border border-blue-500/10"
-                  >
-                    <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center shrink-0">
-                      <Pill className="w-3.5 h-3.5 text-blue-500" />
+                  >                      <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center shrink-0">
+                      <Pill className="w-3.5 h-3.5 text-blue-500" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-surface-900 dark:text-white">
@@ -106,7 +113,7 @@ export default function Prescriptions() {
 
             {/* Lab Orders */}
             {rx.labOrders.length > 0 && (
-              <div className="ml-[52px] mt-4">
+              <div className="sm:ml-[52px] mt-4">
                 <p className="text-xs font-medium text-surface-500 uppercase tracking-wider mb-2 flex items-center gap-1">
                   <TestTube className="w-3 h-3" />
                   Lab Orders
@@ -117,9 +124,9 @@ export default function Prescriptions() {
                       key={i}
                       className={`text-xs px-2.5 py-1 rounded-full font-medium ${
                         order.status === 'COMPLETED'
-                          ? 'bg-green-500/10 text-green-500'
+                          ? 'bg-status-completed-bg text-emerald-500'
                           : order.status === 'IN_PROGRESS'
-                          ? 'bg-blue-500/10 text-blue-500'
+                          ? 'bg-status-consulting-bg text-blue-500'
                           : 'bg-purple-500/10 text-purple-500'
                       }`}
                     >
@@ -135,6 +142,7 @@ export default function Prescriptions() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default function Billing() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Billing</h1>
+          <h1 className="text-display text-surface-900 dark:text-white">Billing</h1>
           <p className="text-surface-500 dark:text-surface-400 mt-1">
             Invoice management and payment processing
           </p>
@@ -59,31 +59,31 @@ export default function Billing() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-5 flex items-center gap-4">
-          <div className="p-3 bg-green-500/10 rounded-xl">
-            <DollarSign className="w-5 h-5 text-green-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="card p-5 flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 rounded-xl">
+            <DollarSign className="w-5 h-5 text-emerald-500" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-surface-900 dark:text-white">৳{totalRevenue.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-surface-900 dark:text-white font-tabular">৳{totalRevenue.toLocaleString()}</p>
             <p className="text-xs text-surface-500">Total Collected</p>
           </div>
         </div>
-        <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-5 flex items-center gap-4">
-          <div className="p-3 bg-amber-500/10 rounded-xl">
-            <Clock className="w-5 h-5 text-amber-500" />
+        <div className="card p-5 flex items-center gap-4">
+          <div className="p-3 bg-status-waiting-bg rounded-xl">
+            <Clock className="w-5 h-5 text-amber-500" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-surface-900 dark:text-white">৳{totalPending.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-surface-900 dark:text-white font-tabular">৳{totalPending.toLocaleString()}</p>
             <p className="text-xs text-surface-500">Pending Amount</p>
           </div>
         </div>
-        <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-5 flex items-center gap-4">
+        <div className="card p-5 flex items-center gap-4">
           <div className="p-3 bg-primary-500/10 rounded-xl">
-            <Receipt className="w-5 h-5 text-primary-500" />
+            <Receipt className="w-5 h-5 text-primary-500" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-surface-900 dark:text-white">{billings?.length ?? 0}</p>
+            <p className="text-2xl font-bold text-surface-900 dark:text-white font-tabular">{billings?.length ?? 0}</p>
             <p className="text-xs text-surface-500">Total Invoices</p>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function Billing() {
           return (
             <div
               key={bill.id}
-              className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-5 hover:shadow-lg transition-shadow"
+              className="card p-5"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
@@ -158,8 +158,8 @@ export default function Billing() {
               </div>
 
               {/* Totals */}
-              <div className="flex items-center justify-between pt-4 border-t border-surface-100 dark:border-surface-800">
-                <div className="flex items-center gap-6 ml-14">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-surface-100 dark:border-[#2A2F38]">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 sm:ml-14">
                   <div>
                     <span className="text-xs text-surface-500">Total</span>
                     <p className="font-semibold text-surface-900 dark:text-white">৳{bill.totalAmount.toLocaleString()}</p>
@@ -203,7 +203,7 @@ export default function Billing() {
       {/* Payment Modal */}
       {payingBill && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700 w-full max-w-md shadow-2xl">
+          <div className="card w-full max-w-md shadow-2xl">
             <div className="p-6 border-b border-surface-100 dark:border-surface-700/50">
               <h2 className="text-lg font-semibold text-surface-900 dark:text-white">Process Payment</h2>
               <p className="text-sm text-surface-500 mt-1">

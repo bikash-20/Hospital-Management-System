@@ -16,19 +16,19 @@ export default function Settings() {
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Settings</h1>
+        <h1 className="text-display text-surface-900 dark:text-white">Settings</h1>
         <p className="text-surface-500 dark:text-surface-400 mt-1">
           System configuration and user preferences
         </p>
       </div>
 
       {/* Appearance */}
-      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-6">
+      <div className="card p-6">
         <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
           <SettingsIcon className="w-5 h-5 text-primary-400" />
           Appearance
         </h2>
-        <div className="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl">
+        <div className="flex items-center justify-between p-4 card-inset">
           <div className="flex items-center gap-3">
             {isDark ? <Moon className="w-5 h-5 text-primary-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
             <div>
@@ -52,7 +52,7 @@ export default function Settings() {
       </div>
 
       {/* User Profile */}
-      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-6">
+      <div className="card p-6">
         <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
           <User className="w-5 h-5 text-primary-400" />
           Profile
@@ -66,7 +66,7 @@ export default function Settings() {
       </div>
 
       {/* Permissions */}
-      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-6">
+      <div className="card p-6">
         <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
           <Shield className="w-5 h-5 text-primary-400" />
           Role Permissions
@@ -118,7 +118,7 @@ export default function Settings() {
       </div>
 
       {/* System Info */}
-      <div className="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700/50 p-6">
+      <div className="card p-6">
         <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
           <Database className="w-5 h-5 text-primary-400" />
           System Information
@@ -129,7 +129,7 @@ export default function Settings() {
           <InfoRow label="Frontend" value="React 18 + TypeScript + Tailwind CSS" />
           <InfoRow label="Backend" value="Spring Boot 3.2 + Java 21" />
           <InfoRow label="Database" value="PostgreSQL 16" />
-          <InfoRow label="Environment" value="Development (Mock Data)" />
+          <InfoRow label="Environment" value="Production (Supabase)" />
         </div>
       </div>
     </div>
@@ -138,7 +138,7 @@ export default function Settings() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-surface-100 dark:border-surface-800 last:border-0">
+    <div className="flex items-center justify-between py-2.5 border-b border-surface-100 dark:border-[#2A2F38] last:border-0">
       <span className="text-sm text-surface-500">{label}</span>
       <span className="text-sm font-medium text-surface-900 dark:text-white">{value}</span>
     </div>
