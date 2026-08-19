@@ -14,7 +14,7 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-50 dark:bg-[#0B0F14]">
+    <div className="flex h-screen overflow-hidden bg-surface-50 dark:bg-[#0B1929]">
       {/* Skip to content link for keyboard users */}
       <a href="#main-content" className="skip-link">
         Skip to main content

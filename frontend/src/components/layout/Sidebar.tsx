@@ -95,7 +95,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         {/* Hamburger button */}
         <button
           onClick={onMobileClose}
-          className="fixed top-3 left-3 z-50 p-2.5 rounded-xl bg-[#1A1F26] border border-[#2A2F38] text-surface-300 hover:text-white transition-colors lg:hidden"
+          className="fixed top-3 left-3 z-50 p-2.5 rounded-xl bg-[#1A2332] border border-[#2A3444] text-surface-300 hover:text-white transition-colors lg:hidden"
           aria-label="Open navigation menu"
           style={{ display: mobileOpen ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '44px', minHeight: '44px' }}
         >
@@ -119,7 +119,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                 animate={{ x: 0 }}
                 exit={{ x: -280 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed inset-y-0 left-0 z-50 w-[260px] sidebar-bg flex flex-col border-r border-[#2A2F38] shadow-[var(--shadow-sidebar)]"
+                className="fixed inset-y-0 left-0 z-50 w-[260px] sidebar-bg flex flex-col border-r border-[#1E2E40] shadow-[var(--shadow-sidebar)]"
               >
                 <MobileSidebarContent
                   items={filteredItems}
@@ -138,12 +138,12 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
     <motion.aside
       animate={{ width: sidebarWidth }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="h-screen sidebar-bg border-r border-[#2A2F38] flex flex-col relative shrink-0 overflow-hidden hidden lg:flex"
+      className="h-screen sidebar-bg border-r border-[#1E2E40] flex flex-col relative shrink-0 overflow-hidden hidden lg:flex"
       role="navigation"
       aria-label="Main navigation"
     >
       {/* Logo */}
-      <div className="p-4 flex items-center gap-3 border-b border-[#2A2F38] min-h-[64px]">
+      <div className="p-4 flex items-center gap-3 border-b border-[#1E2E40] min-h-[64px]">
         <div className="p-1 bg-white/95 rounded-xl shrink-0">
           <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />
         </div>
@@ -248,7 +248,7 @@ function MobileSidebarContent({
   return (
     <>
       {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-[#2A2F38] min-h-[64px]">
+      <div className="p-4 flex items-center justify-between border-b border-[#1E2E40] min-h-[64px]">
         <div className="flex items-center gap-3">
           <div className="p-1 bg-white/95 rounded-xl">
             <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />

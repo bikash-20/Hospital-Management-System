@@ -53,7 +53,7 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
   if (!user) return null;
 
   return (
-    <header className="h-16 bg-white/80 dark:bg-[#111820]/80 backdrop-blur-xl border-b border-surface-200 dark:border-[#2A2F38] flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+    <header className="h-16 bg-white/80 dark:bg-[#0F1A28]/90 backdrop-blur-xl border-b border-surface-200 dark:border-[#1E2E40] flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
       <div className="flex items-center gap-3">
         {/* Mobile hamburger */}
         <motion.button
@@ -143,7 +143,7 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#1A1F26] border border-surface-200 dark:border-[#2A2F38] rounded-xl shadow-xl py-2 z-50"
+                className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#1A2332] border border-surface-200 dark:border-[#2A3444] rounded-xl shadow-xl py-2 z-50"
                 role="menu"
               >
                 <div className="px-4 py-2 border-b border-surface-100 dark:border-[#2A2F38]">

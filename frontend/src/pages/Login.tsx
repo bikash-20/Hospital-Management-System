@@ -52,7 +52,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0B0F14] via-[#111820] to-[#0A1628] flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#0B1929] via-[#0F1A28] to-[#0A1628] flex">
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/10" />
@@ -202,7 +202,7 @@ export default function Login() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 bg-surface-800/50 border border-surface-700 rounded-xl text-white placeholder-surface-500 focus:outline-none transition-all"
+                className="w-full px-4 py-3 bg-[#141D28] border border-[#2A3444] rounded-xl text-white placeholder-[#7A92A8] focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-all"
                 placeholder="Enter username"
                 required
                 autoFocus
@@ -220,7 +220,7 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface-800/50 border border-surface-700 rounded-xl text-white placeholder-surface-500 focus:outline-none transition-all pr-11"
+                  className="w-full px-4 py-3 bg-[#141D28] border border-[#2A3444] rounded-xl text-white placeholder-[#7A92A8] focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-all pr-11"
                   placeholder="Enter password"
                   required
                 />
@@ -284,7 +284,7 @@ export default function Login() {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => fillDemo(demo.username)}
-                  className="flex flex-col items-center gap-1 p-2 rounded-lg bg-surface-800/30 hover:bg-surface-700/50 border border-surface-700/50 hover:border-primary-500/30 transition-colors text-xs group"
+                  className="flex flex-col items-center gap-1 p-2 rounded-lg bg-[#141D28] hover:bg-[#1A2A3A] border border-[#2A3444] hover:border-primary-500/40 transition-colors text-xs group"
                 >
                   <demo.icon className="w-4 h-4 text-surface-400 group-hover:text-primary-400 transition-colors" aria-hidden="true" />
                   <span className="text-surface-400 group-hover:text-surface-200 transition-colors">
