@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sun,
   Moon,
-  Bell,
   LogOut,
   ChevronDown,
   User,
@@ -12,6 +11,8 @@ import {
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { UserRole } from '@/types';
+import CommandPalette from '@/components/CommandPalette';
+import NotificationsPanel from '@/components/NotificationsPanel';
 
 const roleLabels: Record<UserRole, string> = {
   ADMIN: 'Administrator',
@@ -78,6 +79,9 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Command Palette Trigger */}
+        <CommandPalette />
+
         {/* Theme toggle */}
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -102,23 +106,8 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
           </AnimatePresence>
         </motion.button>
 
-        {/* Notifications */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-          className="relative p-2.5 rounded-xl text-surface-400 hover:text-surface-600 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-white/5 transition-colors focus-ring"
-          style={{ minWidth: '44px', minHeight: '44px' }}
-          aria-label="Notifications"
-        >
-          <Bell className="w-5 h-5" />
-          <motion.span
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"
-            aria-hidden="true"
-          />
-        </motion.button>
+        {/* Notifications Panel */}
+        <NotificationsPanel />
 
         {/* User dropdown */}
         <div className="relative" ref={dropdownRef}>

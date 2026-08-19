@@ -20,6 +20,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import DashboardCharts from '@/components/DashboardCharts';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -129,6 +130,21 @@ export default function Dashboard() {
           )}
         </StaggerItem>
       </StaggerContainer>
+
+      {/* Charts Section */}
+      {!statsLoading && !bedsLoading && appointments && beds && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <DashboardCharts
+            appointments={appointments}
+            beds={beds}
+            revenue={stats?.revenue ?? 0}
+          />
+        </motion.div>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

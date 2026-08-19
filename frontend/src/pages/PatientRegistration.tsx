@@ -12,7 +12,8 @@ import {
   Users,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
+import DataTable, { type Column } from '@/components/ui/DataTable';
+import { EmptyPatients, SearchEmpty } from '@/components/ui/EmptyState';
 
 export default function PatientRegistration() {
   const { showToast } = useToast();
@@ -70,6 +71,68 @@ export default function PatientRegistration() {
     { value: 'MALE', label: 'Male' },
     { value: 'FEMALE', label: 'Female' },
     { value: 'OTHER', label: 'Other' },
+  ];
+
+  const patientColumns: Column<Patient>[] = [
+    {
+      key: 'uhid',
+      label: 'UHID',
+      sortable: true,
+      render: (patient) => (
+        <span className="text-xs font-mono bg-primary-500/10 text-primary-600 dark:text-primary-400 px-2 py-1 rounded-md font-tabular">
+          {patient.uhid}
+        </span>
+      ),
+    },
+    {
+      key: 'fullName',
+      label: 'Patient Name',
+      sortable: true,
+      render: (patient) => (
+        <span className="text-sm font-medium text-surface-900 dark:text-white">
+          {patient.fullName}
+        </span>
+      ),
+    },
+    {
+      key: 'mobileNumber',
+      label: 'Mobile',
+      sortable: true,
+      render: (patient) => (
+        <span className="text-sm text-surface-600 dark:text-surface-300 font-tabular">
+          {patient.mobileNumber}
+        </span>
+      ),
+    },
+    {
+      key: 'dob',
+      label: 'DOB',
+      sortable: true,
+      render: (patient) => (
+        <span className="text-sm text-surface-600 dark:text-surface-300">
+          {new Date(patient.dob).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      key: 'gender',
+      label: 'Gender',
+      sortable: true,
+      render: (patient) => (
+        <span className="text-sm text-surface-600 dark:text-surface-300">
+          {patient.gender}
+        </span>
+      ),
+    },
+    {
+      key: 'address',
+      label: 'Address',
+      render: (patient) => (
+        <span className="text-sm text-surface-500 truncate max-w-[200px] block">
+          {patient.address}
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -143,88 +206,18 @@ export default function PatientRegistration() {
         </div>
 
         {/* Desktop table */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-surface-100 dark:border-[#2A2F38]">
-                <th className="text-left text-xs font-medium text-surface-500 uppercase tracking-wider px-4 py-3">UHID</th>
-                <th className="text-left text-xs font-medium text-surface-500 uppercase tracking-wider px-4 py-3">Patient Name</th>
-                <th className="text-left text-xs font-medium text-surface-500 uppercase tracking-wider px-4 py-3">Mobile</th>
-                <th className="text-left text-xs font-medium text-surface-500 uppercase tracking-wider px-4 py-3">DOB</th>
-                <th className="text-left text-xs font-medium text-surface-500 uppercase tracking-wider px-4 py-3">Gender</th>
-                <th className="text-left text-xs font-medium text-surface-500 uppercase tracking-wider px-4 py-3">Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8">
-                    <div className="space-y-3">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="flex items-center gap-4">
-                          <div className="skeleton w-24 h-6 rounded" />
-                          <div className="skeleton w-40 h-5 rounded" />
-                          <div className="skeleton w-28 h-5 rounded" />
-                          <div className="skeleton w-24 h-5 rounded" />
-                          <div className="skeleton w-16 h-5 rounded" />
-                          <div className="skeleton flex-1 h-5 rounded" />
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ) : !patients || patients.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center">
-                    <Users className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-surface-500">No patients found</p>
-                    <p className="text-xs text-surface-400 mt-1">
-                      {searchQuery ? 'Try a different search term' : 'Register your first patient to get started'}
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                <StaggerContainer>
-                  {patients.map((patient) => (
-                    <StaggerItem key={patient.id}>
-                      <tr className="border-b border-surface-50 dark:border-[#1A1F26] table-row-hover">
-                        <td className="px-4 py-3">
-                          <span className="text-xs font-mono bg-primary-500/10 text-primary-600 dark:text-primary-400 px-2 py-1 rounded-md font-tabular">
-                            {patient.uhid}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm font-medium text-surface-900 dark:text-white">
-                            {patient.fullName}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-surface-600 dark:text-surface-300 font-tabular">
-                            {patient.mobileNumber}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-surface-600 dark:text-surface-300">
-                            {new Date(patient.dob).toLocaleDateString()}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-surface-600 dark:text-surface-300">
-                            {patient.gender}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-surface-500 truncate max-w-[200px] block">
-                            {patient.address}
-                          </span>
-                        </td>
-                      </tr>
-                    </StaggerItem>
-                  ))}
-                </StaggerContainer>
-              )}
-            </tbody>
-          </table>
+        <div className="hidden md:block">
+          <DataTable
+            columns={patientColumns}
+            data={patients ?? []}
+            pageSize={10}
+            searchable
+            searchPlaceholder="Search patients..."
+            searchKeys={['fullName', 'uhid', 'mobileNumber']}
+            emptyMessage={searchQuery ? `No patients found for "${searchQuery}"` : 'No patients registered yet'}
+            emptyIcon={<Users className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto" />}
+            isLoading={isLoading}
+          />
         </div>
 
         {/* Mobile card view */}
@@ -240,9 +233,12 @@ export default function PatientRegistration() {
               ))}
             </div>
           ) : !patients || patients.length === 0 ? (
-            <div className="p-8 text-center">
-              <Users className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-3" />
-              <p className="text-sm font-medium text-surface-500">No patients found</p>
+            <div className="p-4">
+              {searchQuery ? (
+                <SearchEmpty query={searchQuery} />
+              ) : (
+                <EmptyPatients onRegister={() => setShowForm(true)} />
+              )}
             </div>
           ) : (
             <div className="p-4 space-y-3">

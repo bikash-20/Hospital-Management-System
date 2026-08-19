@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Primary: Teal / Clinical Blue-Green ── */
+  /* ── Primary: Warm Clinical Teal ── */
   --color-primary-50: #f0fdfa;
   --color-primary-100: #ccfbf1;
   --color-primary-200: #99f6e4;
   --color-primary-300: #5eead4;
-  --color-primary-400: #2dd4bf;
-  --color-primary-500: #14b8a6;
-  --color-primary-600: #0d9488;
-  --color-primary-700: #0f766e;
-  --color-primary-800: #115e59;
-  --color-primary-900: #134e4a;
+  --color-primary-400: #0F9F9A;
+  --color-primary-500: #0D8F8A;
+  --color-primary-600: #0C7F7A;
+  --color-primary-700: #0B6F6A;
+  --color-primary-800: #0A5F5A;
+  --color-primary-900: #094F4A;
   --color-primary-950: #042f2e;
 
   /* ── Accent: Emerald (success/positive actions) ── */
@@ -19,38 +19,38 @@
   --color-accent-500: #10b981;
   --color-accent-600: #059669;
 
-  /* ── Surface: Charcoal base (dark) / Slate (light) ── */
-  /* Light mode surfaces */
-  --color-surface-50: #f8fafc;
-  --color-surface-100: #f1f5f9;
-  --color-surface-200: #e2e8f0;
-  --color-surface-300: #cbd5e1;
-  --color-surface-400: #94a3b8;
-  --color-surface-500: #64748b;
-  --color-surface-600: #475569;
-  --color-surface-700: #334155;
-  --color-surface-800: #1e293b;
-  --color-surface-900: #0f172a;
-  --color-surface-950: #020617;
+  /* ── Surface: Warm Clinical (light) / Deep Navy (dark) ── */
+  /* Light mode: soft blue-gray background */
+  --color-surface-50: #F4F8F8;
+  --color-surface-100: #E8F0F0;
+  --color-surface-200: #D9E5E7;
+  --color-surface-300: #B8C9CE;
+  --color-surface-400: #8A9DA5;
+  --color-surface-500: #60758A;
+  --color-surface-600: #4A5D70;
+  --color-surface-700: #354558;
+  --color-surface-800: #1E293B;
+  --color-surface-900: #16324F;
+  --color-surface-950: #0B1929;
 
   /* ── Semantic: Desaturated status colors ── */
-  --color-status-waiting: #f59e0b;
-  --color-status-waiting-bg: #f59e0b15;
-  --color-status-waiting-border: #f59e0b30;
-  --color-status-consulting: #3b82f6;
-  --color-status-consulting-bg: #3b82f615;
-  --color-status-consulting-border: #3b82f630;
-  --color-status-completed: #22c55e;
-  --color-status-completed-bg: #22c55e15;
-  --color-status-completed-border: #22c55e30;
-  --color-status-cancelled: #ef4444;
-  --color-status-cancelled-bg: #ef444415;
-  --color-status-cancelled-border: #ef444430;
+  --color-status-waiting: #D97706;
+  --color-status-waiting-bg: #FEF3C7;
+  --color-status-waiting-border: #FDE68A;
+  --color-status-consulting: #2563EB;
+  --color-status-consulting-bg: #DBEAFE;
+  --color-status-consulting-border: #BFDBFE;
+  --color-status-completed: #16A34A;
+  --color-status-completed-bg: #DCFCE7;
+  --color-status-completed-border: #BBF7D0;
+  --color-status-cancelled: #DC2626;
+  --color-status-cancelled-bg: #FEE2E2;
+  --color-status-cancelled-border: #FECACA;
 
-  /* ── Shadows ── */
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03);
-  --shadow-card-hover: 0 4px 16px rgba(20,184,166,0.06), 0 8px 24px rgba(0,0,0,0.05);
-  --shadow-elevated: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.04);
+  /* ── Shadows: Subtle and restrained ── */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 8px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
   --shadow-sidebar: 2px 0 12px rgba(0,0,0,0.15);
 
   /* ── Typography ── */
@@ -63,11 +63,11 @@
   --duration-slow: 350ms;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* ── Border radius ── */
+  /* ── Border radius: Reduced from excessive rounded ── */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 }
 
 /* ═══════════════════════════════════════════
@@ -85,7 +85,7 @@ body {
 
 .dark {
   color-scheme: dark;
-  background: #0B0F14;
+  background: #0B1929;
   color: #e2e8f0;
 }
 
@@ -145,7 +145,7 @@ body {
    ═══════════════════════════════════════════ */
 
 .card {
-  background: white;
+  background: #FFFFFF;
   border: 1px solid var(--color-surface-200);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
@@ -158,25 +158,25 @@ body {
 }
 
 .dark .card {
-  background: #1A1F26;
-  border-color: #2A2F38;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.15);
+  background: #141B24;
+  border-color: #252D3A;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .dark .card:hover {
-  box-shadow: 0 4px 16px rgba(20,184,166,0.08), 0 8px 24px rgba(0,0,0,0.2);
-  border-color: #3A3F48;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2);
+  border-color: #303A48;
 }
 
 .card-flat {
-  background: white;
-  border: 1px solid var(--color-surface-100);
+  background: #FFFFFF;
+  border: 1px solid var(--color-surface-200);
   border-radius: var(--radius-md);
 }
 
 .dark .card-flat {
-  background: #151A21;
-  border-color: #252A32;
+  background: #1A2230;
+  border-color: #252D3A;
 }
 
 .card-inset {
@@ -186,8 +186,8 @@ body {
 }
 
 .dark .card-inset {
-  background: #111620;
-  border-color: #252A32;
+  background: #111820;
+  border-color: #252D3A;
 }
 
 /* ═══════════════════════════════════════════
@@ -195,7 +195,16 @@ body {
    ═══════════════════════════════════════════ */
 
 .sidebar-bg {
-  background: linear-gradient(180deg, #0F1720 0%, #0B0F14 100%);
+  background: linear-gradient(180deg, #0D1520 0%, #0B1929 100%);
+}
+
+/* Light mode teal hover state */
+.table-row-hover:hover {
+  background-color: rgba(15, 159, 154, 0.04);
+}
+
+.dark .table-row-hover:hover {
+  background-color: rgba(15, 159, 154, 0.06);
 }
 
 /* ═══════════════════════════════════════════
@@ -246,7 +255,7 @@ body {
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #2A2F38;
+  background: #252D3A;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -269,7 +278,7 @@ body {
 }
 
 .dark .skeleton {
-  background: #1E2430;
+  background: #1A2230;
 }
 
 .skeleton-text {
@@ -293,14 +302,6 @@ body {
 
 .table-row-hover {
   transition: background-color var(--duration-fast) ease;
-}
-
-.table-row-hover:hover {
-  background-color: rgba(20, 184, 166, 0.03);
-}
-
-.dark .table-row-hover:hover {
-  background-color: rgba(20, 184, 166, 0.05);
 }
 
 /* ═══════════════════════════════════════════
