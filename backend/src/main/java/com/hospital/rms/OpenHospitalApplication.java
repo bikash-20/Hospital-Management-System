@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
@@ -21,19 +22,27 @@ public class OpenHospitalApplication {
     }
 
     @Bean
+    @Order(1)
     CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.count() == 0) {
-                List<User> seedUsers = List.of(
-                    createUser("admin", "Admin User", "admin@hospital.com", "password", Role.ADMIN, passwordEncoder),
-                    createUser("dr.rahim", "Dr. Rahim Ahmed", "rahim@hospital.com", "password", Role.DOCTOR, passwordEncoder),
-                    createUser("dr.sara", "Dr. Sara Khan", "sara@hospital.com", "password", Role.DOCTOR, passwordEncoder),
-                    createUser("reception1", "Fatima Begum", "fatima@hospital.com", "password", Role.RECEPTIONIST, passwordEncoder),
-                    createUser("labtech1", "Kamal Hossain", "kamal@hospital.com", "password", Role.LAB_TECH, passwordEncoder),
-                    createUser("cashier1", "Nasir Uddin", "nasir@hospital.com", "password", Role.CASHIER, passwordEncoder)
-                );
-                userRepository.saveAll(seedUsers);
-                log.info("Seeded {} demo users", seedUsers.size());
+            List<User> demoUsers = List.of(
+                createUser("admin", "Admin User", "admin@hospital.com", "password", Role.ADMIN, passwordEncoder),
+                createUser("dr.rahim", "Dr. Rahim Ahmed", "rahim@hospital.com", "password", Role.DOCTOR, passwordEncoder),
+                createUser("dr.sara", "Dr. Sara Khan", "sara@hospital.com", "password", Role.DOCTOR, passwordEncoder),
+                createUser("reception1", "Fatima Begum", "fatima@hospital.com", "password", Role.RECEPTIONIST, passwordEncoder),
+                createUser("labtech1", "Kamal Uddin", "kamal@hospital.com", "password", Role.LAB_TECH, passwordEncoder),
+                createUser("cashier1", "Nasir Uddin", "nasir@hospital.com", "password", Role.CASHIER, passwordEncoder)
+            );
+
+            List<User> missingUsers = demoUsers.stream()
+                .filter(user -> !userRepository.existsByUsername(user.getUsername()))
+                .toList();
+
+            if (!missingUsers.isEmpty()) {
+                userRepository.saveAll(missingUsers);
+                log.info("Seeded {} missing demo users", missingUsers.size());
+            } else {
+                log.info("Demo users already present — skipping user seed");
             }
         };
     }

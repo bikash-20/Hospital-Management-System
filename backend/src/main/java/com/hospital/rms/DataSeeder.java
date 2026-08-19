@@ -6,6 +6,7 @@ import com.hospital.rms.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Component
+@Order(2)
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
