@@ -1,0 +1,69 @@
+# ── OpenHospital RMS ─────────────────────────────────────
+# Run with:
+#   docker compose up --build              (local Postgres)
+#   docker compose --profile supabase up --build  (Supabase via .env)
+#
+# Services:
+#   frontend  → http://localhost
+#   backend   → http://localhost:8080
+#   postgres  → localhost:5432 (local only)
+# ──────────────────────────────────────────────────────────
+
+services:
+  # ── Local PostgreSQL (for dev / no-Supabase) ────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: hospital-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openhospital
+      POSTGRES_USER: hospital
+      POSTGRES_PASSWORD: hospital123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hospital -d openhospital"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Spring Boot Backend ─────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hospital-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # Uses Supabase DATABASE_URL if set, otherwise falls back to local postgres
+      DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/openhospital?sslmode=disable}
+      DB_USERNAME: ${DB_USERNAME:-hospital}
+      DB_PASSWORD: ${DB_PASSWORD:-hospital123}
+      JWT_SECRET: ${JWT_SECRET:-Y2hhbmdldGhpc3RvYW5nZXJzZWNyZXRrZXlmb3Jqd3R0b2tlbjEyMzQ1Njc4}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - default
+      - supabase
+
+  # ── Frontend (nginx) ───────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hospital-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+*.jar
+*.war
+
+# Env
+.env
+.env.local
+
+# Logs
+*.log
+
+# H2 database files
+*.db
+*.mv.db
+*.trace.db
