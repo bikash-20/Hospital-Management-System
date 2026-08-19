@@ -538,6 +538,19 @@ Vercel's GitHub integration automatically creates preview deployments for pull r
 
 This setup uses Vercel's native Git integration and a Render deploy hook. It requires no Fly.io account, Fly token, or payment method.
 
+#### Temporary demo login recovery
+
+If the live demo reports invalid credentials, set a temporary Render environment variable named `DEMO_RESET_TOKEN` to a private random value, redeploy, then run:
+
+```bash
+curl --fail-with-body -X POST "https://YOUR_RENDER_SERVICE.onrender.com/api/setup/reset-password" \
+     -H "Content-Type: application/json" \
+     -H "X-Demo-Reset-Token: YOUR_PRIVATE_RESET_TOKEN" \
+     -d '{"password":"password"}'
+```
+
+An omitted `username` resets the six documented demo accounts. To reset only one account, include `"username":"admin"`. Remove `DEMO_RESET_TOKEN` from Render immediately after the command and redeploy. The endpoint is unavailable when that variable is empty.
+
 ---
 
 ## Development
