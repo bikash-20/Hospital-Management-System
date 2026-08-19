@@ -144,8 +144,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
     >
       {/* Logo */}
       <div className="p-4 flex items-center gap-3 border-b border-[#2A2F38] min-h-[64px]">
-        <div className="p-2 bg-primary-500/15 rounded-xl shrink-0">
-          <Activity className="w-5 h-5 text-primary-400" aria-hidden="true" />
+        <div className="p-1 bg-white/95 rounded-xl shrink-0">
+          <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-7 h-7" />
         </div>
         <AnimatePresence>
           {!isCollapsed && (
@@ -250,8 +250,8 @@ function MobileSidebarContent({
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-[#2A2F38] min-h-[64px]">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary-500/15 rounded-xl">
-            <Activity className="w-5 h-5 text-primary-400" />
+          <div className="p-1 bg-white/95 rounded-xl">
+            <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-7 h-7" />
           </div>
           <div>
             <h2 className="text-sm font-bold text-white">OpenHospital</h2>

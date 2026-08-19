@@ -85,7 +85,7 @@ export default function Login() {
             className="flex items-center justify-center mb-8"
           >
             <div className="p-4 bg-primary-500/20 rounded-2xl backdrop-blur-sm border border-primary-500/30">
-              <Heart className="w-12 h-12 text-primary-400" />
+              <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-16 h-16" />
             </div>
           </motion.div>
 
@@ -152,7 +152,7 @@ export default function Login() {
             className="lg:hidden flex items-center gap-3 mb-8 justify-center"
           >
             <div className="p-3 bg-primary-500/20 rounded-xl border border-primary-500/30">
-              <Heart className="w-8 h-8 text-primary-400" />
+              <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-10 h-10" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">OpenHospital</h1>

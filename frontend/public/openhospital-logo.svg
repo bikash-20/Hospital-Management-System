@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">OpenHospital medical logo</title>
+  <desc id="desc">A clinical cross inside a caring shield with a pulse line</desc>
+  <path fill="#102A43" d="M48 4 82 17v27c0 22-14 39-34 48C28 83 14 66 14 44V17L48 4Z"/>
+  <path fill="#0FA3A3" d="M48 13 73 23v21c0 16-9 29-25 37-16-8-25-21-25-37V23l25-10Z"/>
+  <path fill="#F7FBFC" d="M42 23h12v17h17v12H54v17H42V52H25V40h17V23Z"/>
+  <path fill="none" stroke="#F4C95D" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M25 61h12l5-8 6 13 7-17 5 12h11"/>
+</svg>
