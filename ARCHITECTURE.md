@@ -7,12 +7,12 @@ This document separates the architecture used by the free student demo from the 
 ```mermaid
 flowchart LR
     User[Browser] --> Vercel[Vercel static React app]
-    Vercel --> Fly[Fly.io Spring Boot API]
-    Fly --> Supabase[(Supabase PostgreSQL)]
+    Vercel --> Render[Render free Spring Boot API]
+    Render --> Supabase[(Supabase PostgreSQL)]
 ```
 
 - Frontend: React + TypeScript + Vite deployed from `frontend/` to Vercel.
-- Backend: one Spring Boot container deployed from `backend/Dockerfile` to Fly.io.
+- Backend: one Spring Boot Docker web service deployed to Render's free tier.
 - Database: Supabase PostgreSQL using the `prod` Spring profile and SSL.
 - Schema: Flyway migrations in `backend/src/main/resources/db/migration`.
 - Cache: none. PostgreSQL remains the source of truth.
@@ -26,7 +26,7 @@ A single free backend can sleep, have limited memory/CPU, and have cold-start la
 ## Request Flow
 
 1. The browser sends HTTPS requests to the Vercel frontend.
-2. The frontend uses `VITE_API_URL` to call the Fly API.
+2. The frontend uses `VITE_API_URL` to call the Render API.
 3. Spring Security validates the JWT and applies role checks.
 4. Service methods run transactional business operations.
 5. Hibernate uses HikariCP to connect to Supabase PostgreSQL.
@@ -129,7 +129,7 @@ Monitor request rate, P95/P99 latency, 4xx/5xx rates, JVM heap, thread pools, We
 
 | Decision | Benefit | Cost or limitation |
 |---|---|---|
-| One Fly instance for demo | Free and simple | Sleep/cold starts and one application failure point |
+| One Render free instance for demo | No card required and simple | Sleep/cold starts and one application failure point |
 | Supabase PostgreSQL | Managed database and SSL | Free-tier limits and possible pause |
 | No Redis in demo | Fewer services and no operational overhead | No shared cache or cross-instance events |
 | Flyway | Reviewable, repeatable schema changes | Migrations require discipline |

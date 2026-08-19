@@ -4,13 +4,13 @@
 
 ## Current Deployment Plan
 
-- Frontend: deploy `frontend/` to Vercel. Set `VITE_API_URL` to the deployed Fly.io API URL.
-- Backend: deploy `backend/` to Fly.io using `backend/fly.toml` and `backend/Dockerfile`.
-- Database: use the existing Supabase PostgreSQL connection string through Fly secrets.
+- Frontend: deploy `frontend/` to Vercel. Set `VITE_API_URL` to the deployed Render API URL.
+- Backend: deploy `backend/` to Render's free web service using `render.yaml` and `backend/Dockerfile`.
+- Database: use the existing Supabase PostgreSQL connection string through Render environment variables.
 - Schema: production uses Flyway migrations and `ddl-auto=validate`.
 - CORS: set `CORS_ALLOWED_ORIGINS` to the exact Vercel URL.
 - Redis, multiple backend instances, and a reverse proxy are intentionally excluded from the demo.
-- CI/CD: `.github/workflows/ci-cd.yml` tests both applications on every pull request and deploys the backend to Fly.io after a successful push to `main`.
+- CI/CD: `.github/workflows/ci-cd.yml` tests both applications on every pull request and triggers a Render deployment after a successful push to `main`.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the free-tier design and the larger production architecture, and [LOAD_TESTING.md](LOAD_TESTING.md) for the local Docker benchmark.
 
@@ -509,33 +509,20 @@ cd frontend && npm run dev
 
 The repository includes [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
 
-#### Fly.io backend
+#### Render backend
 
-1. Create the Fly application using `backend/fly.toml`, and change its `app` value to your unique Fly app name.
-2. Create a Fly deploy token:
+1. In Render, choose **New → Blueprint** and select this GitHub repository. Render will read `render.yaml` and create the backend web service.
+2. In the Render service, open **Settings → Deploy Hook** and create a deploy hook URL.
+3. Add the following GitHub Actions values under **Settings → Secrets and variables → Actions**:
 
-     ```bash
-     fly tokens create deploy -a YOUR_FLY_APP_NAME
-     ```
+     - Secret `RENDER_DEPLOY_HOOK_URL`: the Render deploy hook URL.
+     - Repository variable `RENDER_SERVICE_URL`: your public Render service URL, such as `https://openhospital-rms-api.onrender.com`.
 
-3. In GitHub, open **Settings → Secrets and variables → Actions** and add:
+4. Set these environment variables in the Render service:
 
-     - Secret `FLY_API_TOKEN`: the token from the previous command.
-     - Repository variable `FLY_APP_NAME`: your Fly app name.
-     - Optional environment `production`: recommended for approval rules and deployment protection.
+     `DATABASE_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION_MS`, and `CORS_ALLOWED_ORIGINS`.
 
-4. Store `DATABASE_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION_MS`, and `CORS_ALLOWED_ORIGINS` as Fly secrets:
-
-     ```bash
-     fly secrets set \
-       DATABASE_URL="jdbc:postgresql://YOUR_SUPABASE_HOST:5432/postgres?sslmode=require" \
-       DB_USERNAME="YOUR_DB_USERNAME" \
-       DB_PASSWORD="YOUR_DB_PASSWORD" \
-       JWT_SECRET="YOUR_LONG_RANDOM_SECRET" \
-       CORS_ALLOWED_ORIGINS="https://YOUR_VERCEL_DOMAIN"
-     ```
-
-Every push to `main` will then run frontend lint/build and backend tests. The Fly deployment runs only if both checks pass. Pull requests run checks but never deploy.
+Set `CORS_ALLOWED_ORIGINS` to the exact Vercel production URL. Keep Render's **Auto-Deploy** disabled when using the GitHub deploy hook, so one push does not trigger two deployments. Every push to `main` will run frontend lint/build and backend tests; the Render deployment runs only if both checks pass. Pull requests run checks but never deploy.
 
 #### Vercel frontend
 
@@ -545,11 +532,11 @@ Connect the GitHub repository in Vercel once:
 - **Build Command:** `npm run build`
 - **Output Directory:** `dist`
 - **Production branch:** `main`
-- Environment variable: `VITE_API_URL=https://YOUR_FLY_APP_NAME.fly.dev`
+- Environment variable: `VITE_API_URL=https://YOUR_RENDER_SERVICE.onrender.com`
 
-Vercel's GitHub integration automatically creates preview deployments for pull requests and production deployments for successful pushes to `main`. Set the final Vercel URL in Fly's `CORS_ALLOWED_ORIGINS` secret.
+Vercel's GitHub integration automatically creates preview deployments for pull requests and production deployments for successful pushes to `main`. Set the final Vercel URL in Render's `CORS_ALLOWED_ORIGINS` environment variable.
 
-This setup intentionally uses Vercel's native Git integration rather than storing a Vercel token in GitHub Actions. It keeps the pipeline smaller and avoids duplicating deployment ownership.
+This setup uses Vercel's native Git integration and a Render deploy hook. It requires no Fly.io account, Fly token, or payment method.
 
 ---
 

@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: openhospital-rms-api
+    runtime: docker
+    plan: free
+    repo: https://github.com/bikash-20/Hospital-Management-System
+    branch: main
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SERVER_PORT
+        value: 8080
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRATION_MS
+        value: 86400000
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
