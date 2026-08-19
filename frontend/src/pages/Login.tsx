@@ -7,10 +7,13 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Shield,
   Stethoscope,
-  Pill,
-  Activity,
+  ClipboardList,
+  FlaskConical,
+  Banknote,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 export default function Login() {
   const { login } = useAuth();
@@ -35,12 +38,12 @@ export default function Login() {
     }
   };
 
-  const demoAccounts = [
-    { username: 'admin', role: 'Admin', icon: '👤' },
-    { username: 'doctor', role: 'Doctor', icon: '🩺' },
-    { username: 'receptionist', role: 'Reception', icon: '📋' },
-    { username: 'labtech', role: 'Lab Tech', icon: '🔬' },
-    { username: 'cashier', role: 'Cashier', icon: '💰' },
+  const demoAccounts: { username: string; role: string; icon: LucideIcon }[] = [
+    { username: 'admin', role: 'Admin', icon: Shield },
+    { username: 'dr.rahim', role: 'Doctor', icon: Stethoscope },
+    { username: 'reception1', role: 'Reception', icon: ClipboardList },
+    { username: 'labtech1', role: 'Lab Tech', icon: FlaskConical },
+    { username: 'cashier1', role: 'Cashier', icon: Banknote },
   ];
 
   const fillDemo = (user: string) => {
@@ -49,7 +52,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface-900 via-surface-800 to-primary-950 flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#0B0F14] via-[#111820] to-[#0A1628] flex">
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/10" />
@@ -119,21 +122,21 @@ export default function Login() {
             animate={{ y: [0, -8, 0], rotate: [0, 5, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <Stethoscope className="w-16 h-16 text-primary-300/20" />
+            <Stethoscope className="w-16 h-16 text-primary-400/20" />
           </motion.div>
           <motion.div
             className="absolute bottom-32 right-16"
             animate={{ y: [0, 8, 0], rotate: [0, -5, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
           >
-            <Pill className="w-14 h-14 text-primary-300/20" />
+            <Heart className="w-14 h-14 text-primary-400/20" />
           </motion.div>
           <motion.div
             className="absolute top-40 right-24"
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
           >
-            <Activity className="w-12 h-12 text-primary-300/20" />
+            <FlaskConical className="w-12 h-12 text-primary-400/20" />
           </motion.div>
         </div>
       </div>
@@ -271,7 +274,7 @@ export default function Login() {
             <p className="text-surface-500 text-xs uppercase tracking-wider mb-3 text-center">
               Demo Accounts — password: <span className="text-primary-400">password</span>
             </p>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {demoAccounts.map((demo, i) => (
                 <motion.button
                   key={demo.username}
@@ -283,7 +286,7 @@ export default function Login() {
                   onClick={() => fillDemo(demo.username)}
                   className="flex flex-col items-center gap-1 p-2 rounded-lg bg-surface-800/30 hover:bg-surface-700/50 border border-surface-700/50 hover:border-primary-500/30 transition-colors text-xs group"
                 >
-                  <span className="text-lg">{demo.icon}</span>
+                  <demo.icon className="w-4 h-4 text-surface-400 group-hover:text-primary-400 transition-colors" aria-hidden="true" />
                   <span className="text-surface-400 group-hover:text-surface-200 transition-colors">
                     {demo.role}
                   </span>

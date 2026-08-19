@@ -8,6 +8,7 @@ import {
   LogOut,
   ChevronDown,
   User,
+  Menu,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { UserRole } from '@/types';
@@ -21,14 +22,18 @@ const roleLabels: Record<UserRole, string> = {
 };
 
 const roleBadgeColors: Record<UserRole, string> = {
-  ADMIN: 'bg-red-500/15 text-red-400 border-red-500/30',
-  DOCTOR: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  RECEPTIONIST: 'bg-green-500/15 text-green-400 border-green-500/30',
-  LAB_TECH: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-  CASHIER: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  ADMIN: 'bg-red-500/12 text-red-400 border-red-500/25',
+  DOCTOR: 'bg-blue-500/12 text-blue-400 border-blue-500/25',
+  RECEPTIONIST: 'bg-emerald-500/12 text-emerald-400 border-emerald-500/25',
+  LAB_TECH: 'bg-purple-500/12 text-purple-400 border-purple-500/25',
+  CASHIER: 'bg-amber-500/12 text-amber-400 border-amber-500/25',
 };
 
-export default function TopNav() {
+interface TopNavProps {
+  onMenuToggle?: () => void;
+}
+
+export default function TopNav({ onMenuToggle }: TopNavProps) {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -47,27 +52,42 @@ export default function TopNav() {
   if (!user) return null;
 
   return (
-    <header className="h-16 bg-white/80 dark:bg-surface-900/80 backdrop-blur-xl border-b border-surface-200 dark:border-surface-700/50 flex items-center justify-between px-6 sticky top-0 z-40">
-      <div>
-        <p className="text-sm text-surface-500 dark:text-surface-400">
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
+    <header className="h-16 bg-white/80 dark:bg-[#111820]/80 backdrop-blur-xl border-b border-surface-200 dark:border-[#2A2F38] flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+      <div className="flex items-center gap-3">
+        {/* Mobile hamburger */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onMenuToggle}
+          className="p-2.5 rounded-xl text-surface-400 hover:text-surface-700 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-white/5 transition-colors lg:hidden focus-ring"
+          style={{ minWidth: '44px', minHeight: '44px' }}
+          aria-label="Toggle navigation menu"
+        >
+          <Menu className="w-5 h-5" />
+        </motion.button>
+
+        <div>
+          <p className="text-sm text-surface-500 dark:text-surface-400 hidden sm:block">
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Theme toggle */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.9, rotate: 15 }}
           transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           onClick={toggleTheme}
-          className="p-2 rounded-xl text-surface-400 hover:text-surface-600 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+          className="p-2.5 rounded-xl text-surface-400 hover:text-surface-600 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-white/5 transition-colors focus-ring"
+          style={{ minWidth: '44px', minHeight: '44px' }}
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           <AnimatePresence mode="wait">
             {isDark ? (
@@ -84,29 +104,35 @@ export default function TopNav() {
 
         {/* Notifications */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-          className="p-2 rounded-xl text-surface-400 hover:text-surface-600 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors relative"
+          className="relative p-2.5 rounded-xl text-surface-400 hover:text-surface-600 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-white/5 transition-colors focus-ring"
+          style={{ minWidth: '44px', minHeight: '44px' }}
+          aria-label="Notifications"
         >
           <Bell className="w-5 h-5" />
           <motion.span
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"
+            className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"
+            aria-hidden="true"
           />
         </motion.button>
 
         {/* User dropdown */}
         <div className="relative" ref={dropdownRef}>
           <motion.button
-            whileHover={{ backgroundColor: 'rgba(241,245,249,0.5)' }}
+            whileHover={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(241,245,249,0.8)' }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-3 pl-3 pr-2 py-1.5 rounded-xl dark:hover:bg-surface-800 transition-all"
+            className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 pr-2 py-1.5 rounded-xl transition-all focus-ring"
+            style={{ minHeight: '44px' }}
+            aria-expanded={dropdownOpen}
+            aria-haspopup="true"
           >
-            <div className="w-8 h-8 bg-primary-500/20 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-primary-400" />
+            <div className="w-8 h-8 bg-primary-500/15 rounded-full flex items-center justify-center shrink-0">
+              <User className="w-4 h-4 text-primary-400" aria-hidden="true" />
             </div>
             <div className="text-left hidden sm:block">
               <p className="text-sm font-medium text-surface-900 dark:text-white leading-tight">
@@ -117,7 +143,7 @@ export default function TopNav() {
               </p>
             </div>
             <motion.div animate={{ rotate: dropdownOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-              <ChevronDown className="w-4 h-4 text-surface-400" />
+              <ChevronDown className="w-4 h-4 text-surface-400" aria-hidden="true" />
             </motion.div>
           </motion.button>
 
@@ -128,9 +154,10 @@ export default function TopNav() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl shadow-xl py-2 z-50"
+                className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#1A1F26] border border-surface-200 dark:border-[#2A2F38] rounded-xl shadow-xl py-2 z-50"
+                role="menu"
               >
-                <div className="px-4 py-2 border-b border-surface-100 dark:border-surface-700">
+                <div className="px-4 py-2 border-b border-surface-100 dark:border-[#2A2F38]">
                   <p className="text-sm font-medium text-surface-900 dark:text-white">{user.fullName}</p>
                   <p className="text-xs text-surface-500">{user.email}</p>
                   <span
@@ -145,9 +172,11 @@ export default function TopNav() {
                     setDropdownOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 transition-colors focus-ring"
+                  style={{ minHeight: '44px' }}
+                  role="menuitem"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4" aria-hidden="true" />
                   Sign out
                 </motion.button>
               </motion.div>
