@@ -30,12 +30,20 @@ public class PatientController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<PatientResponse>> search(@RequestParam String q) {
-        return ResponseEntity.ok(patientService.search(q));
+    public ResponseEntity<List<PatientResponse>> search(
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+        if (q != null && !q.isBlank()) {
+            return ResponseEntity.ok(patientService.search(q, page, size));
+        }
+        return ResponseEntity.ok(patientService.getAll(page, size));
     }
 
     @GetMapping
-    public ResponseEntity<List<PatientResponse>> getAll() {
-        return ResponseEntity.ok(patientService.getAll());
+    public ResponseEntity<List<PatientResponse>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+        return ResponseEntity.ok(patientService.getAll(page, size));
     }
 }

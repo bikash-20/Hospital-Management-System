@@ -1,7 +1,7 @@
 # ── OpenHospital RMS ─────────────────────────────────────
 # Run with:
-#   docker compose up --build              (local Postgres)
-#   docker compose --profile supabase up --build  (Supabase via .env)
+#   docker compose up --build                    (local Postgres)
+#   docker compose --profile supabase up --build (Supabase via .env)
 #
 # Services:
 #   frontend  → http://localhost
@@ -49,9 +49,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    profiles:
-      - default
-      - supabase
 
   # ── Frontend (nginx) ───────────────────────────────────
   frontend:

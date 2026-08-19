@@ -1,0 +1,15 @@
+package com.hospital.rms.repository;
+
+import com.hospital.rms.entity.SequenceCounter;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface SequenceCounterRepository extends JpaRepository<SequenceCounter, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<SequenceCounter> findBySequenceKey(String sequenceKey);
+}

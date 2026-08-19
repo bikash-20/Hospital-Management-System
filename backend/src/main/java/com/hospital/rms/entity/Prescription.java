@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "prescriptions")
+@Table(name = "prescriptions", indexes = {
+    @Index(name = "idx_prescription_patient_date", columnList = "patient_id, createdDate"),
+    @Index(name = "idx_prescription_doctor_date", columnList = "doctor_id, createdDate")
+})
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Prescription {
 

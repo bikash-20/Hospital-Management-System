@@ -2,6 +2,8 @@ package com.hospital.rms.repository;
 
 import com.hospital.rms.entity.Appointment;
 import com.hospital.rms.enums.AppointmentStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -25,4 +27,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     List<Appointment> findByStatus(AppointmentStatus status);
 
     List<Appointment> findByDoctorIdAndStatus(UUID doctorId, AppointmentStatus status);
+
+    Page<Appointment> findAll(Pageable pageable);
 }

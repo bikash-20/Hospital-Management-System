@@ -45,7 +45,9 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AppointmentResponse>> getAll() {
-        return ResponseEntity.ok(appointmentService.getAll());
+    public ResponseEntity<List<AppointmentResponse>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+        return ResponseEntity.ok(appointmentService.getAll(page, size));
     }
 }

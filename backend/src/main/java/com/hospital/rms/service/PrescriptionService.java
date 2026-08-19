@@ -10,6 +10,8 @@ import com.hospital.rms.repository.AppointmentRepository;
 import com.hospital.rms.repository.PrescriptionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,8 +77,10 @@ public class PrescriptionService {
     }
 
     @Transactional(readOnly = true)
-    public List<PrescriptionResponse> getAll() {
-        return prescriptionRepository.findAll().stream()
+    public List<PrescriptionResponse> getAll(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+            Sort.by(Sort.Direction.DESC, "createdDate"));
+        return prescriptionRepository.findAll(pageRequest).stream()
             .map(this::toResponse)
             .toList();
     }

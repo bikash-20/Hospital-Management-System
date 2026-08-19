@@ -1,5 +1,20 @@
 # OpenHospital RMS
 
+> Student portfolio project. The live-demo deployment is intentionally a low-cost free-tier setup and must not be used with real patient data.
+
+## Current Deployment Plan
+
+- Frontend: deploy `frontend/` to Vercel. Set `VITE_API_URL` to the deployed Fly.io API URL.
+- Backend: deploy `backend/` to Fly.io using `backend/fly.toml` and `backend/Dockerfile`.
+- Database: use the existing Supabase PostgreSQL connection string through Fly secrets.
+- Schema: production uses Flyway migrations and `ddl-auto=validate`.
+- CORS: set `CORS_ALLOWED_ORIGINS` to the exact Vercel URL.
+- Redis, multiple backend instances, and a reverse proxy are intentionally excluded from the demo.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the free-tier design and the larger production architecture, and [LOAD_TESTING.md](LOAD_TESTING.md) for the local Docker benchmark.
+
+For local Docker with PostgreSQL defaults, use `docker compose --env-file /dev/null up -d --build`. The `--env-file /dev/null` flag prevents a local `.env` Supabase connection from being used accidentally.
+
 **Resource & Patient Workflow Management System** — a full-stack hospital operations platform for clinics and regional hospitals in South/Southeast Asia.
 
 Built to replace paper-based workflows with a unified digital system covering patient registration, doctor consultations, prescriptions, lab orders, billing, bed management, and real-time queue display.
@@ -52,7 +67,7 @@ Built to replace paper-based workflows with a unified digital system covering pa
 │   │         SECURITY LAYER                                │           │
 │   │  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  │           │
 │   │  │ CORS Filter │  │ JWT Filter  │  │ RBAC Gate  │  │           │
-│   │  │ (origins *) │  │ (BCrypt +   │  │ (role-based│  │           │
+│   │  │ (allowlist) │  │ (BCrypt +   │  │ (role-based│  │           │
 │   │  │             │  │  HS256 JWT) │  │  endpoint  │  │           │
 │   │  │             │  │             │  │  security) │  │           │
 │   │  └─────────────┘  └─────────────┘  └────────────┘  │           │
@@ -95,7 +110,7 @@ Built to replace paper-based workflows with a unified digital system covering pa
 │   ┌───────┼──────────────┼──────────────┼──────────────────┐         │
 │   │       │    HikariCP CONNECTION POOL (10 connections)   │         │
 │   │       │    spring.jpa.open-in-view=false                │         │
-│   │       │    spring.jpa.hibernate.ddl-auto=update         │         │
+│   │       │    spring.jpa.hibernate.ddl-auto=validate        │         │
 │   └───────┼──────────────┼──────────────┼──────────────────┘         │
 │           │              │              │                            │
 │   ┌───────┼──────────────┼──────────────┼──────────────────┐         │
@@ -312,7 +327,7 @@ Built to replace paper-based workflows with a unified digital system covering pa
 |-----------|--------|-----|----------|
 | **Production** | Supabase PostgreSQL 17 | Free tier (500MB), managed backups, SSL, connection pooling | 60 connection limit; cold starts on free tier |
 | **Development** | H2 in-memory | Zero setup, instant schema creation | No persistence; can't test PostgreSQL-specific features |
-| **Schema** | `ddl-auto=update` | Auto-migrates schema on startup | Dangerous in production with complex migrations; works for this scale |
+| **Schema** | Flyway + `ddl-auto=validate` | Versioned SQL migrations with startup validation | Requires migration discipline; safer for production |
 | **Pool** | HikariCP (10 conns) | Battle-tested, fast, respects Supabase limits | 10 connections may bottleneck under high concurrency |
 
 ### Infrastructure
@@ -359,8 +374,8 @@ Built to replace paper-based workflows with a unified digital system covering pa
 
 1. **JWT in localStorage** — vulnerable to XSS. Mitigated by CSP headers (not yet implemented) and same-origin policy.
 2. **No token revocation** — a compromised token is valid until expiry. For this scale, acceptable. For production, add a Redis blacklist.
-3. **CORS allows `*`** — acceptable for development; should be locked down in production deployment.
-4. **`ddl-auto=update`** — no migration rollback. Acceptable for initial deployment; should migrate to Flyway/Liquibase for production.
+3. **CORS is environment-configured** — local development allows `http://localhost:5173`; production must set `CORS_ALLOWED_ORIGINS` to the deployed frontend origin.
+4. **Flyway migrations** — production uses versioned SQL and `ddl-auto=validate`; rollback still requires a reviewed down-migration or restore plan.
 
 ---
 
@@ -550,9 +565,9 @@ cd frontend && npx tsc --noEmit
 
 ### Current Limitations
 
-1. **No server-side pagination** — all records fetched at once. Fine for <1000 patients; will need cursor-based pagination at scale.
+1. **Pagination metadata is not returned yet** — collection endpoints now use bounded `page` and `size` queries, but retain array responses for frontend compatibility.
 2. **JSON TEXT for structured data** — `medicines`, `labOrders`, `lineItems` stored as JSON strings. Can't query individual items via SQL.
-3. **`ddl-auto=update`** — Hibernate auto-migrates schema. Risk of data loss on column type changes. Should migrate to Flyway.
+3. **One-instance counter allocation** — UHID and appointment token counters use locked rows and JVM synchronization for the single free-tier backend. Multi-instance deployment needs an atomic shared counter operation.
 4. **No WebSocket authentication** — queue updates are broadcast without verifying the subscriber's identity.
 5. **No file upload** — prescriptions/lab orders are text-only. No PDF/image upload for reports.
 6. **Hardcoded UHID prefix** — `SYL-2026-` is Sylhet-specific. Should be configurable per hospital.
@@ -569,10 +584,10 @@ cd frontend && npx tsc --noEmit
 | **Input Validation** | Basic @Valid | Jakarta Bean Validation + SQL injection prevention |
 | **Logging** | Console only | Structured JSON → ELK/Datadog |
 | **Monitoring** | None | Micrometer + Prometheus/Grafana |
-| **Database Migrations** | ddl-auto=update | Flyway with versioned SQL scripts |
+| **Database Migrations** | Flyway + ddl-auto=validate | Versioned SQL scripts in `backend/src/main/resources/db/migration` |
 | **HTTPS** | Termination at LB | Certbot / Let's Encrypt for self-hosted |
 | **Backup** | Supabase auto-backups | Point-in-time recovery + offsite copies |
-| **CORS** | Allow all origins | Lock to production domain |
+| **CORS** | Environment-configured allowlist | Set `CORS_ALLOWED_ORIGINS` to the production domain |
 
 ### Feature Roadmap
 

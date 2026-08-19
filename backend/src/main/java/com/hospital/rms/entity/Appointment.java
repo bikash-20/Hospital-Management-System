@@ -13,7 +13,9 @@ import java.util.UUID;
 @Table(name = "appointments", indexes = {
     @Index(name = "idx_appointment_date", columnList = "appointmentDate"),
     @Index(name = "idx_appointment_doctor_date", columnList = "doctor_id, appointmentDate"),
-    @Index(name = "idx_appointment_status", columnList = "status")
+    @Index(name = "idx_appointment_status", columnList = "status"),
+    @Index(name = "idx_appointment_patient_date", columnList = "patient_id, appointmentDate"),
+    @Index(name = "idx_appointment_doctor_token", columnList = "doctor_id, tokenNumber")
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Appointment {

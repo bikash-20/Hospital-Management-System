@@ -40,7 +40,9 @@ public class PrescriptionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PrescriptionResponse>> getAll() {
-        return ResponseEntity.ok(prescriptionService.getAll());
+    public ResponseEntity<List<PrescriptionResponse>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+        return ResponseEntity.ok(prescriptionService.getAll(page, size));
     }
 }

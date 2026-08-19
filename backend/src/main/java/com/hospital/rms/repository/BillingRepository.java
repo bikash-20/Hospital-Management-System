@@ -2,6 +2,8 @@ package com.hospital.rms.repository;
 
 import com.hospital.rms.entity.Billing;
 import com.hospital.rms.enums.PaymentStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,4 +15,6 @@ public interface BillingRepository extends JpaRepository<Billing, UUID> {
     List<Billing> findByPatientIdOrderByCreatedDateDesc(UUID patientId);
     List<Billing> findByStatus(PaymentStatus status);
     boolean existsByInvoiceNumber(String invoiceNumber);
+    Page<Billing> findAll(Pageable pageable);
+    Page<Billing> findByStatus(PaymentStatus status, Pageable pageable);
 }

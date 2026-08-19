@@ -9,6 +9,8 @@ import com.hospital.rms.enums.PaymentStatus;
 import com.hospital.rms.repository.BillingRepository;
 import com.hospital.rms.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,17 +82,22 @@ public class BillingService {
     }
 
     @Transactional(readOnly = true)
-    public List<BillingResponse> getUnpaid() {
-        return billingRepository.findByStatus(PaymentStatus.UNPAID).stream()
+    public List<BillingResponse> getUnpaid(int page, int size) {
+        return billingRepository.findByStatus(PaymentStatus.UNPAID, pageRequest(page, size)).stream()
             .map(this::toResponse)
             .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<BillingResponse> getAll() {
-        return billingRepository.findAll().stream()
+    public List<BillingResponse> getAll(int page, int size) {
+        return billingRepository.findAll(pageRequest(page, size)).stream()
             .map(this::toResponse)
             .toList();
+    }
+
+    private PageRequest pageRequest(int page, int size) {
+        return PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+            Sort.by(Sort.Direction.DESC, "createdDate"));
     }
 
     private String generateInvoiceNumber() {

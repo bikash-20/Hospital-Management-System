@@ -39,12 +39,16 @@ public class BillingController {
     }
 
     @GetMapping("/unpaid")
-    public ResponseEntity<List<BillingResponse>> getUnpaid() {
-        return ResponseEntity.ok(billingService.getUnpaid());
+    public ResponseEntity<List<BillingResponse>> getUnpaid(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+        return ResponseEntity.ok(billingService.getUnpaid(page, size));
     }
 
     @GetMapping
-    public ResponseEntity<List<BillingResponse>> getAll() {
-        return ResponseEntity.ok(billingService.getAll());
+    public ResponseEntity<List<BillingResponse>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+        return ResponseEntity.ok(billingService.getAll(page, size));
     }
 }

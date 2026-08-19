@@ -8,10 +8,6 @@ import {
   AlertTriangle,
   X,
   Check,
-  Phone,
-  Calendar,
-  MapPin,
-  CreditCard,
   Users,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

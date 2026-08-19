@@ -1,6 +1,8 @@
 package com.hospital.rms.repository;
 
 import com.hospital.rms.entity.Patient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -19,4 +21,6 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     java.util.List<Patient> findByFullNameContainingIgnoreCase(String name);
 
     java.util.List<Patient> findByMobileNumber(String mobileNumber);
+
+    Page<Patient> findByFullNameContainingIgnoreCase(String name, Pageable pageable);
 }

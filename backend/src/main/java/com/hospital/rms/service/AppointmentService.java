@@ -11,6 +11,8 @@ import com.hospital.rms.repository.AppointmentRepository;
 import com.hospital.rms.repository.PatientRepository;
 import com.hospital.rms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ public class AppointmentService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final SequenceService sequenceService;
 
     @Transactional
     public AppointmentResponse create(AppointmentRequest request) {
@@ -43,13 +46,14 @@ public class AppointmentService {
         LocalDateTime dayEnd = day.atTime(LocalTime.MAX);
 
         int maxToken = appointmentRepository.findMaxTokenForDoctorOnDay(doctor.getId(), dayStart, dayEnd);
-        int nextToken = maxToken + 1;
+        String sequenceKey = "appointment:" + doctor.getId() + ":" + day;
+        long nextToken = sequenceService.next(sequenceKey, maxToken);
 
         Appointment appointment = Appointment.builder()
             .patient(patient)
             .doctor(doctor)
             .appointmentDate(request.getAppointmentDate())
-            .tokenNumber(nextToken)
+            .tokenNumber(Math.toIntExact(nextToken))
             .status(AppointmentStatus.WAITING)
             .build();
 
@@ -93,8 +97,10 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<AppointmentResponse> getAll() {
-        return appointmentRepository.findAll().stream()
+    public List<AppointmentResponse> getAll(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+            Sort.by(Sort.Direction.DESC, "appointmentDate"));
+        return appointmentRepository.findAll(pageRequest).stream()
             .map(this::toResponse)
             .toList();
     }

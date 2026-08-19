@@ -82,7 +82,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
       <>
         {/* Hamburger button */}
         <button
-          onClick={onMobileClose ? () => {} : undefined}
+          onClick={onMobileClose}
           className="fixed top-3 left-3 z-50 p-2.5 rounded-xl bg-[#1A1F26] border border-[#2A2F38] text-surface-300 hover:text-white transition-colors lg:hidden"
           aria-label="Open navigation menu"
           style={{ display: mobileOpen ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '44px', minHeight: '44px' }}

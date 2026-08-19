@@ -13,7 +13,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "billing", indexes = {
     @Index(name = "idx_billing_invoice", columnList = "invoiceNumber", unique = true),
-    @Index(name = "idx_billing_status", columnList = "status")
+    @Index(name = "idx_billing_status", columnList = "status"),
+    @Index(name = "idx_billing_patient_date", columnList = "patient_id, createdDate")
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Billing {
