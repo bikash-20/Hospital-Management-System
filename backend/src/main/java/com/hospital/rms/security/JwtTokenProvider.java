@@ -21,7 +21,7 @@ public class JwtTokenProvider {
     private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret.replaceAll("\\s", ""));
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
