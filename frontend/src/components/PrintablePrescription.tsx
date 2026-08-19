@@ -8,7 +8,7 @@ interface PrintablePrescriptionProps {
 
 export default function PrintablePrescription({
   prescription,
-  hospitalName = 'OpenHospital',
+  hospitalName = 'CareBridge',
   hospitalAddress = 'Sylhet, Bangladesh',
 }: PrintablePrescriptionProps) {
   return (

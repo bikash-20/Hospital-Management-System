@@ -8,7 +8,7 @@ interface PrintableInvoiceProps {
 
 export default function PrintableInvoice({
   billing,
-  hospitalName = 'OpenHospital',
+  hospitalName = 'CareBridge',
   hospitalAddress = 'Sylhet, Bangladesh',
 }: PrintableInvoiceProps) {
   const lineItems: BillingLineItem[] = Array.isArray(billing.lineItems)

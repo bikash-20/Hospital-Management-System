@@ -145,7 +145,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
       {/* Logo */}
       <div className="p-4 flex items-center gap-3 border-b border-[#2A2F38] min-h-[64px]">
         <div className="p-1 bg-white/95 rounded-xl shrink-0">
-          <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-7 h-7" />
+          <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />
         </div>
         <AnimatePresence>
           {!isCollapsed && (
@@ -156,7 +156,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
               transition={{ duration: 0.2 }}
               className="overflow-hidden whitespace-nowrap"
             >
-              <h2 className="text-sm font-bold text-white">OpenHospital</h2>
+              <h2 className="text-sm font-bold text-white">CareBridge</h2>
               <p className="text-[10px] text-surface-500 uppercase tracking-wider">RMS</p>
             </motion.div>
           )}
@@ -251,10 +251,10 @@ function MobileSidebarContent({
       <div className="p-4 flex items-center justify-between border-b border-[#2A2F38] min-h-[64px]">
         <div className="flex items-center gap-3">
           <div className="p-1 bg-white/95 rounded-xl">
-            <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-7 h-7" />
+            <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white">OpenHospital</h2>
+            <h2 className="text-sm font-bold text-white">CareBridge</h2>
             <p className="text-[10px] text-surface-500 uppercase tracking-wider">RMS</p>
           </div>
         </div>

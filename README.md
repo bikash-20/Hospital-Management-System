@@ -1,4 +1,4 @@
-# OpenHospital RMS
+# CareBridge RMS
 
 > Student portfolio project. The live-demo deployment is intentionally a low-cost free-tier setup and must not be used with real patient data.
 
@@ -16,7 +16,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the free-tier design and the larger p
 
 For local Docker with PostgreSQL defaults, use `docker compose --env-file /dev/null up -d --build`. The `--env-file /dev/null` flag prevents a local `.env` Supabase connection from being used accidentally.
 
-**Resource & Patient Workflow Management System** — a full-stack hospital operations platform for clinics and regional hospitals in South/Southeast Asia.
+**CareBridge Resource Management System** — a full-stack hospital operations platform for clinics and regional hospitals in South/Southeast Asia.
 
 Built to replace paper-based workflows with a unified digital system covering patient registration, doctor consultations, prescriptions, lab orders, billing, bed management, and real-time queue display.
 

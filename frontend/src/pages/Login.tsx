@@ -85,7 +85,7 @@ export default function Login() {
             className="flex items-center justify-center mb-8"
           >
             <div className="p-4 bg-primary-500/20 rounded-2xl backdrop-blur-sm border border-primary-500/30">
-              <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-16 h-16" />
+              <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-16 h-16" />
             </div>
           </motion.div>
 
@@ -95,7 +95,7 @@ export default function Login() {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="text-5xl font-bold text-white mb-4 tracking-tight"
           >
-            OpenHospital
+            CareBridge
           </motion.h1>
 
           <motion.p
@@ -152,10 +152,10 @@ export default function Login() {
             className="lg:hidden flex items-center gap-3 mb-8 justify-center"
           >
             <div className="p-3 bg-primary-500/20 rounded-xl border border-primary-500/30">
-              <img src="/openhospital-logo.svg" alt="OpenHospital medical logo" className="w-10 h-10" />
+              <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-10 h-10" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">OpenHospital</h1>
+              <h1 className="text-2xl font-bold text-white">CareBridge</h1>
               <p className="text-surface-400 text-sm">RMS</p>
             </div>
           </motion.div>

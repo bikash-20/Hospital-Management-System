@@ -124,7 +124,7 @@ export default function Settings() {
           System Information
         </h2>
         <div className="space-y-3">
-          <InfoRow label="Application" value="OpenHospital RMS" />
+          <InfoRow label="Application" value="CareBridge RMS" />
           <InfoRow label="Version" value="1.0.0" />
           <InfoRow label="Frontend" value="React 18 + TypeScript + Tailwind CSS" />
           <InfoRow label="Backend" value="Spring Boot 3.2 + Java 21" />

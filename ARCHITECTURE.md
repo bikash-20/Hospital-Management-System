@@ -1,4 +1,4 @@
-# OpenHospital RMS Architecture
+# CareBridge RMS Architecture
 
 This document separates the architecture used by the free student demo from the architecture I would deploy for a larger hospital. The demo is intentionally small and inexpensive; it is not a claim that free hosting provides production availability or compliance guarantees.
 
