@@ -8,6 +8,11 @@ import type {
   User,
   UserRole,
   DashboardStats,
+  AuditLog,
+  ManagedUser,
+  DoctorSchedule,
+  LabResult,
+  RevenueReport,
 } from '@/types';
 
 // ===== Backend Response Types (what the API actually returns) =====
@@ -338,4 +343,123 @@ export async function getDashboardStatsApi(): Promise<DashboardStats> {
     revenue,
     pendingBills,
   };
+}
+
+// ===== Audit Logs API =====
+export async function getAuditLogsApi(limit = 50): Promise<AuditLog[]> {
+  const { data } = await api.get<AuditLog[]>('/audit-logs', { params: { limit } });
+  return data;
+}
+
+export async function getAuditLogsByEntityApi(entityName: string): Promise<AuditLog[]> {
+  const { data } = await api.get<AuditLog[]>(`/audit-logs/entity/${entityName}`);
+  return data;
+}
+
+// ===== User Management API =====
+export async function getUsersApi(): Promise<ManagedUser[]> {
+  const { data } = await api.get<ManagedUser[]>('/admin/users');
+  return data;
+}
+
+export async function createUserApi(payload: {
+  username: string;
+  fullName: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  enabled?: boolean;
+}): Promise<ManagedUser> {
+  const { data } = await api.post<ManagedUser>('/admin/users', payload);
+  return data;
+}
+
+export async function updateUserApi(id: string, payload: {
+  fullName: string;
+  email: string;
+  role: UserRole;
+  enabled: boolean;
+  password?: string;
+}): Promise<ManagedUser> {
+  const { data } = await api.put<ManagedUser>(`/admin/users/${id}`, payload);
+  return data;
+}
+
+export async function toggleUserEnabledApi(id: string): Promise<void> {
+  await api.patch(`/admin/users/${id}/toggle-enabled`);
+}
+
+export async function deleteUserApi(id: string): Promise<void> {
+  await api.delete(`/admin/users/${id}`);
+}
+
+// ===== Doctor Schedule API =====
+export async function getDoctorScheduleApi(doctorId: string): Promise<DoctorSchedule[]> {
+  const { data } = await api.get<DoctorSchedule[]>(`/schedules/doctor/${doctorId}`);
+  return data;
+}
+
+export async function setDoctorScheduleApi(doctorId: string, schedule: {
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  active: boolean;
+}[]): Promise<DoctorSchedule[]> {
+  const { data } = await api.post<DoctorSchedule[]>(`/schedules/doctor/${doctorId}`, schedule);
+  return data;
+}
+
+// ===== Lab Results API =====
+export async function getLabResultsApi(status?: string): Promise<LabResult[]> {
+  const params = status ? { status } : {};
+  const { data } = await api.get<LabResult[]>('/lab-results', { params });
+  return data;
+}
+
+export async function getLabResultsByPatientApi(patientId: string): Promise<LabResult[]> {
+  const { data } = await api.get<LabResult[]>(`/lab-results/patient/${patientId}`);
+  return data;
+}
+
+export async function createLabResultApi(payload: {
+  appointmentId: string;
+  patientId: string;
+  testName: string;
+  priority?: string;
+  resultValue?: string;
+  notes?: string;
+}): Promise<LabResult> {
+  const { data } = await api.post<LabResult>('/lab-results', payload);
+  return data;
+}
+
+export async function updateLabResultStatusApi(id: string, status: string): Promise<LabResult> {
+  const { data } = await api.patch<LabResult>(`/lab-results/${id}/status`, { status });
+  return data;
+}
+
+// ===== Revenue Reports API =====
+export async function getRevenueReportApi(): Promise<RevenueReport> {
+  const { data } = await api.get<RevenueReport>('/reports/revenue');
+  return data;
+}
+
+export async function getTodayRevenueApi(): Promise<RevenueReport> {
+  const { data } = await api.get<RevenueReport>('/reports/revenue/today');
+  return data;
+}
+
+export async function getWeekRevenueApi(): Promise<RevenueReport> {
+  const { data } = await api.get<RevenueReport>('/reports/revenue/week');
+  return data;
+}
+
+export async function getMonthRevenueApi(): Promise<RevenueReport> {
+  const { data } = await api.get<RevenueReport>('/reports/revenue/month');
+  return data;
+}
+
+export async function getRevenueByDateRangeApi(start: string, end: string): Promise<RevenueReport> {
+  const { data } = await api.get<RevenueReport>('/reports/revenue/range', { params: { start, end } });
+  return data;
 }

@@ -16,6 +16,12 @@ import {
   Menu,
   X,
   Stethoscope,
+  History,
+  UserCog,
+  CalendarClock,
+  FlaskConical,
+  BarChart3,
+  ClipboardList,
 } from 'lucide-react';
 
 interface NavItem {
@@ -28,12 +34,18 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_TECH', 'CASHIER'] },
   { label: 'Patients', path: '/patients', icon: Users, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
+  { label: 'Patient History', path: '/patient-history', icon: ClipboardList, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST'] },
   { label: 'Appointments', path: '/appointments', icon: Calendar, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
   { label: 'Consultation', path: '/consultation', icon: Stethoscope, roles: ['DOCTOR'] },
   { label: 'Prescriptions', path: '/prescriptions', icon: FileText, roles: ['DOCTOR', 'RECEPTIONIST'] },
   { label: 'Queue Display', path: '/queue', icon: Activity, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
+  { label: 'Lab Results', path: '/lab-results', icon: FlaskConical, roles: ['LAB_TECH', 'DOCTOR'] },
+  { label: 'Doctor Schedule', path: '/schedule', icon: CalendarClock, roles: ['DOCTOR'] },
   { label: 'Bed Management', path: '/beds', icon: Bed, roles: ['ADMIN'] },
   { label: 'Billing', path: '/billing', icon: Receipt, roles: ['ADMIN', 'CASHIER', 'RECEPTIONIST'] },
+  { label: 'Revenue Reports', path: '/reports', icon: BarChart3, roles: ['ADMIN', 'CASHIER'] },
+  { label: 'User Management', path: '/users', icon: UserCog, roles: ['ADMIN'] },
+  { label: 'Audit Logs', path: '/audit-logs', icon: History, roles: ['ADMIN'] },
   { label: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
 ];
 
@@ -239,7 +251,7 @@ function MobileSidebarContent({
       <div className="p-4 flex items-center justify-between border-b border-[#2A2F38] min-h-[64px]">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary-500/15 rounded-xl">
-            <Activity className="w-5 h-5 text-primary-400" aria-hidden="true" />
+            <Activity className="w-5 h-5 text-primary-400" />
           </div>
           <div>
             <h2 className="text-sm font-bold text-white">OpenHospital</h2>

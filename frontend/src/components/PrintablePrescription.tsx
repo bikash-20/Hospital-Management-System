@@ -1,0 +1,157 @@
+import type { Prescription } from '@/types';
+
+interface PrintablePrescriptionProps {
+  prescription: Prescription;
+  hospitalName?: string;
+  hospitalAddress?: string;
+}
+
+export default function PrintablePrescription({
+  prescription,
+  hospitalName = 'OpenHospital',
+  hospitalAddress = 'Sylhet, Bangladesh',
+}: PrintablePrescriptionProps) {
+  return (
+    <div className="print-container bg-white text-black p-8 max-w-[800px] mx-auto">
+      {/* Header */}
+      <div className="border-b-2 border-black pb-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{hospitalName}</h1>
+            <p className="text-sm text-gray-600">{hospitalAddress}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-medium">PRESCRIPTION</p>
+            <p className="text-xs text-gray-500">
+              Date: {new Date(prescription.createdDate).toLocaleDateString()}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Patient Info */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Patient</p>
+          <p className="font-medium">{prescription.patient.fullName}</p>
+          <p className="text-sm text-gray-600">UHID: {prescription.patient.uhid}</p>
+          <p className="text-sm text-gray-600">Mobile: {prescription.patient.mobileNumber}</p>
+          <p className="text-sm text-gray-600">
+            DOB: {new Date(prescription.patient.dob).toLocaleDateString()}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Doctor</p>
+          <p className="font-medium">{prescription.doctor.fullName}</p>
+          <p className="text-sm text-gray-600">
+            Token: #{prescription.appointment.tokenNumber}
+          </p>
+        </div>
+      </div>
+
+      {/* Chief Complaints */}
+      {prescription.chiefComplaints && prescription.chiefComplaints.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">
+            Chief Complaints
+          </h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {prescription.chiefComplaints.map((complaint, i) => (
+              <li key={i}>{complaint}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Diagnosis */}
+      {prescription.diagnosis && (
+        <div className="mb-6">
+          <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">
+            Diagnosis
+          </h3>
+          <p className="text-sm">{prescription.diagnosis}</p>
+        </div>
+      )}
+
+      {/* Medicines */}
+      {prescription.medicines && prescription.medicines.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">
+            Medicines
+          </h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-2 font-medium">Medicine</th>
+                <th className="text-left py-2 font-medium">Dosage</th>
+                <th className="text-left py-2 font-medium">Frequency</th>
+                <th className="text-left py-2 font-medium">Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              {prescription.medicines.map((med, i) => (
+                <tr key={i} className="border-b border-gray-100">
+                  <td className="py-2">{med.name}</td>
+                  <td className="py-2">{med.dosage}</td>
+                  <td className="py-2">{med.frequency}</td>
+                  <td className="py-2">{med.duration}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Lab Orders */}
+      {prescription.labOrders && prescription.labOrders.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">
+            Lab Orders
+          </h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {prescription.labOrders.map((order, i) => (
+              <li key={i}>
+                {order.testName}
+                {order.priority === 'URGENT' && (
+                  <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">
+                    URGENT
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="mt-12 pt-4 border-t border-gray-300">
+        <div className="flex justify-between items-end">
+          <div>
+            <p className="text-xs text-gray-500">Generated by {hospitalName} RMS</p>
+          </div>
+          <div className="text-right">
+            <div className="w-48 border-t border-black mt-8 pt-1">
+              <p className="text-sm">{prescription.doctor.fullName}</p>
+              <p className="text-xs text-gray-500">Signature</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          .print-container {
+            margin: 0;
+            padding: 20px;
+            box-shadow: none;
+            border: none;
+          }
+          body {
+            background: white;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}

@@ -1,18 +1,33 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPrescriptionsApi } from '@/api/api';
+import type { Prescription } from '@/types';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText,
   User,
   Calendar,
   Pill,
   TestTube,
+  Printer,
+  X,
 } from 'lucide-react';
+import PrintablePrescription from '@/components/PrintablePrescription';
 
 export default function Prescriptions() {
   const { data: prescriptions = [] } = useQuery({
     queryKey: ['prescriptions'],
     queryFn: getPrescriptionsApi,
   });
+
+  const [printingRx, setPrintingRx] = useState<Prescription | null>(null);
+
+  const handlePrint = (rx: Prescription) => {
+    setPrintingRx(rx);
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -59,10 +74,19 @@ export default function Prescriptions() {
                   </div>
                 </div>
               </div>
-              <span className="text-xs text-surface-400 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                {new Date(rx.createdDate).toLocaleDateString()}
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePrint(rx)}
+                  className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-white/5 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+                  title="Print prescription"
+                >
+                  <Printer className="w-4 h-4" />
+                </button>
+                <span className="text-xs text-surface-400 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {new Date(rx.createdDate).toLocaleDateString()}
+                </span>
+              </div>
             </div>
 
             {/* Chief Complaints */}
@@ -143,6 +167,49 @@ export default function Prescriptions() {
         ))}
       </div>
       )}
+
+      {/* Print Preview Modal */}
+      <AnimatePresence>
+        {printingRx && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 print:hidden"
+              onClick={() => setPrintingRx(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 flex items-center justify-center z-50 p-4 print:p-0 print:inset-auto"
+            >
+              <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl print:shadow-none print:max-h-none print:overflow-visible">
+                <div className="p-4 border-b border-surface-200 flex items-center justify-between print:hidden">
+                  <h3 className="font-semibold text-surface-900">Prescription Preview</h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => window.print()}
+                      className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-sm font-medium flex items-center gap-2"
+                    >
+                      <Printer className="w-4 h-4" />
+                      Print
+                    </button>
+                    <button
+                      onClick={() => setPrintingRx(null)}
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                <PrintablePrescription prescription={printingRx} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

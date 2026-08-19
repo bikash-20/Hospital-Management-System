@@ -142,3 +142,73 @@ export interface DashboardStats {
   revenue: number;
   pendingBills: number;
 }
+
+// ===== Audit Log =====
+export interface AuditLog {
+  id: string;
+  entityName: string;
+  operation: string;
+  entityId: string;
+  oldValues: string | null;
+  newValues: string | null;
+  userId: string;
+  userName: string;
+  timestamp: string;
+}
+
+// ===== User Management =====
+export interface ManagedUser {
+  id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  enabled: boolean;
+  createdDate: string;
+}
+
+// ===== Doctor Schedule =====
+export interface DoctorSchedule {
+  id: string;
+  doctorId: string;
+  doctorName: string;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  active: boolean;
+}
+
+// ===== Lab Results =====
+export interface LabResult {
+  id: string;
+  appointmentId: string;
+  patient: Patient;
+  orderedByName: string;
+  testName: string;
+  priority: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  resultValue: string | null;
+  notes: string | null;
+  completedAt: string | null;
+  createdDate: string;
+}
+
+// ===== Revenue Reports =====
+export interface RevenueReport {
+  totalRevenue: number;
+  totalCollected: number;
+  totalPending: number;
+  totalDiscount: number;
+  totalInvoices: number;
+  paidInvoices: number;
+  unpaidInvoices: number;
+  partialInvoices: number;
+  dailyBreakdown: DailyRevenue[];
+  revenueByStatus: Record<string, number>;
+}
+
+export interface DailyRevenue {
+  date: string;
+  revenue: number;
+  invoiceCount: number;
+}

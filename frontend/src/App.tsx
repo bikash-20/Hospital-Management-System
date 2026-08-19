@@ -14,6 +14,12 @@ import QueueDisplay from '@/pages/QueueDisplay';
 import BedManagement from '@/pages/BedManagement';
 import Billing from '@/pages/Billing';
 import Settings from '@/pages/Settings';
+import AuditLogs from '@/pages/AuditLogs';
+import UserManagement from '@/pages/UserManagement';
+import DoctorSchedule from '@/pages/DoctorSchedule';
+import LabResults from '@/pages/LabResults';
+import RevenueReports from '@/pages/RevenueReports';
+import PatientVisitHistory from '@/pages/PatientVisitHistory';
 import type { ReactNode } from 'react';
 
 const queryClient = new QueryClient({
@@ -55,6 +61,13 @@ function AnimatedRoutes() {
           <Route path="/beds" element={<ProtectedRoute roles={['ADMIN']}><BedManagement /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute roles={['ADMIN', 'CASHIER', 'RECEPTIONIST']}><Billing /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute roles={['ADMIN']}><Settings /></ProtectedRoute>} />
+          {/* New Routes */}
+          <Route path="/audit-logs" element={<ProtectedRoute roles={['ADMIN']}><AuditLogs /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute roles={['ADMIN']}><UserManagement /></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute roles={['DOCTOR']}><DoctorSchedule /></ProtectedRoute>} />
+          <Route path="/lab-results" element={<ProtectedRoute roles={['LAB_TECH', 'DOCTOR']}><LabResults /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute roles={['ADMIN', 'CASHIER']}><RevenueReports /></ProtectedRoute>} />
+          <Route path="/patient-history" element={<ProtectedRoute roles={['ADMIN', 'DOCTOR', 'RECEPTIONIST']}><PatientVisitHistory /></ProtectedRoute>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
