@@ -35,6 +35,7 @@ export default function PatientRegistration() {
   const { data: patients, isLoading } = useQuery({
     queryKey: ['patients', searchQuery],
     queryFn: () => getPatientsApi(searchQuery || undefined),
+    placeholderData: (prev) => prev,
   });
 
   const registerMutation = useMutation({
@@ -46,6 +47,12 @@ export default function PatientRegistration() {
       queryClient.invalidateQueries({ queryKey: ['patients'] });
       showToast(`Patient ${newPatient.uhid} registered successfully`, 'success');
       setTimeout(() => setFormSuccess(null), 5000);
+    },
+    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
+      const serverMsg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).join(', ')
+        : error.response?.data?.message || error.message || 'Registration failed. Please try again.';
+      showToast(serverMsg, 'error');
     },
   });
 

@@ -60,6 +60,12 @@ export default function Appointments() {
       setShowCreateModal(false);
       showToast('Appointment created successfully', 'success');
     },
+    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).join(', ')
+        : error.response?.data?.message || error.message || 'Failed to create appointment';
+      showToast(msg, 'error');
+    },
   });
 
   return (

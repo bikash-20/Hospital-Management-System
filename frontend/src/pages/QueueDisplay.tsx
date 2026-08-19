@@ -21,8 +21,8 @@ export default function QueueDisplay() {
     queryFn: getDoctorsApi,
   });
 
-  // Auto-select first doctor
-  const doctorId = selectedDoctor || doctors?.[0]?.fullName || '';
+  // Auto-select first doctor — use id (UUID), not fullName
+  const doctorId = selectedDoctor || doctors?.[0]?.id || '';
 
   const { data: queueAppointments } = useQuery({
     queryKey: ['queue', doctorId],
@@ -41,7 +41,7 @@ export default function QueueDisplay() {
     }
   };
 
-  const currentDoctor = doctors?.find((d) => d.fullName === doctorId);
+  const currentDoctor = doctors?.find((d) => d.id === doctorId);
 
   // Derive queue state from appointments
   const waitingList = queueAppointments?.filter(
@@ -69,7 +69,7 @@ export default function QueueDisplay() {
               className="px-4 py-2.5 bg-white dark:bg-[#1A1F26] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring"
             >
               {doctors?.map((doc) => (
-                <option key={doc.fullName} value={doc.fullName}>{doc.fullName} — {doc.specialization}</option>
+                <option key={doc.id} value={doc.id}>{doc.fullName} — {doc.specialization}</option>
               ))}
             </select>
             <motion.button

@@ -82,6 +82,12 @@ export default function DoctorSchedule() {
       showToast('Doctor schedule saved successfully', 'success');
       setTimeout(() => setSuccessMessage(false), 3000);
     },
+    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).join(', ')
+        : error.response?.data?.message || error.message || 'Failed to save schedule';
+      showToast(msg, 'error');
+    },
   });
 
   const addSlot = (day: string) => {

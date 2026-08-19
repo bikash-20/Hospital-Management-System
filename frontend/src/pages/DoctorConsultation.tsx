@@ -5,6 +5,7 @@ import {
   getPrescriptionsByPatientApi,
   createPrescriptionApi,
 } from '@/api/api';
+import { useToast } from '@/context/ToastContext';
 import type { Appointment, Medicine, LabOrder } from '@/types';
 import {
   User,
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function DoctorConsultation() {
+  const { showToast } = useToast();
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [diagnosis, setDiagnosis] = useState('');
   const [chiefComplaints, setChiefComplaints] = useState('');
@@ -53,6 +55,12 @@ export default function DoctorConsultation() {
       setChiefComplaints('');
       setMedicines([{ name: '', dosage: '', duration: '', frequency: '' }]);
       setLabOrders([]);
+    },
+    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).join(', ')
+        : error.response?.data?.message || error.message || 'Failed to save prescription';
+      showToast(msg, 'error');
     },
   });
 

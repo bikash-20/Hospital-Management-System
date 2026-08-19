@@ -60,6 +60,12 @@ export default function UserManagement() {
       setShowCreateModal(false);
       showToast('User created successfully', 'success');
     },
+    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).join(', ')
+        : error.response?.data?.message || error.message || 'Failed to create user';
+      showToast(msg, 'error');
+    },
   });
 
   const updateMutation = useMutation({
@@ -70,6 +76,12 @@ export default function UserManagement() {
       setEditingUser(null);
       showToast('User updated successfully', 'success');
     },
+    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).join(', ')
+        : error.response?.data?.message || error.message || 'Failed to update user';
+      showToast(msg, 'error');
+    },
   });
 
   const toggleMutation = useMutation({
@@ -77,6 +89,9 @@ export default function UserManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       showToast('User access updated', 'success');
+    },
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      showToast(error.response?.data?.message || error.message || 'Failed to update user access', 'error');
     },
   });
 
@@ -86,6 +101,9 @@ export default function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setDeleteConfirm(null);
       showToast('User deleted successfully', 'success');
+    },
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      showToast(error.response?.data?.message || error.message || 'Failed to delete user', 'error');
     },
   });
 

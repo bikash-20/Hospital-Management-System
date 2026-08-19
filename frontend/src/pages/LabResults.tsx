@@ -50,6 +50,9 @@ export default function LabResults() {
       queryClient.invalidateQueries({ queryKey: ['lab-results'] });
       showToast('Lab result status updated', 'success');
     },
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      showToast(error.response?.data?.message || error.message || 'Failed to update status', 'error');
+    },
   });
 
   const updateResultMutation = useMutation({
@@ -60,6 +63,9 @@ export default function LabResults() {
       setSelectedResult(null);
       setResultValue('');
       showToast('Lab result completed successfully', 'success');
+    },
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      showToast(error.response?.data?.message || error.message || 'Failed to complete result', 'error');
     },
   });
 

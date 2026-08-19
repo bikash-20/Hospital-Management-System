@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBedsApi, updateBedStatusApi } from '@/api/api';
+import { useToast } from '@/context/ToastContext';
 import type { BedStatus } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
@@ -19,6 +20,7 @@ const statusConfig: Record<BedStatus, { color: string; bg: string; border: strin
 };
 
 export default function BedManagement() {
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
 
@@ -30,6 +32,9 @@ export default function BedManagement() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: BedStatus }) => updateBedStatusApi(id, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['beds'] }),
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      showToast(error.response?.data?.message || error.message || 'Failed to update bed status', 'error');
+    },
   });
 
   const wards = beds ? [...new Set(beds.map((b) => b.wardName))] : [];

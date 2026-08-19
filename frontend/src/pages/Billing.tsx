@@ -46,6 +46,12 @@ export default function Billing() {
       setPayAmount('');
       showToast('Payment recorded successfully', 'success');
     },
+    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).join(', ')
+        : error.response?.data?.message || error.message || 'Payment failed';
+      showToast(msg, 'error');
+    },
   });
 
   const filteredBillings = statusFilter

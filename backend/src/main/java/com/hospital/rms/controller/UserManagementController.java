@@ -28,6 +28,8 @@ public class UserManagementController {
         return ResponseEntity.ok(userManagementService.getAllUsers());
     }
 
+
+
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

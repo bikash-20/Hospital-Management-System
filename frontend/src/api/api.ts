@@ -181,7 +181,7 @@ export async function loginApi(username: string, password: string): Promise<{ ac
 // ===== Patients API =====
 export async function getPatientsApi(search?: string): Promise<Patient[]> {
   if (search) {
-    const { data } = await api.get<BackendPatient[]>('/patients', { params: { q: search } });
+    const { data } = await api.get<BackendPatient[]>('/patients/search', { params: { q: search } });
     return data.map(mapPatient);
   }
   const { data } = await api.get<BackendPatient[]>('/patients');
@@ -304,16 +304,30 @@ export async function updateBedStatusApi(id: string, status: Bed['status']): Pro
   return mapBed(data);
 }
 
-// ===== Doctors API (from User repo — filter by DOCTOR role) =====
-// Backend doesn't have a dedicated doctors endpoint yet, so we derive from users
+// ===== Doctors API =====
+interface BackendDoctor {
+  id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  role: string;
+  enabled: boolean;
+}
+
 export async function getDoctorsApi(): Promise<{ id: string; fullName: string; specialization: string; available: boolean }[]> {
-  // The backend seeds users with role DOCTOR. We'll use the patient list as a proxy
-  // or add a quick endpoint. For now, we return a static list matching the seed data.
-  // TODO: Add GET /api/users/doctors endpoint to backend
-  return [
-    { id: '', fullName: 'Dr. Rahim Ahmed', specialization: 'General Medicine', available: true },
-    { id: '', fullName: 'Dr. Sara Khan', specialization: 'General Medicine', available: true },
-  ];
+  try {
+    const { data } = await api.get<BackendDoctor[]>('/doctors');
+    return data
+      .filter((d) => d.enabled)
+      .map((d) => ({
+        id: d.id,
+        fullName: d.fullName,
+        specialization: 'General Medicine',
+        available: d.enabled,
+      }));
+  } catch {
+    return [];
+  }
 }
 
 // ===== Dashboard Stats (computed from real data) =====
