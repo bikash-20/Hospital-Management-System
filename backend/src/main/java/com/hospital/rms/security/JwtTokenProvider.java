@@ -15,7 +15,8 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private static final String DEFAULT_DEV_SECRET = "Y2hhbmdldGhpc3RvYW5nZXJzZWNyZXRrZXlmb3Jqd3R0b2tlbjEyMzQ1Njc4";
+    private static final String DEFAULT_DEV_SECRET =
+        "Y2hhbmdldGhpc3RvYW5nZXJzZWNyZXRrZXlmb3Jqd3R0b2tlbjEyMzQ1Njc4";
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -24,31 +25,28 @@ public class JwtTokenProvider {
     private long jwtExpirationMs;
 
     @PostConstruct
-      void rejectInsecureDefaultInProd() {
-          String activeProfile = System.getProperty("spring.profiles.active",
-  "");
-          boolean isProd = java.util.Arrays.asList(activeProfile.split(","))
-              .contains("prod");
-          boolean usingDefault = DEFAULT_DEV_SECRET.equals(jwtSecret);
+    void rejectInsecureDefaultInProd() {
+        String activeProfile = System.getProperty("spring.profiles.active", "");
+        boolean isProd = java.util.Arrays.asList(activeProfile.split(","))
+            .contains("prod");
+        boolean usingDefault = DEFAULT_DEV_SECRET.equals(jwtSecret);
 
-          if (usingDefault && isProd) {
-              throw new IllegalStateException(
-                  "JWT secret is still set to the public default. " +
-                  "Set the JWT_SECRET environment variable before deploying to
-  production."
-              );
-          }
-          if (usingDefault) {
-              System.err.println(
-                  "[WARNING] Using the default development JWT secret. " +
-                  "Set JWT_SECRET before exposing this instance publicly."
-              );
-          }
-      }
+        if (usingDefault && isProd) {
+            throw new IllegalStateException(
+                "JWT secret is still set to the public default. "
+                + "Set the JWT_SECRET environment variable before deploying to production."
+            );
+        }
+        if (usingDefault) {
+            System.err.println(
+                "[WARNING] Using the default development JWT secret. "
+                + "Set JWT_SECRET before exposing this instance publicly."
+            );
+        }
+    }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret.replaceAll("\\s",
-                ""));
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret.replaceAll("\\s", ""));
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -59,8 +57,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .subject(userDetails.getUsername())
-                .claim("role",
-                        userDetails.getAuthorities().iterator().next().getAuthority())
+                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
