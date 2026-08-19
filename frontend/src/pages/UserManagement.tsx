@@ -8,7 +8,6 @@ import {
   Users,
   Plus,
   Search,
-  Shield,
   UserCheck,
   UserX,
   Trash2,

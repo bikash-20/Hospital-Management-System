@@ -7,8 +7,6 @@ import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
   History,
   Search,
-  Filter,
-  ChevronDown,
   FileText,
   User,
   Clock,

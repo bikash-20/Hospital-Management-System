@@ -1,19 +1,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getLabResultsApi, createLabResultApi, updateLabResultStatusApi } from '@/api/api';
+import { getLabResultsApi, updateLabResultStatusApi } from '@/api/api';
 import type { LabResult } from '@/types';
-import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
   FlaskConical,
   Search,
-  Plus,
   Clock,
   Check,
-  AlertTriangle,
-  FileText,
-  ChevronDown,
 } from 'lucide-react';
 
 const statusStyles: Record<string, { icon: typeof Clock; color: string; bg: string }> = {
@@ -29,7 +24,6 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function LabResults() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,7 +50,7 @@ export default function LabResults() {
   });
 
   const updateResultMutation = useMutation({
-    mutationFn: ({ id, resultValue }: { id: string; resultValue: string }) =>
+    mutationFn: ({ id }: { id: string; resultValue: string }) =>
       updateLabResultStatusApi(id, 'COMPLETED'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lab-results'] });

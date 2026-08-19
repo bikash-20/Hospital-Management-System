@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getRevenueReportApi, getTodayRevenueApi, getWeekRevenueApi, getMonthRevenueApi, getRevenueByDateRangeApi } from '@/api/api';
-import type { RevenueReport } from '@/types';
 import { motion } from 'framer-motion';
-import { StaggerContainer, StaggerItem, AnimatedNumber } from '@/components/ui/motion';
+import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
   DollarSign,
   TrendingUp,

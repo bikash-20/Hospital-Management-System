@@ -1,13 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDoctorScheduleApi, setDoctorScheduleApi } from '@/api/api';
-import type { DoctorSchedule as Schedule } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
   Calendar,
-  Clock,
   Plus,
   Trash2,
   Save,
@@ -42,14 +39,14 @@ export default function DoctorSchedule() {
   // In a real app, this would come from the logged-in user's ID
   const doctorId = user?.id || '';
 
-  const { data: existingSchedule, isLoading } = useQuery({
+  const { data: existingSchedule } = useQuery({
     queryKey: ['doctor-schedule', doctorId],
     queryFn: () => getDoctorScheduleApi(doctorId),
     enabled: !!doctorId,
   });
 
   // Initialize schedule from existing data
-  useState(() => {
+  useEffect(() => {
     if (existingSchedule && existingSchedule.length > 0) {
       const grouped: Record<string, TimeSlot[]> = {};
       existingSchedule.forEach(s => {
@@ -62,7 +59,7 @@ export default function DoctorSchedule() {
       });
       setSchedule(grouped);
     }
-  });
+  }, [existingSchedule]);
 
   const saveMutation = useMutation({
     mutationFn: () => {

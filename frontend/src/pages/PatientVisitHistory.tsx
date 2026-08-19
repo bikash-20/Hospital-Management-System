@@ -3,17 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { getPatientsApi, getPrescriptionsByPatientApi, getBillingsApi } from '@/api/api';
 import type { Patient, Prescription, Billing } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
   Search,
   User,
   Calendar,
   FileText,
   Receipt,
-  Clock,
   ChevronDown,
   ChevronRight,
-  Printer,
   Stethoscope,
 } from 'lucide-react';
 
@@ -21,7 +18,7 @@ export default function PatientVisitHistory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
-  const { data: patients, isLoading: patientsLoading } = useQuery({
+  const { data: patients } = useQuery({
     queryKey: ['patients', searchQuery],
     queryFn: () => getPatientsApi(searchQuery || undefined),
   });
