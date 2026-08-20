@@ -53,7 +53,17 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            // In Spring Security 6/7 with STATELESS sessions, AnonymousAuthenticationFilter
+            // forcibly overwrites the SecurityContext with an anonymous Authentication whenever
+            // it runs. Our JWT filter used to be installed BEFORE UsernamePasswordAuthenticationFilter
+            // (and thus before AnonymousAuthenticationFilter), so the auth we set was silently
+            // replaced with "anonymous" by the very next filter — AuthorizationFilter then
+            // saw an anonymous user and returned 403 on every authenticated POST.
+            //
+            // Installing the JWT filter AFTER AnonymousAuthenticationFilter means we are the
+            // last auth-establishing filter before AuthorizationFilter runs, so the context
+            // we set is the one the authorization check sees.
+            .addFilterAfter(jwtAuthFilter, org.springframework.security.web.authentication.AnonymousAuthenticationFilter.class);
 
         return http.build();
     }

@@ -55,9 +55,17 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
+        // Strip Spring's "ROLE_" prefix so the JWT carries the bare role name
+        // (e.g. "ADMIN"). JwtAuthenticationFilter re-adds the prefix when
+        // building the SecurityContext — keeping the prefix in only one place
+        // avoids the historical ROLE_ROLE_ADMIN mismatch that silently 403'd
+        // every authenticated POST.
+        String rawRole = userDetails.getAuthorities().iterator().next().getAuthority();
+        String role = rawRole.startsWith("ROLE_") ? rawRole.substring(5) : rawRole;
+
         return Jwts.builder()
                 .subject(userDetails.getUsername())
-                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())

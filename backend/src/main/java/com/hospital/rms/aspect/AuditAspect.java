@@ -24,7 +24,16 @@ public class AuditAspect {
 
     private final AuditLogRepository auditLogRepository;
 
-    @Pointcut("execution(* com.hospital.rms.repository.*.save(..))")
+    /**
+     * Match save() on every repository except AuditLogRepository itself.
+     * Without this exclusion the aspect recurses into itself when persisting
+     * an AuditLog entry — each save() re-enters @Around, calls save() again,
+     * and stacks overflow. The try/catch below catches Exception, but not
+     * StackOverflowError (a Throwable, not an Exception), so the recursive
+     * call blew past our guard and Spring returned 403 to the client.
+     */
+    @Pointcut("execution(* com.hospital.rms.repository.*.save(..)) "
+        + "&& !execution(* com.hospital.rms.repository.AuditLogRepository.save(..))")
     public void repositorySaveMethods() {}
 
     @Around("repositorySaveMethods()")
@@ -56,8 +65,11 @@ public class AuditAspect {
 
             auditLogRepository.save(auditLog);
             log.debug("Audit: {} {} on {} by {}", operation, entityName, auditLog.getEntityId(), userId);
-        } catch (Exception e) {
-            log.warn("Failed to create audit log for {} {}: {}", operation, entityName, e.getMessage());
+        } catch (Throwable t) {
+            // Catching Throwable (not Exception) so a StackOverflowError or
+            // NoClassDefFoundError from this aspect never propagates as a
+            // failed request. Audit logging is best-effort.
+            log.warn("Failed to create audit log for {} {}: {}", operation, entityName, t.getMessage());
         }
 
         return result;
