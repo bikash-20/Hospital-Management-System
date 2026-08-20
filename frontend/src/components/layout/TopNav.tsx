@@ -61,7 +61,8 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
           onClick={onMenuToggle}
           className="p-2.5 rounded-xl text-surface-400 hover:text-surface-700 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-white/5 transition-colors lg:hidden focus-ring"
           style={{ minWidth: '44px', minHeight: '44px' }}
-          aria-label="Toggle navigation menu"
+          aria-label="Open navigation menu"
+          aria-expanded={false}
         >
           <Menu className="w-5 h-5" />
         </motion.button>

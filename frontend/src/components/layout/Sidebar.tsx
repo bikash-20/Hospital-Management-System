@@ -13,7 +13,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Menu,
   X,
   Stethoscope,
   History,
@@ -73,63 +72,72 @@ interface SidebarProps {
 export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const { user } = useAuth();
   const bp = useBreakpoint();
-  const [collapsed, setCollapsed] = useState(false);
+  // userCollapsed: explicit user action on desktop; defaults to undefined so tablet auto-collapses via derivation
+  const [userCollapsed, setUserCollapsed] = useState<boolean | undefined>(undefined);
 
-  // Auto-collapse on tablet
+  // Close on Escape (mobile)
   useEffect(() => {
-    if (bp === 'tablet') setCollapsed(true);
-    if (bp === 'desktop') setCollapsed(false);
-  }, [bp]);
+    if (!mobileOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onMobileClose();
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [mobileOpen, onMobileClose]);
+
+  // Lock body scroll while sidebar is open on mobile
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  // Auto-close on viewport resize to desktop
+  useEffect(() => {
+    if (bp !== 'mobile' && mobileOpen) onMobileClose();
+  }, [bp, mobileOpen, onMobileClose]);
 
   const filteredItems = navItems.filter(
     (item) => user && item.roles.includes(user.role),
   );
 
-  const isCollapsed = bp === 'tablet' || (bp === 'desktop' && collapsed);
+  // Derived: tablet always collapsed; desktop follows user toggle; otherwise expanded
+  const isCollapsed = bp === 'tablet' || (bp === 'desktop' && userCollapsed === true);
   const sidebarWidth = isCollapsed ? 72 : 260;
 
-  // Mobile: full overlay sidebar
+  // Mobile: full overlay sidebar (the TopNav hamburger is the trigger; no duplicate button here)
   if (bp === 'mobile') {
     return (
-      <>
-        {/* Hamburger button */}
-        <button
-          onClick={onMobileClose}
-          className="fixed top-3 left-3 z-50 p-2.5 rounded-xl bg-[#1A2332] border border-[#2A3444] text-surface-300 hover:text-white transition-colors lg:hidden"
-          aria-label="Open navigation menu"
-          style={{ display: mobileOpen ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '44px', minHeight: '44px' }}
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-
-        {/* Mobile overlay */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="mobile-overlay lg:hidden"
-                onClick={onMobileClose}
-              />
-              <motion.aside
-                initial={{ x: -280 }}
-                animate={{ x: 0 }}
-                exit={{ x: -280 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed inset-y-0 left-0 z-50 w-[260px] sidebar-bg flex flex-col border-r border-[#1E2E40] shadow-[var(--shadow-sidebar)]"
-              >
-                <MobileSidebarContent
-                  items={filteredItems}
-                  onClose={onMobileClose}
-                />
-              </motion.aside>
-            </>
-          )}
-        </AnimatePresence>
-      </>
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              onClick={onMobileClose}
+              aria-hidden
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed inset-y-0 left-0 z-50 w-[280px] sidebar-bg flex flex-col border-r border-[#1E2E40] shadow-[var(--shadow-sidebar)]"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+            >
+              <MobileSidebarContent items={filteredItems} onClose={onMobileClose} />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
     );
   }
 
@@ -188,7 +196,6 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                   title={isCollapsed ? item.label : undefined}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  {/* Active indicator bar */}
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active"
@@ -222,11 +229,11 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => setUserCollapsed(userCollapsed === true ? false : true)}
           className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-surface-800 border border-surface-700 rounded-full flex items-center justify-center text-surface-400 hover:text-white hover:bg-surface-700 transition-colors z-10 shadow-lg focus-ring"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? (
+          {isCollapsed ? (
             <ChevronRight className="w-3 h-3" aria-hidden="true" />
           ) : (
             <ChevronLeft className="w-3 h-3" aria-hidden="true" />
@@ -237,7 +244,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   );
 }
 
-// Mobile sidebar content
+// Mobile sidebar content (drawer)
 function MobileSidebarContent({
   items,
   onClose,
@@ -249,12 +256,12 @@ function MobileSidebarContent({
     <>
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-[#1E2E40] min-h-[64px]">
-        <div className="flex items-center gap-3">
-          <div className="p-1 bg-white/95 rounded-xl">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-1 bg-white/95 rounded-xl shrink-0">
             <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />
           </div>
-          <div>
-            <h2 className="text-sm font-bold text-white">CareBridge</h2>
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold text-white truncate">CareBridge</h2>
             <p className="text-[10px] text-surface-500 uppercase tracking-wider">RMS</p>
           </div>
         </div>
