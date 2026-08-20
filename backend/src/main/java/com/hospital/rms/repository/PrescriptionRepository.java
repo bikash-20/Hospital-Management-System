@@ -13,4 +13,5 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, UUID
     List<Prescription> findByDoctorIdOrderByCreatedDateDesc(UUID doctorId);
     Prescription findByAppointmentId(UUID appointmentId);
     Page<Prescription> findAll(Pageable pageable);
+    long countByDoctorId(UUID doctorId);
 }

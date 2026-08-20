@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class UserRequest {
-    @NotBlank(message = "Username is required")
+    // Username is immutable after creation — the frontend's updateUserApi
+    // doesn't send it (the PATCH path is set-username-by-id), so we drop the
+    // @NotBlank constraint that previously rejected every PUT with 400.
     private String username;
 
     @NotBlank(message = "Full name is required")

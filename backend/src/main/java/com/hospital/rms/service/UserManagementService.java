@@ -3,6 +3,10 @@ package com.hospital.rms.service;
 import com.hospital.rms.dto.UserRequest;
 import com.hospital.rms.dto.UserResponse;
 import com.hospital.rms.entity.User;
+import com.hospital.rms.repository.AppointmentRepository;
+import com.hospital.rms.repository.DoctorScheduleRepository;
+import com.hospital.rms.repository.LabResultRepository;
+import com.hospital.rms.repository.PrescriptionRepository;
 import com.hospital.rms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +22,10 @@ public class UserManagementService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AppointmentRepository appointmentRepository;
+    private final PrescriptionRepository prescriptionRepository;
+    private final LabResultRepository labResultRepository;
+    private final DoctorScheduleRepository doctorScheduleRepository;
 
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
@@ -40,6 +48,9 @@ public class UserManagementService {
 
     @Transactional
     public UserResponse createUser(UserRequest request) {
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            throw new IllegalArgumentException("Username is required when creating a user");
+        }
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists: " + request.getUsername());
         }
@@ -95,6 +106,27 @@ public class UserManagementService {
         if (!userRepository.existsById(id)) {
             throw new IllegalArgumentException("User not found: " + id);
         }
+
+        // Count historical references that would block the FK. Hard-deleting a
+        // user with appointments/prescriptions/lab_results would orphan or
+        // cascade-delete clinical records — neither is what the UI wants.
+        // We surface a 409 Conflict (mapped from IllegalStateException via the
+        // controller advice) so the frontend can fall back to disabling the
+        // user (PATCH /api/admin/users/{id}/toggle-enabled) instead.
+        long appointments = appointmentRepository.countByDoctorId(id);
+        long prescriptions = prescriptionRepository.countByDoctorId(id);
+        long labResults = labResultRepository.countByOrderedById(id);
+        long schedules = doctorScheduleRepository.countByDoctorId(id);
+        long references = appointments + prescriptions + labResults + schedules;
+
+        if (references > 0) {
+            throw new IllegalStateException(
+                "Cannot delete user with " + references + " clinical record(s). "
+                + "Disable the account instead (toggle-enabled), or reassign their "
+                + "appointments / prescriptions / lab orders first."
+            );
+        }
+
         userRepository.deleteById(id);
     }
 

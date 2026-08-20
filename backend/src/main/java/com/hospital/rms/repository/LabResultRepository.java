@@ -12,4 +12,5 @@ public interface LabResultRepository extends JpaRepository<LabResult, UUID> {
     List<LabResult> findByStatusOrderByCreatedDateDesc(String status);
     List<LabResult> findByOrderedByIdOrderByCreatedDateDesc(UUID doctorId);
     long countByStatus(String status);
+    long countByOrderedById(UUID doctorId);
 }

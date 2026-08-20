@@ -11,4 +11,5 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
     List<DoctorSchedule> findByDoctorIdAndDayOfWeekOrderByStartTime(UUID doctorId, DayOfWeek dayOfWeek);
     List<DoctorSchedule> findByDoctorIdOrderByDayOfWeekAscStartTimeAsc(UUID doctorId);
     void deleteByDoctorIdAndDayOfWeek(UUID doctorId, DayOfWeek dayOfWeek);
+    long countByDoctorId(UUID doctorId);
 }

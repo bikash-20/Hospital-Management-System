@@ -33,7 +33,15 @@ public interface BillingRepository extends JpaRepository<Billing, UUID> {
     @Query("SELECT COALESCE(SUM(b.totalAmount), 0) FROM Billing b WHERE b.createdDate BETWEEN :start AND :end")
     BigDecimal sumTotalAmountBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    @Query("SELECT FUNCTION('DATE', b.createdDate) as date, COALESCE(SUM(b.paidAmount), 0) as revenue, COUNT(b) as count FROM Billing b WHERE b.createdDate BETWEEN :start AND :end GROUP BY FUNCTION('DATE', b.createdDate) ORDER BY date")
+    /**
+     * Daily revenue aggregation. Hibernate's FUNCTION('DATE', x) syntax expands
+     * to raw SQL DATE(x) which H2 fails on with "Function DATE not found"
+     * (90022-240) because Hibernate strips the cast when the dialect hands the
+     * function off to the driver. Instead we project to LocalDate with
+     * CAST(... AS LocalDate) in JPQL — Hibernate renders this as the
+     * dialect-appropriate date truncation on both H2 and PostgreSQL.
+     */
+    @Query("SELECT CAST(b.createdDate AS LocalDate) as day, COALESCE(SUM(b.paidAmount), 0) as revenue, COUNT(b) as count FROM Billing b WHERE b.createdDate BETWEEN :start AND :end GROUP BY CAST(b.createdDate AS LocalDate) ORDER BY day")
     List<Object[]> getDailyRevenueBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("SELECT b.status, COALESCE(SUM(b.paidAmount), 0) FROM Billing b GROUP BY b.status")

@@ -35,6 +35,18 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        // 409 Conflict for "request is well-formed but cannot be applied"
+        // (e.g. deleting a doctor with clinical records still attached).
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+            "timestamp", LocalDateTime.now(),
+            "status", 409,
+            "error", "Conflict",
+            "message", ex.getMessage()
+        ));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();

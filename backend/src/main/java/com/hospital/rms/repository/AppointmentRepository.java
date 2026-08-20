@@ -31,4 +31,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     Page<Appointment> findAll(Pageable pageable);
 
     long countByAppointmentDateBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByDoctorId(UUID doctorId);
 }
