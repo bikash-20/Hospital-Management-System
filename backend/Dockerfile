@@ -30,4 +30,6 @@ USER appuser
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Render sets $PORT at runtime; Spring Boot binds to it via SERVER_PORT.
+# Spring profiles: prod enables real Postgres + disables H2.
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080} --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-default}"]
