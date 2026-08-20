@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getQueueApi, getDoctorsApi } from '@/api/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -351,12 +351,16 @@ export default function QueueDisplay() {
 }
 
 // ===== Inline stat block =====
+// icon: any component that takes { className?: string } — accepts both Lucide
+// icons (forwardRef components) and plain function components like our local
+// CheckCircleSvg fallback. Using typeof Users previously required the
+// forwardRef `$$typeof` shape, which broke the build.
 function Stat({
   icon: Icon,
   label,
   value,
 }: {
-  icon: typeof Users;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string | number;
 }) {
