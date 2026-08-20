@@ -130,6 +130,7 @@ export default function Settings() {
           <InfoRow label="Backend" value="Spring Boot 4.1 + Java 25" />
           <InfoRow label="Database" value="PostgreSQL 17" />
           <InfoRow label="Environment" value="Production (Supabase)" />
+          <InfoRow label="Developed by" value="Bikash Talukder" />
         </div>
       </div>
     </div>
