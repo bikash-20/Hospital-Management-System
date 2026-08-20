@@ -7,6 +7,7 @@ import {
 } from '@/api/api';
 import { useToast } from '@/context/ToastContext';
 import type { Appointment, Medicine, LabOrder } from '@/types';
+import { extractErrorMessage } from '@/components/ui/primitives';
 import {
   User,
   Calendar,
@@ -56,11 +57,8 @@ export default function DoctorConsultation() {
       setMedicines([{ name: '', dosage: '', duration: '', frequency: '' }]);
       setLabOrders([]);
     },
-    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).join(', ')
-        : error.response?.data?.message || error.message || 'Failed to save prescription';
-      showToast(msg, 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to save prescription'), 'error');
     },
   });
 

@@ -5,6 +5,7 @@ import type { LabResult } from '@/types';
 import { useToast } from '@/context/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
+import { LabStatusPill, extractErrorMessage } from '@/components/ui/primitives';
 import {
   FlaskConical,
   Search,
@@ -50,8 +51,8 @@ export default function LabResults() {
       queryClient.invalidateQueries({ queryKey: ['lab-results'] });
       showToast('Lab result status updated', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      showToast(error.response?.data?.message || error.message || 'Failed to update status', 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to update status'), 'error');
     },
   });
 
@@ -64,8 +65,8 @@ export default function LabResults() {
       setResultValue('');
       showToast('Lab result completed successfully', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      showToast(error.response?.data?.message || error.message || 'Failed to complete result', 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to complete result'), 'error');
     },
   });
 
@@ -182,13 +183,7 @@ export default function LabResults() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[result.status]?.bg}`}>
-                            {(() => {
-                              const StatusIcon = statusStyles[result.status]?.icon || Clock;
-                              return <StatusIcon className="w-3 h-3" />;
-                            })()}
-                            {statusLabels[result.status]}
-                          </span>
+                          <LabStatusPill status={result.status} />
                         </td>
                         <td className="px-4 py-3">
                           <span className="text-xs text-surface-500">
@@ -253,9 +248,7 @@ export default function LabResults() {
                       <p className="text-sm font-medium text-surface-900 dark:text-white">{result.patient.fullName}</p>
                       <p className="text-xs text-surface-500">{result.testName}</p>
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[result.status]?.bg}`}>
-                      {statusLabels[result.status]}
-                    </span>
+                    <LabStatusPill status={result.status} />
                   </div>
                   <div className="flex items-center gap-2 mt-3">
                     {result.status === 'PENDING' && (

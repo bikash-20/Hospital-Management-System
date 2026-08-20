@@ -126,9 +126,9 @@ export default function Settings() {
         <div className="space-y-3">
           <InfoRow label="Application" value="CareBridge RMS" />
           <InfoRow label="Version" value="1.0.0" />
-          <InfoRow label="Frontend" value="React 18 + TypeScript + Tailwind CSS" />
-          <InfoRow label="Backend" value="Spring Boot 3.2 + Java 21" />
-          <InfoRow label="Database" value="PostgreSQL 16" />
+          <InfoRow label="Frontend" value="React 19 + TypeScript + Tailwind CSS v4" />
+          <InfoRow label="Backend" value="Spring Boot 4.1 + Java 25" />
+          <InfoRow label="Database" value="PostgreSQL 17" />
           <InfoRow label="Environment" value="Production (Supabase)" />
         </div>
       </div>

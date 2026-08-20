@@ -7,25 +7,22 @@ import {
 } from '@/api/api';
 import type { AppointmentStatus } from '@/types';
 import { useToast } from '@/context/ToastContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
+import {
+  AppointmentStatusPill,
+  Modal,
+  extractErrorMessage,
+} from '@/components/ui/primitives';
 import {
   Plus,
   Filter,
   Clock,
-  X,
   Calendar,
   ChevronDown,
 } from 'lucide-react';
 
-const statusColors: Record<string, string> = {
-  WAITING: 'bg-status-waiting-bg text-amber-600 dark:text-amber-400 border border-status-waiting-border',
-  IN_CONSULTATION: 'bg-status-consulting-bg text-blue-600 dark:text-blue-400 border border-status-consulting-border',
-  COMPLETED: 'bg-status-completed-bg text-emerald-600 dark:text-emerald-400 border border-status-completed-border',
-  CANCELLED: 'bg-status-cancelled-bg text-red-600 dark:text-red-400 border border-status-cancelled-border',
-};
-
-const statusLabels: Record<string, string> = {
+const statusLabels: Record<AppointmentStatus, string> = {
   WAITING: 'Waiting',
   IN_CONSULTATION: 'In Consultation',
   COMPLETED: 'Completed',
@@ -60,11 +57,8 @@ export default function Appointments() {
       setShowCreateModal(false);
       showToast('Appointment created successfully', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).join(', ')
-        : error.response?.data?.message || error.message || 'Failed to create appointment';
-      showToast(msg, 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to create appointment'), 'error');
     },
   });
 
@@ -115,18 +109,18 @@ export default function Appointments() {
           >
             All
           </button>
-          {Object.entries(statusLabels).map(([key, label]) => (
+          {(Object.keys(statusLabels) as AppointmentStatus[]).map((key) => (
             <button
               key={key}
-              onClick={() => setStatusFilter(key as AppointmentStatus)}
+              onClick={() => setStatusFilter(key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all focus-ring ${
                 statusFilter === key
-                  ? statusColors[key]
+                  ? 'bg-primary-500/12 text-primary-600 dark:text-primary-400 border border-primary-500/25'
                   : 'card-flat text-surface-500 hover:text-surface-700 dark:hover:text-surface-300'
               }`}
               style={{ minHeight: '36px' }}
             >
-              {label}
+              {statusLabels[key]}
             </button>
           ))}
         </div>
@@ -198,9 +192,7 @@ export default function Appointments() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusColors[apt.status]}`}>
-                            {statusLabels[apt.status]}
-                          </span>
+                          <AppointmentStatusPill status={apt.status} />
                         </td>
                       </tr>
                     </StaggerItem>
@@ -236,9 +228,7 @@ export default function Appointments() {
                     <span className="w-9 h-9 bg-primary-500/10 rounded-xl flex items-center justify-center text-sm font-bold text-primary-600 dark:text-primary-400 font-tabular">
                       #{apt.tokenNumber}
                     </span>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColors[apt.status]}`}>
-                      {statusLabels[apt.status]}
-                    </span>
+                    <AppointmentStatusPill status={apt.status} />
                   </div>
                   <p className="text-sm font-medium text-surface-900 dark:text-white">{apt.patient.fullName}</p>
                   <p className="text-xs text-surface-500 mt-1">
@@ -256,89 +246,56 @@ export default function Appointments() {
       </div>
 
       {/* Create Modal */}
-      <AnimatePresence>
-        {showCreateModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-              onClick={() => setShowCreateModal(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="fixed inset-0 flex items-center justify-center z-50 p-4"
-            >
-              <div
-                className="card w-full max-w-md shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-                role="dialog"
-                aria-modal="true"
-                aria-label="Create new appointment"
-              >
-                <div className="p-5 border-b border-surface-100 dark:border-[#2A2F38] flex items-center justify-between">
-                  <h2 className="text-heading text-surface-900 dark:text-white">New Appointment</h2>
-                  <button
-                    onClick={() => setShowCreateModal(false)}
-                    className="p-2.5 rounded-xl hover:bg-surface-100 dark:hover:bg-white/5 text-surface-400 focus-ring"
-                    style={{ minWidth: '44px', minHeight: '44px' }}
-                    aria-label="Close dialog"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.currentTarget);
-                    const patientId = formData.get('patientId') as string;
-                    const doctorId = formData.get('doctorId') as string;
-                    const date = formData.get('appointmentDate') as string;
-                    if (patientId && doctorId) {
-                      createMutation.mutate({
-                        patientId,
-                        doctorId,
-                        appointmentDate: date || new Date().toISOString(),
-                      });
-                    }
-                  }}
-                  className="p-5 space-y-4"
-                >
-                  <div>
-                    <label htmlFor="apt-patient" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Patient</label>
-                    <select id="apt-patient" name="patientId" required className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" style={{ minHeight: '44px' }}>
-                      <option value="">Select patient</option>
-                      {patients?.map((p) => (
-                        <option key={p.id} value={p.id}>{p.fullName} ({p.uhid})</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="apt-doctor" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Doctor</label>
-                    <input id="apt-doctor" name="doctorId" type="text" required className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" placeholder="Doctor ID" style={{ minHeight: '44px' }} />
-                  </div>
-                  <div>
-                    <label htmlFor="apt-date" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Date & Time</label>
-                    <input id="apt-date" name="appointmentDate" type="datetime-local" className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" style={{ minHeight: '44px' }} />
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-2.5 rounded-xl border border-surface-200 dark:border-[#2A2F38] text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-white/5 font-medium transition-all focus-ring" style={{ minHeight: '44px' }}>
-                      Cancel
-                    </button>
-                    <button type="submit" disabled={createMutation.isPending} className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-600/50 text-white rounded-xl font-medium transition-all shadow-lg shadow-primary-600/20 focus-ring" style={{ minHeight: '44px' }}>
-                      {createMutation.isPending ? 'Creating...' : 'Create'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <Modal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="New Appointment"
+        maxWidth="md"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const patientId = formData.get('patientId') as string;
+            const doctorId = formData.get('doctorId') as string;
+            const date = formData.get('appointmentDate') as string;
+            if (patientId && doctorId) {
+              createMutation.mutate({
+                patientId,
+                doctorId,
+                appointmentDate: date || new Date().toISOString(),
+              });
+            }
+          }}
+          className="p-5 space-y-4"
+        >
+          <div>
+            <label htmlFor="apt-patient" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Patient</label>
+            <select id="apt-patient" name="patientId" required className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" style={{ minHeight: '44px' }}>
+              <option value="">Select patient</option>
+              {patients?.map((p) => (
+                <option key={p.id} value={p.id}>{p.fullName} ({p.uhid})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="apt-doctor" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Doctor</label>
+            <input id="apt-doctor" name="doctorId" type="text" required className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" placeholder="Doctor ID" style={{ minHeight: '44px' }} />
+          </div>
+          <div>
+            <label htmlFor="apt-date" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Date & Time</label>
+            <input id="apt-date" name="appointmentDate" type="datetime-local" className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" style={{ minHeight: '44px' }} />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-2.5 rounded-xl border border-surface-200 dark:border-[#2A2F38] text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-white/5 font-medium transition-all focus-ring" style={{ minHeight: '44px' }}>
+              Cancel
+            </button>
+            <button type="submit" disabled={createMutation.isPending} className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-600/50 text-white rounded-xl font-medium transition-all shadow-lg shadow-primary-600/20 focus-ring" style={{ minHeight: '44px' }}>
+              {createMutation.isPending ? 'Creating...' : 'Create'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

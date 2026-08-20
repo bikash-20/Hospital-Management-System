@@ -5,6 +5,7 @@ import type { ManagedUser, UserRole } from '@/types';
 import { useToast } from '@/context/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
+import { extractErrorMessage } from '@/components/ui/primitives';
 import {
   Users,
   Plus,
@@ -13,8 +14,8 @@ import {
   UserX,
   Trash2,
   Edit,
-  X,
   AlertTriangle,
+  X,
 } from 'lucide-react';
 
 const roleColors: Record<string, string> = {
@@ -60,11 +61,8 @@ export default function UserManagement() {
       setShowCreateModal(false);
       showToast('User created successfully', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).join(', ')
-        : error.response?.data?.message || error.message || 'Failed to create user';
-      showToast(msg, 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to create user'), 'error');
     },
   });
 
@@ -76,11 +74,8 @@ export default function UserManagement() {
       setEditingUser(null);
       showToast('User updated successfully', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).join(', ')
-        : error.response?.data?.message || error.message || 'Failed to update user';
-      showToast(msg, 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to update user'), 'error');
     },
   });
 
@@ -90,8 +85,8 @@ export default function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       showToast('User access updated', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      showToast(error.response?.data?.message || error.message || 'Failed to update user access', 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to update user access'), 'error');
     },
   });
 
@@ -102,8 +97,8 @@ export default function UserManagement() {
       setDeleteConfirm(null);
       showToast('User deleted successfully', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      showToast(error.response?.data?.message || error.message || 'Failed to delete user', 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to delete user'), 'error');
     },
   });
 

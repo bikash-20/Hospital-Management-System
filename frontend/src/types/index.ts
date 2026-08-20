@@ -104,35 +104,6 @@ export interface LoginCredentials {
   password: string;
 }
 
-// ===== Queue =====
-export interface QueueEntry {
-  appointment: Appointment;
-  position: number;
-  estimatedWait: number;
-}
-
-export interface QueueUpdate {
-  doctorId: string;
-  currentToken: number;
-  queue: QueueEntry[];
-  lastUpdated: string;
-}
-
-// ===== API =====
-export interface PaginatedResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  page: number;
-  size: number;
-}
-
-export interface ApiError {
-  message: string;
-  code: string;
-  timestamp: string;
-}
-
 // ===== Stats =====
 export interface DashboardStats {
   patientsToday: number;

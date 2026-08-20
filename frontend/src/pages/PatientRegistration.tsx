@@ -5,15 +5,18 @@ import { useToast } from '@/context/ToastContext';
 import type { Patient, PatientGender } from '@/types';
 import {
   UserPlus,
-  Search,
-  AlertTriangle,
-  X,
   Check,
   Users,
+  Search,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DataTable, { type Column } from '@/components/ui/DataTable';
 import { EmptyPatients, SearchEmpty } from '@/components/ui/EmptyState';
+import {
+  Modal,
+  DuplicatePatientWarning,
+  extractErrorMessage,
+} from '@/components/ui/primitives';
 
 export default function PatientRegistration() {
   const { showToast } = useToast();
@@ -48,11 +51,8 @@ export default function PatientRegistration() {
       showToast(`Patient ${newPatient.uhid} registered successfully`, 'success');
       setTimeout(() => setFormSuccess(null), 5000);
     },
-    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
-      const serverMsg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).join(', ')
-        : error.response?.data?.message || error.message || 'Registration failed. Please try again.';
-      showToast(serverMsg, 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Registration failed. Please try again.'), 'error');
     },
   });
 
@@ -61,9 +61,24 @@ export default function PatientRegistration() {
     setDuplicateWarning(null);
   };
 
+  const closeForm = () => {
+    setShowForm(false);
+    resetForm();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.fullName || !form.mobileNumber || !form.dob || !form.gender) return;
+    // Client-side duplicate check against the already-loaded patient list.
+    // Matches on mobile number + DOB — the same criteria the backend would
+    // need to enforce, so the warning is accurate for the working dataset.
+    const existing = patients?.find(
+      (p) => p.mobileNumber === form.mobileNumber && p.dob === form.dob,
+    );
+    if (existing) {
+      setDuplicateWarning(existing);
+      return;
+    }
     registerMutation.mutate({
       fullName: form.fullName,
       mobileNumber: form.mobileNumber,
@@ -275,205 +290,158 @@ export default function PatientRegistration() {
       </div>
 
       {/* Registration Form Modal */}
-      <AnimatePresence>
-        {showForm && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-              onClick={() => { setShowForm(false); resetForm(); }}
+      <Modal
+        open={showForm}
+        onClose={closeForm}
+        title="Register New Patient"
+        subtitle="Fill in patient details below"
+        maxWidth="lg"
+      >
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
+          {duplicateWarning && <DuplicatePatientWarning patient={duplicateWarning} />}
+
+          {/* Full Name */}
+          <div>
+            <label htmlFor="patient-name" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+              Full Name *
+            </label>
+            <input
+              id="patient-name"
+              type="text"
+              value={form.fullName}
+              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+              className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+              placeholder="Enter full name"
+              required
+              autoFocus
             />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="fixed inset-0 flex items-center justify-center z-50 p-4"
-            >
-              <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-                role="dialog"
-                aria-modal="true"
-                aria-label="Register new patient"
-              >
-                <div className="p-5 sm:p-6 border-b border-surface-100 dark:border-[#2A2F38] flex items-center justify-between">
-                  <div>
-                    <h2 className="text-heading text-surface-900 dark:text-white">
-                      Register New Patient
-                    </h2>
-                    <p className="text-caption text-surface-500 mt-0.5">
-                      Fill in patient details below
-                    </p>
-                  </div>
+          </div>
+
+          {/* Mobile + DOB */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="patient-mobile" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+                Mobile Number *
+              </label>
+              <input
+                id="patient-mobile"
+                type="tel"
+                value={form.mobileNumber}
+                onChange={(e) => {
+                  setForm({ ...form, mobileNumber: e.target.value });
+                  if (duplicateWarning) setDuplicateWarning(null);
+                }}
+                className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                placeholder="01XXXXXXXXX"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="patient-dob" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+                Date of Birth *
+              </label>
+              <input
+                id="patient-dob"
+                type="date"
+                value={form.dob}
+                onChange={(e) => {
+                  setForm({ ...form, dob: e.target.value });
+                  if (duplicateWarning) setDuplicateWarning(null);
+                }}
+                className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Gender */}
+          <div>
+            <fieldset>
+              <legend className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+                Gender *
+              </legend>
+              <div className="flex gap-3">
+                {genderOptions.map((opt) => (
                   <button
-                    onClick={() => { setShowForm(false); resetForm(); }}
-                    className="p-2.5 rounded-xl hover:bg-surface-100 dark:hover:bg-white/5 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors focus-ring"
-                    style={{ minWidth: '44px', minHeight: '44px' }}
-                    aria-label="Close dialog"
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, gender: opt.value })}
+                    className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all focus-ring ${
+                      form.gender === opt.value
+                        ? 'bg-primary-500/12 border-primary-500/40 text-primary-600 dark:text-primary-400'
+                        : 'bg-surface-50 dark:bg-[#111820] border-surface-200 dark:border-[#2A2F38] text-surface-600 dark:text-surface-400 hover:border-surface-300 dark:hover:border-[#3A3F48]'
+                    }`}
+                    style={{ minHeight: '44px' }}
+                    aria-pressed={form.gender === opt.value}
                   >
-                    <X className="w-5 h-5" />
+                    {opt.label}
                   </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
-                  {/* Duplicate Warning */}
-                  {duplicateWarning && (
-                    <div className="p-3 bg-amber-50 dark:bg-amber-500/8 border border-amber-200 dark:border-amber-500/20 rounded-xl flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" aria-hidden="true" />
-                      <div>
-                        <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                          Duplicate Patient Found
-                        </p>
-                        <p className="text-xs text-amber-600 dark:text-amber-400/70 mt-0.5">
-                          A patient with this mobile number and DOB already exists:{' '}
-                          <span className="font-medium">{duplicateWarning.fullName}</span> (UHID: {duplicateWarning.uhid})
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Full Name */}
-                  <div>
-                    <label htmlFor="patient-name" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
-                      Full Name *
-                    </label>
-                    <input
-                      id="patient-name"
-                      type="text"
-                      value={form.fullName}
-                      onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                      placeholder="Enter full name"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  {/* Mobile + DOB */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="patient-mobile" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
-                        Mobile Number *
-                      </label>
-                      <input
-                        id="patient-mobile"
-                        type="tel"
-                        value={form.mobileNumber}
-                        onChange={(e) => setForm({ ...form, mobileNumber: e.target.value })}
-                        className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                        placeholder="01XXXXXXXXX"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="patient-dob" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
-                        Date of Birth *
-                      </label>
-                      <input
-                        id="patient-dob"
-                        type="date"
-                        value={form.dob}
-                        onChange={(e) => setForm({ ...form, dob: e.target.value })}
-                        className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Gender */}
-                  <div>
-                    <fieldset>
-                      <legend className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
-                        Gender *
-                      </legend>
-                      <div className="flex gap-3">
-                        {genderOptions.map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => setForm({ ...form, gender: opt.value })}
-                            className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all focus-ring ${
-                              form.gender === opt.value
-                                ? 'bg-primary-500/12 border-primary-500/40 text-primary-600 dark:text-primary-400'
-                                : 'bg-surface-50 dark:bg-[#111820] border-surface-200 dark:border-[#2A2F38] text-surface-600 dark:text-surface-400 hover:border-surface-300 dark:hover:border-[#3A3F48]'
-                            }`}
-                            style={{ minHeight: '44px' }}
-                            aria-pressed={form.gender === opt.value}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </fieldset>
-                  </div>
-
-                  {/* NID */}
-                  <div>
-                    <label htmlFor="patient-nid" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
-                      NID Number
-                    </label>
-                    <input
-                      id="patient-nid"
-                      type="text"
-                      value={form.nid}
-                      onChange={(e) => setForm({ ...form, nid: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                      placeholder="National ID number"
-                    />
-                  </div>
-
-                  {/* Address */}
-                  <div>
-                    <label htmlFor="patient-address" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
-                      Address
-                    </label>
-                    <textarea
-                      id="patient-address"
-                      value={form.address}
-                      onChange={(e) => setForm({ ...form, address: e.target.value })}
-                      rows={2}
-                      className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all resize-none"
-                      placeholder="Full address"
-                    />
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => { setShowForm(false); resetForm(); }}
-                      className="flex-1 py-2.5 rounded-xl border border-surface-200 dark:border-[#2A2F38] text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-white/5 font-medium transition-all focus-ring"
-                      style={{ minHeight: '44px' }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={registerMutation.isPending}
-                      className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-600/50 text-white rounded-xl font-medium transition-all shadow-lg shadow-primary-600/20 focus-ring"
-                      style={{ minHeight: '44px' }}
-                    >
-                      {registerMutation.isPending ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                          </svg>
-                          Registering...
-                        </span>
-                      ) : (
-                        'Register Patient'
-                      )}
-                    </button>
-                  </div>
-                </form>
+                ))}
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+            </fieldset>
+          </div>
+
+          {/* NID */}
+          <div>
+            <label htmlFor="patient-nid" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+              NID Number
+            </label>
+            <input
+              id="patient-nid"
+              type="text"
+              value={form.nid}
+              onChange={(e) => setForm({ ...form, nid: e.target.value })}
+              className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+              placeholder="National ID number"
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label htmlFor="patient-address" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+              Address
+            </label>
+            <textarea
+              id="patient-address"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              rows={2}
+              className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all resize-none"
+              placeholder="Full address"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={closeForm}
+              className="flex-1 py-2.5 rounded-xl border border-surface-200 dark:border-[#2A2F38] text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-white/5 font-medium transition-all focus-ring"
+              style={{ minHeight: '44px' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={registerMutation.isPending}
+              className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-600/50 text-white rounded-xl font-medium transition-all shadow-lg shadow-primary-600/20 focus-ring"
+              style={{ minHeight: '44px' }}
+            >
+              {registerMutation.isPending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Registering...
+                </span>
+              ) : (
+                'Register Patient'
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

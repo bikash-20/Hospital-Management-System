@@ -5,6 +5,7 @@ import { useToast } from '@/context/ToastContext';
 import type { BedStatus } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
+import { BedStatusPill, extractErrorMessage } from '@/components/ui/primitives';
 import {
   Check,
   X,
@@ -32,8 +33,8 @@ export default function BedManagement() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: BedStatus }) => updateBedStatusApi(id, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['beds'] }),
-    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      showToast(error.response?.data?.message || error.message || 'Failed to update bed status', 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to update bed status'), 'error');
     },
   });
 
@@ -125,9 +126,7 @@ export default function BedManagement() {
                     <p className="text-sm text-surface-500 mb-4">{bed.wardName}</p>
 
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.color}`}>
-                        {config.label}
-                      </span>
+                      <BedStatusPill status={bed.status} />
 
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {bed.status !== 'AVAILABLE' && (

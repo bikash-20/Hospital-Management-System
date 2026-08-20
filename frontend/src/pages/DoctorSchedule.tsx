@@ -4,6 +4,7 @@ import { getDoctorScheduleApi, setDoctorScheduleApi } from '@/api/api';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { extractErrorMessage } from '@/components/ui/primitives';
 import {
   Calendar,
   Plus,
@@ -82,11 +83,8 @@ export default function DoctorSchedule() {
       showToast('Doctor schedule saved successfully', 'success');
       setTimeout(() => setSuccessMessage(false), 3000);
     },
-    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).join(', ')
-        : error.response?.data?.message || error.message || 'Failed to save schedule';
-      showToast(msg, 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Failed to save schedule'), 'error');
     },
   });
 

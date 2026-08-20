@@ -1,33 +1,35 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBillingsApi, processPaymentApi } from '@/api/api';
-import type { Billing as BillingType } from '@/types';
-import { motion, AnimatePresence } from 'framer-motion';
+import type { Billing as BillingType, BillingStatus } from '@/types';
 import {
   Receipt,
   DollarSign,
   CreditCard,
   Filter,
-  Check,
-  AlertCircle,
   Clock,
   ArrowUpRight,
   Printer,
-  X,
 } from 'lucide-react';
 import PrintableInvoice from '@/components/PrintableInvoice';
 import { useToast } from '@/context/ToastContext';
+import {
+  BillingStatusPill,
+  Modal,
+  PrintModal,
+  extractErrorMessage,
+} from '@/components/ui/primitives';
 
-const statusConfig: Record<string, { color: string; bg: string; label: string; icon: typeof Check }> = {
-  PAID: { color: 'text-green-500', bg: 'bg-green-500/10', label: 'Paid', icon: Check },
-  PARTIAL: { color: 'text-amber-500', bg: 'bg-amber-500/10', label: 'Partial', icon: Clock },
-  UNPAID: { color: 'text-red-500', bg: 'bg-red-500/10', label: 'Unpaid', icon: AlertCircle },
+const statusLabelMap: Record<BillingStatus, string> = {
+  PAID: 'Paid',
+  PARTIAL: 'Partial',
+  UNPAID: 'Unpaid',
 };
 
 export default function Billing() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<BillingStatus | ''>('');
   const [payingBill, setPayingBill] = useState<BillingType | null>(null);
   const [payAmount, setPayAmount] = useState('');
   const [printingBill, setPrintingBill] = useState<BillingType | null>(null);
@@ -46,11 +48,8 @@ export default function Billing() {
       setPayAmount('');
       showToast('Payment recorded successfully', 'success');
     },
-    onError: (error: Error & { response?: { data?: { message?: string; errors?: Record<string, string> } } }) => {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).join(', ')
-        : error.response?.data?.message || error.message || 'Payment failed';
-      showToast(msg, 'error');
+    onError: (error) => {
+      showToast(extractErrorMessage(error, 'Payment failed'), 'error');
     },
   });
 
@@ -61,11 +60,14 @@ export default function Billing() {
   const totalRevenue = billings?.reduce((sum, b) => sum + b.paidAmount, 0) ?? 0;
   const totalPending = billings?.reduce((sum, b) => sum + (b.totalAmount - b.discount - b.paidAmount), 0) ?? 0;
 
+  const closePayModal = () => {
+    setPayingBill(null);
+    setPayAmount('');
+  };
+
   const handlePrint = (bill: BillingType) => {
     setPrintingBill(bill);
-    setTimeout(() => {
-      window.print();
-    }, 100);
+    setTimeout(() => window.print(), 100);
   };
 
   return (
@@ -113,19 +115,19 @@ export default function Billing() {
       {/* Filter */}
       <div className="flex items-center gap-2">
         <Filter className="w-4 h-4 text-surface-400" />
-        {['', 'UNPAID', 'PARTIAL', 'PAID'].map((status) => (
+        {(['', 'UNPAID', 'PARTIAL', 'PAID'] as const).map((status) => (
           <button
-            key={status}
-            onClick={() => setStatusFilter(status)}
+            key={status || 'ALL'}
+            onClick={() => setStatusFilter(status as BillingStatus | '')}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               statusFilter === status
                 ? status
-                  ? `${statusConfig[status].bg} ${statusConfig[status].color} border border-current/20`
+                  ? 'bg-primary-500/15 text-primary-600 dark:text-primary-400 border border-primary-500/30'
                   : 'bg-primary-500/15 text-primary-600 dark:text-primary-400 border border-primary-500/30'
                 : 'bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-surface-500 hover:text-surface-700'
             }`}
           >
-            {status ? statusConfig[status].label : 'All'}
+            {status ? statusLabelMap[status as BillingStatus] : 'All'}
           </button>
         ))}
       </div>
@@ -135,26 +137,20 @@ export default function Billing() {
         {isLoading ? (
           <div className="text-center py-20 text-surface-400">Loading invoices...</div>
         ) : filteredBillings?.map((bill) => {
-          const config = statusConfig[bill.status];
           const remaining = bill.totalAmount - bill.discount - bill.paidAmount;
           return (
-            <div
-              key={bill.id}
-              className="card p-5"
-            >
+            <div key={bill.id} className="card p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-xl ${config.bg}`}>
-                    <Receipt className={`w-5 h-5 ${config.color}`} />
+                  <div className="p-2 rounded-xl bg-primary-500/10">
+                    <Receipt className="w-5 h-5 text-primary-500" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-mono font-semibold text-surface-900 dark:text-white">
                         {bill.invoiceNumber}
                       </p>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${config.bg} ${config.color}`}>
-                        {config.label}
-                      </span>
+                      <BillingStatusPill status={bill.status} />
                     </div>
                     <p className="text-sm text-surface-500 mt-0.5">
                       {bill.patient.fullName} · {bill.patient.uhid}
@@ -166,6 +162,7 @@ export default function Billing() {
                     onClick={() => handlePrint(bill)}
                     className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-white/5 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
                     title="Print invoice"
+                    aria-label="Print invoice"
                   >
                     <Printer className="w-4 h-4" />
                   </button>
@@ -231,115 +228,59 @@ export default function Billing() {
       </div>
 
       {/* Payment Modal */}
-      <AnimatePresence>
-        {payingBill && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-              onClick={() => { setPayingBill(null); setPayAmount(''); }}
+      <Modal
+        open={!!payingBill}
+        onClose={closePayModal}
+        title="Process Payment"
+        subtitle={payingBill ? `Invoice: ${payingBill.invoiceNumber} — ${payingBill.patient.fullName}` : ''}
+        maxWidth="md"
+      >
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+              Payment Amount (৳)
+            </label>
+            <input
+              type="number"
+              value={payAmount}
+              onChange={(e) => setPayAmount(e.target.value)}
+              className="w-full px-4 py-2.5 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-lg font-semibold text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+              min={0}
+              max={payingBill ? payingBill.totalAmount - payingBill.discount - payingBill.paidAmount : undefined}
             />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            {payingBill && (
+              <p className="text-xs text-surface-500 mt-1">
+                Remaining: ৳{payingBill.totalAmount - payingBill.discount - payingBill.paidAmount}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={closePayModal}
+              className="flex-1 py-2.5 rounded-xl border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-surface-800 font-medium transition-all"
             >
-              <div className="card w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6 border-b border-surface-100 dark:border-surface-700/50">
-                  <h2 className="text-lg font-semibold text-surface-900 dark:text-white">Process Payment</h2>
-                  <p className="text-sm text-surface-500 mt-1">
-                    Invoice: {payingBill.invoiceNumber} — {payingBill.patient.fullName}
-                  </p>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
-                      Payment Amount (৳)
-                    </label>
-                    <input
-                      type="number"
-                      value={payAmount}
-                      onChange={(e) => setPayAmount(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-lg font-semibold text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                      min={0}
-                      max={payingBill.totalAmount - payingBill.discount - payingBill.paidAmount}
-                    />
-                    <p className="text-xs text-surface-500 mt-1">
-                      Remaining: ৳{payingBill.totalAmount - payingBill.discount - payingBill.paidAmount}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      onClick={() => { setPayingBill(null); setPayAmount(''); }}
-                      className="flex-1 py-2.5 rounded-xl border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-surface-800 font-medium transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (payAmount && Number(payAmount) > 0) {
-                          payMutation.mutate({ id: payingBill.id, amount: Number(payAmount) });
-                        }
-                      }}
-                      disabled={!payAmount || Number(payAmount) <= 0 || payMutation.isPending}
-                      className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-600/50 text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2"
-                    >
-                      <ArrowUpRight className="w-4 h-4" />
-                      {payMutation.isPending ? 'Processing...' : 'Confirm Payment'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                if (payingBill && payAmount && Number(payAmount) > 0) {
+                  payMutation.mutate({ id: payingBill.id, amount: Number(payAmount) });
+                }
+              }}
+              disabled={!payAmount || Number(payAmount) <= 0 || payMutation.isPending}
+              className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-600/50 text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2"
+            >
+              <ArrowUpRight className="w-4 h-4" />
+              {payMutation.isPending ? 'Processing...' : 'Confirm Payment'}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Print Preview Modal */}
-      <AnimatePresence>
-        {printingBill && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 print:hidden"
-              onClick={() => setPrintingBill(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-0 flex items-center justify-center z-50 p-4 print:p-0 print:inset-auto"
-            >
-              <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl print:shadow-none print:max-h-none print:overflow-visible">
-                <div className="p-4 border-b border-surface-200 flex items-center justify-between print:hidden">
-                  <h3 className="font-semibold text-surface-900">Invoice Preview</h3>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => window.print()}
-                      className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-sm font-medium flex items-center gap-2"
-                    >
-                      <Printer className="w-4 h-4" />
-                      Print
-                    </button>
-                    <button
-                      onClick={() => setPrintingBill(null)}
-                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-                <PrintableInvoice billing={printingBill} />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <PrintModal open={!!printingBill} onClose={() => setPrintingBill(null)} title="Invoice Preview">
+        {printingBill && <PrintableInvoice billing={printingBill} />}
+      </PrintModal>
     </div>
   );
 }

@@ -3,15 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { getPatientsApi, getPrescriptionsByPatientApi, getBillingsApi } from '@/api/api';
 import type { Patient, Prescription, Billing } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BillingStatusPill, PatientSearchInput } from '@/components/ui/primitives';
 import {
-  Search,
-  User,
-  Calendar,
   FileText,
   Receipt,
   ChevronDown,
-  ChevronRight,
   Stethoscope,
+  Calendar,
 } from 'lucide-react';
 
 export default function PatientVisitHistory() {
@@ -35,7 +33,7 @@ export default function PatientVisitHistory() {
     enabled: !!selectedPatient,
   });
 
-  const patientBillings = billings?.filter(b => b.patient.id === selectedPatient?.id);
+  const patientBillings = billings?.filter((b) => b.patient.id === selectedPatient?.id);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -49,47 +47,18 @@ export default function PatientVisitHistory() {
 
       {/* Patient Search */}
       <div className="card p-4">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
-          <input
-            type="text"
-            placeholder="Search patient by name, UHID, or mobile..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-          />
-        </div>
-
-        {/* Patient Results */}
-        {searchQuery && patients && patients.length > 0 && (
-          <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
-            {patients.slice(0, 10).map((patient) => (
-              <button
-                key={patient.id}
-                onClick={() => {
-                  setSelectedPatient(patient);
-                  setSearchQuery('');
-                }}
-                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-surface-50 dark:hover:bg-white/5 transition-colors text-left"
-              >
-                <div className="w-10 h-10 bg-primary-500/10 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-surface-900 dark:text-white truncate">{patient.fullName}</p>
-                  <p className="text-xs text-surface-500">{patient.uhid} · {patient.mobileNumber}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-surface-400 ml-auto" />
-              </button>
-            ))}
-          </div>
-        )}
+        <PatientSearchInput
+          query={searchQuery}
+          onQueryChange={setSearchQuery}
+          results={patients ?? []}
+          onSelect={setSelectedPatient}
+          placeholder="Search patient by name, UHID, or mobile..."
+        />
       </div>
 
       {/* Selected Patient */}
       {selectedPatient && (
         <div className="space-y-6">
-          {/* Patient Info Card */}
           <div className="card p-5">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
@@ -268,12 +237,6 @@ function PrescriptionCard({ prescription }: { prescription: Prescription }) {
 }
 
 function BillingCard({ billing }: { billing: Billing }) {
-  const statusColors: Record<string, string> = {
-    PAID: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    PARTIAL: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    UNPAID: 'bg-red-500/10 text-red-600 dark:text-red-400',
-  };
-
   return (
     <div className="p-4">
       <div className="flex items-start justify-between">
@@ -285,9 +248,7 @@ function BillingCard({ billing }: { billing: Billing }) {
             {new Date(billing.createdDate).toLocaleDateString()}
           </p>
         </div>
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColors[billing.status]}`}>
-          {billing.status}
-        </span>
+        <BillingStatusPill status={billing.status} />
       </div>
       <div className="mt-2 flex items-center gap-4">
         <div>
