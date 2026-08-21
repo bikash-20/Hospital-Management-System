@@ -23,32 +23,35 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
+    private final TokenBlacklist tokenBlacklist;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = extractJwtFromRequest(request);
-        log.debug("JWT filter invoked for {} {} — token present: {}",
-            request.getMethod(), request.getRequestURI(), StringUtils.hasText(token));
 
         if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
-            String username = tokenProvider.getUsernameFromToken(token);
-            String role = tokenProvider.getRoleFromToken(token);
-            log.debug("JWT validated — user={}, role={}", username, role);
+            // Reject refresh tokens used as access tokens — they have a different
+            // 'type' claim and must only be presented at /api/auth/refresh.
+            String type = tokenProvider.getTokenType(token);
+            if (!"access".equals(type)) {
+                log.debug("Rejecting token of type '{}' presented as access", type);
+            } else if (tokenBlacklist.isRevoked(tokenProvider.getJti(token))) {
+                log.debug("Rejecting revoked token jti={}", tokenProvider.getJti(token));
+            } else {
+                String username = tokenProvider.getUsernameFromToken(token);
+                String role = tokenProvider.getRoleFromToken(token);
 
-            List<SimpleGrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + role)
-            );
+                List<SimpleGrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + role));
 
-            UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(username, null, authorities);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("Set SecurityContext authentication for {}", username);
-        } else if (StringUtils.hasText(token)) {
-            log.warn("JWT present but validateToken() returned false");
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);

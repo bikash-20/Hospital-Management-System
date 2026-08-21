@@ -1,45 +1,54 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User, UserRole } from '@/types';
-import { loginApi } from '@/api/api';
+import { loginApi, getCurrentUserApi, logoutApi } from '@/api/api';
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   hasRole: (...roles: UserRole[]) => boolean;
+  bootstrap: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('oh_token');
-    const storedUser = localStorage.getItem('oh_user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+  /**
+   * Bootstrap the auth state by calling /api/auth/me. Succeeds if the browser
+   * still has a valid httpOnly access or refresh cookie; the cookie itself is
+   * never visible to JavaScript (XSS-safe).
+   */
+  const bootstrap = useCallback(async () => {
+    try {
+      const me = await getCurrentUserApi();
+      setUser(me);
+    } catch {
+      setUser(null);
     }
   }, []);
+
+  useEffect(() => {
+    bootstrap();
+  }, [bootstrap]);
 
   const login = useCallback(async (username: string, password: string) => {
     const response = await loginApi(username, password);
     setUser(response.user);
-    setToken(response.accessToken);
-    localStorage.setItem('oh_token', response.accessToken);
-    localStorage.setItem('oh_user', JSON.stringify(response.user));
+    // The backend sets httpOnly cookies automatically — no JS storage needed.
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // Logout is best-effort; clear local state regardless.
+    }
     setUser(null);
-    setToken(null);
-    localStorage.removeItem('oh_token');
-    localStorage.removeItem('oh_user');
+    window.location.href = '/login';
   }, []);
 
   const hasRole = useCallback(
@@ -53,11 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        token,
         isAuthenticated: !!user,
         login,
         logout,
         hasRole,
+        bootstrap,
       }}
     >
       {children}

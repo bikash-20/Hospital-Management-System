@@ -14,6 +14,16 @@ public interface BedRepository extends JpaRepository<Bed, UUID> {
     long countByStatus(BedStatus status);
     long countByWardNameAndStatus(String wardName, BedStatus status);
 
+    /**
+     * Runtime uniqueness check used when creating a new bed.
+     * The DB-level guarantee is provided by the V3 unique index on (ward_name, bed_number).
+     */
+    boolean existsByWardNameAndBedNumber(String wardName, String bedNumber);
+
+    /** Distinct ward names — drives the "Add Bed" ward dropdown on the frontend. */
+    @Query("SELECT DISTINCT b.wardName FROM Bed b ORDER BY b.wardName")
+    List<String> findDistinctWardNames();
+
     @Query("SELECT b.wardName, b.status, COUNT(b) FROM Bed b GROUP BY b.wardName, b.status ORDER BY b.wardName")
     List<Object[]> getBedSummaryByWard();
 }

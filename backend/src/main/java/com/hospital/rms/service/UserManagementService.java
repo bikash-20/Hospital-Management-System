@@ -57,10 +57,15 @@ public class UserManagementService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists: " + request.getEmail());
         }
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new IllegalArgumentException(
+                "Password is required when creating a user (cannot default to a shared value)");
+        }
+        if (request.getPassword().length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        }
 
-        String encodedPassword = passwordEncoder.encode(
-            request.getPassword() != null ? request.getPassword() : "password"
-        );
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         User user = User.builder()
             .username(request.getUsername())

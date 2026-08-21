@@ -17,7 +17,13 @@ import type {
 
 // ===== Backend Response Types (what the API actually returns) =====
 interface BackendLoginResponse {
-  accessToken: string;
+  // accessToken / refreshToken are still returned in the body for clients
+  // (mobile apps, etc.) that cannot rely on cookies. The browser frontend
+  // ignores them and uses the httpOnly cookies set via Set-Cookie headers.
+  accessToken?: string;
+  refreshToken?: string;
+  accessExpiresInMs?: number;
+  refreshExpiresInMs?: number;
   tokenType: string;
   username: string;
   fullName: string;
@@ -166,7 +172,7 @@ function safeJsonParse<T>(value: string | null, fallback: T): T {
 }
 
 // ===== Auth API =====
-export async function loginApi(username: string, password: string): Promise<{ accessToken: string; user: User }> {
+export async function loginApi(username: string, password: string): Promise<{ user: User }> {
   const { data } = await api.post<BackendLoginResponse>('/auth/login', { username, password });
   const user: User = {
     id: data.username, // backend doesn't return UUID for user yet
@@ -175,7 +181,37 @@ export async function loginApi(username: string, password: string): Promise<{ ac
     role: data.role as UserRole,
     email: data.email,
   };
-  return { accessToken: data.accessToken, user };
+  return { user };
+}
+
+/**
+ * Get the currently authenticated user (used on app bootstrap to rehydrate
+ * from the httpOnly cookie without exposing it to JavaScript).
+ */
+export async function getCurrentUserApi(): Promise<User> {
+  const { data } = await api.get<BackendLoginResponse>('/auth/me');
+  return {
+    id: data.username,
+    username: data.username,
+    fullName: data.fullName,
+    role: data.role as UserRole,
+    email: data.email,
+  };
+}
+
+/**
+ * Logout — revokes both tokens server-side and clears the cookies.
+ */
+export async function logoutApi(): Promise<void> {
+  await api.post('/auth/logout', {});
+}
+
+/**
+ * Refresh — handled inside the axios interceptor (client.ts). Exposed here
+ * only for callers that need to force a refresh (e.g. before a critical mutation).
+ */
+export async function refreshApi(): Promise<void> {
+  await api.post('/auth/refresh', {});
 }
 
 // ===== Patients API =====
@@ -304,6 +340,32 @@ export async function updateBedStatusApi(id: string, status: Bed['status']): Pro
   return mapBed(data);
 }
 
+/**
+ * Create a new bed in a ward. The backend enforces uniqueness of
+ * (wardName, bedNumber) and returns 400 with a structured error if the
+ * bed already exists.
+ */
+export async function createBedApi(payload: {
+  bedNumber: string;
+  wardName: string;
+}): Promise<Bed> {
+  const { data } = await api.post<BackendBed>('/beds', payload);
+  return mapBed(data);
+}
+
+/**
+ * Remove a bed. The backend returns 409 if the bed is currently OCCUPIED.
+ */
+export async function deleteBedApi(id: string): Promise<void> {
+  await api.delete(`/beds/${id}`);
+}
+
+/** Distinct ward names — drives the "Add Bed" ward datalist. */
+export async function getWardsApi(): Promise<string[]> {
+  const { data } = await api.get<string[]>('/beds/wards');
+  return data;
+}
+
 // ===== Doctors API =====
 interface BackendDoctor {
   id: string;
@@ -325,7 +387,9 @@ export async function getDoctorsApi(): Promise<{ id: string; fullName: string; s
         specialization: 'General Medicine',
         available: d.enabled,
       }));
-  } catch {
+  } catch (error) {
+    // Don't silently swallow — surface to the caller so the UI can show a toast.
+    console.error('Failed to load doctors:', error);
     return [];
   }
 }

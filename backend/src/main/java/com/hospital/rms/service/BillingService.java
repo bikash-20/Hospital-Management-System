@@ -1,5 +1,7 @@
 package com.hospital.rms.service;
 
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import com.hospital.rms.dto.BillingRequest;
 import com.hospital.rms.dto.BillingResponse;
 import com.hospital.rms.dto.PatientResponse;
@@ -9,6 +11,7 @@ import com.hospital.rms.enums.PaymentStatus;
 import com.hospital.rms.repository.BillingRepository;
 import com.hospital.rms.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -18,17 +21,23 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BillingService {
+
+    /** Key for the invoice-number sequence in `sequence_counters`. Date-suffixed to
+     *  keep each day's series independent; collisions across days are therefore
+     *  impossible by construction. */
+    private static final String INVOICE_SEQ_KEY_PREFIX = "invoice:";
 
     private final BillingRepository billingRepository;
     private final PatientRepository patientRepository;
-
-    private static final AtomicInteger invoiceCounter = new AtomicInteger(0);
+    private final SequenceService sequenceService;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public BillingResponse createInvoice(BillingRequest request) {
@@ -47,7 +56,7 @@ public class BillingService {
             .totalAmount(total)
             .discount(discount)
             .paidAmount(BigDecimal.ZERO)
-            .status(PaymentStatus.UNPAID)
+            .status(finalAmount.signum() == 0 ? PaymentStatus.PAID : PaymentStatus.UNPAID)
             .lineItems(request.getLineItems())
             .build();
 
@@ -57,6 +66,9 @@ public class BillingService {
 
     @Transactional
     public BillingResponse processPayment(UUID billingId, BigDecimal amount) {
+        if (amount == null || amount.signum() <= 0) {
+            throw new IllegalArgumentException("Payment amount must be positive");
+        }
         Billing billing = billingRepository.findById(billingId)
             .orElseThrow(() -> new IllegalArgumentException("Billing not found: " + billingId));
 
@@ -100,16 +112,49 @@ public class BillingService {
             Sort.by(Sort.Direction.DESC, "createdDate"));
     }
 
+    /**
+     * Allocate a daily invoice number from the database-backed sequence counter.
+     * Survives restarts and is safe across multiple JVM instances (the
+     * pessimistic DB lock in {@link SequenceService} provides serialization).
+     */
     private String generateInvoiceNumber() {
         String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        int seq = invoiceCounter.incrementAndGet();
+        long seq = sequenceService.next(INVOICE_SEQ_KEY_PREFIX + dateStr, 0L);
         return "INV-" + dateStr + "-" + String.format("%04d", seq);
     }
 
+    /**
+     * Compute the total from the line-items JSON.
+     * <p>Accepts the existing wire format:
+     * <pre>[{"description":"...","quantity":1,"unitPrice":800,"total":800}, ...]</pre>
+     * Sums the {@code total} field. If the JSON is malformed or the array is empty,
+     * returns {@link BigDecimal#ZERO} and lets the caller decide (we still persist
+     * a zero-total invoice as PAID so the audit trail is intact).
+     */
     private BigDecimal calculateTotal(String lineItemsJson) {
-        // Simplified: parse JSON and sum amounts
-        // In production, use proper JSON parsing
-        return BigDecimal.valueOf(500); // Placeholder
+        if (lineItemsJson == null || lineItemsJson.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            List<Map<String, Object>> items = objectMapper.readValue(
+                lineItemsJson, new TypeReference<List<Map<String, Object>>>() {});
+            BigDecimal sum = BigDecimal.ZERO;
+            for (Map<String, Object> item : items) {
+                Object total = item.get("total");
+                if (total == null) continue;
+                BigDecimal line;
+                if (total instanceof Number n) {
+                    line = BigDecimal.valueOf(n.doubleValue());
+                } else {
+                    line = new BigDecimal(total.toString());
+                }
+                sum = sum.add(line);
+            }
+            return sum;
+        } catch (Exception e) {
+            log.warn("Failed to parse lineItems JSON: {}", e.getMessage());
+            throw new IllegalArgumentException("Malformed lineItems JSON: " + e.getMessage());
+        }
     }
 
     private BillingResponse toResponse(Billing b) {

@@ -12,9 +12,14 @@ public class SequenceService {
 
     private final SequenceCounterRepository sequenceCounterRepository;
 
-    /** Allocates a value while holding a database row lock for this key. */
+    /**
+     * Allocates a value while holding a database row lock for this key.
+     * <p>The JPA {@code @Lock(PESSIMISTIC_WRITE)} on the repository is the
+     * actual serialization mechanism — it works across multiple JVM instances
+     * (whereas {@code synchronized} would not). The DB lock is sufficient.
+     */
     @Transactional
-    public synchronized long next(String key, long minimumCurrentValue) {
+    public long next(String key, long minimumCurrentValue) {
         SequenceCounter counter = sequenceCounterRepository.findBySequenceKey(key)
             .orElseGet(() -> SequenceCounter.builder()
                 .sequenceKey(key)

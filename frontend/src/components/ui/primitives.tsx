@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, AlertTriangle, Check, Clock, AlertCircle, Printer } from 'lucide-react';
 import type { Patient, AppointmentStatus, BillingStatus, BedStatus } from '@/types';
@@ -129,6 +129,9 @@ interface ModalProps {
 const widthMap = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-xl', '2xl': 'max-w-2xl' };
 
 export function Modal({ open, onClose, title, subtitle, children, maxWidth = 'lg' }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocused = useRef<Element | null>(null);
+
   // Escape-to-close
   useEffect(() => {
     if (!open) return;
@@ -146,6 +149,52 @@ export function Modal({ open, onClose, title, subtitle, children, maxWidth = 'lg
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  // Focus management: remember the trigger element, move focus into the dialog
+  // on open, trap Tab/Shift+Tab inside, and restore focus on close.
+  useEffect(() => {
+    if (!open) return;
+    previouslyFocused.current = document.activeElement;
+
+    const focusables = () =>
+      dialogRef.current
+        ? Array.from(
+            dialogRef.current.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ),
+          ).filter((el) => !el.hasAttribute('aria-hidden'))
+        : [];
+
+    // Focus the first focusable element on open (after a tick so it exists in DOM).
+    const t = setTimeout(() => {
+      const els = focusables();
+      if (els.length > 0) els[0].focus();
+    }, 0);
+
+    function onKeydown(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return;
+      const els = focusables();
+      if (els.length === 0) return;
+      const first = els[0];
+      const last = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    document.addEventListener('keydown', onKeydown);
+
+    return () => {
+      clearTimeout(t);
+      document.removeEventListener('keydown', onKeydown);
+      // Restore focus to the element that opened the dialog.
+      const prev = previouslyFocused.current as HTMLElement | null;
+      if (prev && typeof prev.focus === 'function') prev.focus();
     };
   }, [open]);
 
@@ -171,6 +220,7 @@ export function Modal({ open, onClose, title, subtitle, children, maxWidth = 'lg
             onClick={onClose}
           >
             <div
+              ref={dialogRef}
               role="dialog"
               aria-modal="true"
               aria-label={title}

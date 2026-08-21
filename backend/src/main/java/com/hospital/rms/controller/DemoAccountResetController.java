@@ -4,6 +4,7 @@ import com.hospital.rms.entity.User;
 import com.hospital.rms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,8 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Development-only password reset endpoint. Bean is created only when the
+ * Spring profile is NOT "prod", so it cannot be deployed to production even
+ * if the token env var is set. This prevents an attacker who learns the
+ * dev-reset token from mass-resetting demo accounts (including admin).
+ */
 @RestController
 @RequestMapping("/api/setup")
+@Profile("!prod")
 @RequiredArgsConstructor
 public class DemoAccountResetController {
 
