@@ -2,6 +2,7 @@ package com.hospital.rms.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -57,10 +58,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /** Cookie name set by AuthController on login. Must match exactly. */
+    private static final String ACCESS_COOKIE = "oh_access";
+
     private String extractJwtFromRequest(HttpServletRequest request) {
+        // Prefer the Authorization header (used by API clients / mobile apps /
+        // curl-based testing). Fall back to the httpOnly access cookie, which
+        // is how the SPA browser frontend authenticates.
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if (ACCESS_COOKIE.equals(c.getName()) && StringUtils.hasText(c.getValue())) {
+                    return c.getValue();
+                }
+            }
         }
         return null;
     }
