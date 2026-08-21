@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -51,6 +52,13 @@ public class DemoDataRefresher implements ApplicationRunner {
     @Value("${app.auto-reseed-demo:false}")
     private boolean autoReseedDemo;
 
+    /** All "today" decisions in this class use the hospital's local zone
+     *  (Asia/Dhaka) so they agree with DashboardService. Without this, a
+     *  Render restart at 23:30 UTC could see "yesterday" and skip the
+     *  refresh, while the dashboard operator in Bangladesh sees "today"
+     *  with no appointments. */
+    private static final ZoneId HOSPITAL_ZONE = ZoneId.of("Asia/Dhaka");
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
@@ -65,7 +73,7 @@ public class DemoDataRefresher implements ApplicationRunner {
             return;
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(HOSPITAL_ZONE);
         LocalDateTime dayStart = today.atStartOfDay();
         LocalDateTime dayEnd = today.plusDays(1).atStartOfDay();
         long todaysAppointments = appointmentRepo.countByAppointmentDateBetween(dayStart, dayEnd);

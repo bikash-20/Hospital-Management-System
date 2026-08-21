@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -56,8 +57,8 @@ public class DemoReseedController {
         if (configuredResetToken.isBlank() || !configuredResetToken.equals(resetToken)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        LocalDate today = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Dhaka"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Dhaka"));
 
         User drRahim = userRepo.findByUsername("dr.rahim").orElseThrow();
         User drSara  = userRepo.findByUsername("dr.sara").orElseThrow();

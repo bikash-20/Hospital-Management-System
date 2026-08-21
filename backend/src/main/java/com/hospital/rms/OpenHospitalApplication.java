@@ -12,12 +12,21 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
+import java.util.TimeZone;
 
 @SpringBootApplication
 @Slf4j
 public class OpenHospitalApplication {
 
     public static void main(String[] args) {
+        // Lock the JVM default timezone to Asia/Dhaka so LocalDate.now(),
+        // LocalDateTime.now() and Instant→LocalDate conversions everywhere
+        // in the app — including DashboardService's "today" filter, the
+        // DataSeeder, and DemoDataRefresher — all agree on the same "today".
+        // Without this, Render runs in UTC and the dashboard's "today" filter
+        // rolls forward 6 hours before yours does, so freshly seeded
+        // appointments stop matching the dashboard query.
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Dhaka"));
         SpringApplication.run(OpenHospitalApplication.class, args);
     }
 

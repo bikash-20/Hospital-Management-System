@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -35,8 +36,8 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        LocalDate today = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Dhaka"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Dhaka"));
 
         // ── Doctors (already seeded as users) ────────────────
         User drRahim = userRepo.findByUsername("dr.rahim").orElseThrow();
