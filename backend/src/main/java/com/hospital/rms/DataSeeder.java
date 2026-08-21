@@ -31,7 +31,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (patientRepo.count() > 0) {
-            log.info("Database already has data — skipping seed");
+            log.info("Database already has data — skipping initial seed (use POST /api/setup/reseed-today to refresh date-bound demo data)");
             return;
         }
 
