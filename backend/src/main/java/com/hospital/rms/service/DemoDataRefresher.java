@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +22,20 @@ import java.util.List;
 
 /**
  * Keeps the demo dashboard meaningful on hosted demos by auto-refreshing
- * date-bound demo data (appointments, prescriptions, billing) on every
- * application startup.
+ * date-bound demo data (appointments, prescriptions, billing).
  *
- * <p><b>Trigger</b>: if the database already has patients (i.e. the original
- * DataSeeder ran) AND there are zero appointments dated today, re-create the
- * date-bound records. Idempotent — once today's appointments exist, this is a
- * no-op. Safe to call repeatedly.
+ * <p><b>Triggers</b>:
+ * <ol>
+ *   <li>On every application startup (after user seeding and initial DataSeeder),
+ *       if the database already has patients AND there are zero appointments
+ *       dated today.</li>
+ *   <li>Once per day at 00:05 Asia/Dhaka via {@link Scheduled @Scheduled}, so the
+ *       dashboard auto-updates across midnight even when the Render free-tier
+ *       service stays warm and does not restart.</li>
+ * </ol>
+ *
+ * <p>Idempotent — once today's appointments exist, both paths are a no-op.
+ * Safe to call repeatedly.
  *
  * <p><b>Disabled by default.</b> Opt in by setting {@code app.auto-reseed-demo=true}
  * (or the env var {@code AUTO_RESEED_DEMO=true}). A real production deployment
@@ -60,8 +68,29 @@ public class DemoDataRefresher implements ApplicationRunner {
     private static final ZoneId HOSPITAL_ZONE = ZoneId.of("Asia/Dhaka");
 
     @Override
-    @Transactional
     public void run(ApplicationArguments args) {
+        refreshIfStale();
+    }
+
+    /**
+     * Daily trigger at 00:05 Asia/Dhaka so the demo dashboard auto-updates across
+     * midnight even when the Render free-tier service stays warm and does not
+     * restart. {@code zone} is set explicitly because the JVM default is already
+     * Asia/Dhaka (locked in {@code OpenHospitalApplication.main}) but we do not
+     * want this annotation to silently break if that lock is ever removed.
+     */
+    @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Dhaka")
+    public void scheduledDailyRefresh() {
+        if (!autoReseedDemo) {
+            log.debug("auto-reseed-demo: scheduled refresh skipped (AUTO_RESEED_DEMO is not enabled)");
+            return;
+        }
+        log.info("auto-reseed-demo: scheduled daily refresh firing");
+        refreshIfStale();
+    }
+
+    @Transactional
+    void refreshIfStale() {
         if (!autoReseedDemo) {
             return;
         }
@@ -92,6 +121,13 @@ public class DemoDataRefresher implements ApplicationRunner {
                 patients.size());
             return;
         }
+
+        // Bump patient.createdDate to "now" so the dashboard's "Patients Today"
+        // counter (countByCreatedDateBetween) returns a meaningful number instead
+        // of 0. Done before the deletes so the patient list is still clean.
+        LocalDateTime now = LocalDateTime.now(HOSPITAL_ZONE);
+        patients.forEach(p -> p.setCreatedDate(now));
+        patientRepo.saveAll(patients);
 
         User drRahim = userRepo.findByUsername("dr.rahim").orElse(null);
         User drSara  = userRepo.findByUsername("dr.sara").orElse(null);

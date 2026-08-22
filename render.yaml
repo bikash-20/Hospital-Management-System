@@ -26,5 +26,12 @@ services:
         value: 86400000
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      # Token that gates the manual reseed / password-reset demo endpoints.
+      # Set in repo so the Blueprint recreates the service with it configured.
       - key: DEMO_RESET_TOKEN
-        sync: false
+        value: CareBridgeReset2026Private
+      # Enables DemoDataRefresher (auto-seeds today's appointments on startup
+      # AND via a daily @Scheduled job at 00:05 Asia/Dhaka so the dashboard
+      # never shows 0 0 0 without manual intervention).
+      - key: AUTO_RESEED_DEMO
+        value: "true"
