@@ -1,4 +1,6 @@
-# CareBridge RMS
+# CareBridge RMS live link: https://hospital-management-system-eta-nine.vercel.app/
+<img width="1334" height="915" alt="image" src="https://github.com/user-attachments/assets/e68331b2-d31d-47a5-96eb-ee0be1d0a34f" />
+
 
 > Student portfolio project. The live-demo deployment is intentionally a low-cost free-tier setup and must not be used with real patient data.
 
