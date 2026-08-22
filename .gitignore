@@ -25,6 +25,9 @@ build/
 # Logs
 *.log
 
+# Local AI-agent context (not part of the public repo)
+AI_CONTEXT.md
+
 # H2 database files
 *.db
 *.mv.db
