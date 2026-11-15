@@ -3,11 +3,13 @@ import api from '@/api/client';
 
 export const DEFAULT_AI_PREFERENCES: AISettingsPreferences = {
   ollamaUrl: 'http://localhost:11434',
-  systemPrompt: 'You are a helpful assistant that replies concisely.',
+  systemPrompt: 'You are CareBridge AI, an intelligent clinical and hospital operations assistant.',
   sttEndpoint: 'http://localhost:5005/transcribe',
   ttsEndpoint: 'http://localhost:5006/speak',
   elevenLabsVoiceId: '21m00Tcm4TlvDq8ikWAM',
 };
+
+const KATEX_MATH_REMINDER = '\n\nA LATEX MATH-FORMATTING REMINDER: When mentioning dosages, vital calculations, or equations, format them using LaTeX math delimiters ($...$ for inline, $$...$$ for display) so they render with KaTeX.';
 
 export function getAISettings(): AISettingsPreferences {
   try {
@@ -66,6 +68,7 @@ export async function sendChatMessage(
 ): Promise<AIChatResponse> {
   const prefs = getAISettings();
   const isOnline = navigator.onLine;
+  const effectiveSystemPrompt = (prefs.systemPrompt || DEFAULT_AI_PREFERENCES.systemPrompt) + KATEX_MATH_REMINDER;
 
   // 1. Try Grok (if API key is present and online)
   if (isOnline && prefs.grokApiKey) {
@@ -79,7 +82,7 @@ export async function sendChatMessage(
         body: JSON.stringify({
           model: 'grok-2',
           messages: [
-            { role: 'system', content: prefs.systemPrompt },
+            { role: 'system', content: effectiveSystemPrompt },
             ...(history || []).map((h) => ({ role: h.role, content: h.content })),
             { role: 'user', content: prompt },
           ],
@@ -115,7 +118,7 @@ export async function sendChatMessage(
         body: JSON.stringify({
           model: 'meta-llama/llama-3.3-70b-instruct:free',
           messages: [
-            { role: 'system', content: prefs.systemPrompt },
+            { role: 'system', content: effectiveSystemPrompt },
             ...(history || []).map((h) => ({ role: h.role, content: h.content })),
             { role: 'user', content: prompt },
           ],
@@ -148,7 +151,7 @@ export async function sendChatMessage(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'llama3',
-        prompt: `${prefs.systemPrompt}\nUser: ${prompt}\nAssistant:`,
+        prompt: `${effectiveSystemPrompt}\nUser: ${prompt}\nAssistant:`,
         stream: false,
       }),
       signal: controller.signal,

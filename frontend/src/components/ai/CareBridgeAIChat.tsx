@@ -10,6 +10,7 @@ import {
 } from '@/services/aiOrchestrator';
 import { scanPrescriptionImage } from '@/services/prescriptionRAG';
 import { speakText, stopSpeaking, VoiceSTTListener } from '@/services/voiceService';
+import KatexRenderer from './KatexRenderer';
 import type { AIChatMessage, AISettingsPreferences, PrescriptionExtractedData } from '@/types';
 import {
   Sparkles,
@@ -90,6 +91,15 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sttListenerRef = useRef<VoiceSTTListener | null>(null);
+  const typewriterIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (typewriterIntervalRef.current) {
+        clearInterval(typewriterIntervalRef.current);
+      }
+    };
+  }, []);
 
   const role = user?.role || 'GUEST';
 
@@ -156,19 +166,55 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
 
       const res = await sendChatMessage(promptToSend, role, language, prescText, messages);
 
+      const assistantMsgId = `msg-${Date.now() + 1}`;
       const assistantMsg: AIChatMessage = {
-        id: `msg-${Date.now() + 1}`,
+        id: assistantMsgId,
         role: 'assistant',
-        content: res.reply,
+        content: '',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         modelUsed: res.modelUsed,
         isOffline: res.isOffline,
         hashMatch: res.hashMatch,
+        isStreaming: true,
         suggestions: res.suggestions,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
+      setLoading(false);
+
+      // Smooth typewriter streaming delivery (word-by-word / chunk-by-chunk)
+      const fullText = res.reply || '';
+      const tokens = fullText.split(/(\s+)/);
+      let currentIndex = 0;
+      let accumulated = '';
+
+      if (typewriterIntervalRef.current) {
+        clearInterval(typewriterIntervalRef.current);
+      }
+
+      typewriterIntervalRef.current = setInterval(() => {
+        if (currentIndex < tokens.length) {
+          accumulated += tokens[currentIndex];
+          currentIndex++;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, content: accumulated, isStreaming: currentIndex < tokens.length }
+                : m
+            )
+          );
+        } else {
+          if (typewriterIntervalRef.current) {
+            clearInterval(typewriterIntervalRef.current);
+            typewriterIntervalRef.current = null;
+          }
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantMsgId ? { ...m, isStreaming: false } : m))
+          );
+        }
+      }, 16);
     } catch (e: unknown) {
+      setLoading(false);
       setMessages((prev) => [
         ...prev,
         {
@@ -181,8 +227,6 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
           isOffline: true,
         },
       ]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -357,7 +401,7 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
                             : 'bg-white dark:bg-[#161E2C] text-surface-900 dark:text-surface-100 border border-surface-200 dark:border-[#273447] rounded-bl-xs'
                         }`}
                       >
-                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                        <KatexRenderer content={msg.content} isStreaming={msg.isStreaming} />
 
                         {/* Metadata & Audio Speak */}
                         <div className="flex items-center justify-between gap-3 mt-2 text-xs opacity-75">

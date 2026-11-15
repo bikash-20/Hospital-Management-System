@@ -87,6 +87,8 @@ export interface Bed {
   bedNumber: string;
   wardName: string;
   status: BedStatus;
+  patientName?: string;
+  patientId?: string;
 }
 
 // ===== Auth & User =====
@@ -269,6 +271,7 @@ export interface AIChatMessage {
   modelUsed?: string;
   isOffline?: boolean;
   hashMatch?: boolean;
+  isStreaming?: boolean;
   suggestions?: ActionSuggestion[];
 }
 

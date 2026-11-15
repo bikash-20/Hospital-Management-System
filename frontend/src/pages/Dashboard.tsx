@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getDashboardStatsApi, getAppointmentsApi, getBedsApi, getBillingsApi } from '@/api/api';
+import { getDashboardStatsApi, getAppointmentsApi, getBedsApi, getBillingsApi, getAllBedBookingsApi } from '@/api/api';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
@@ -18,6 +18,7 @@ import {
   Users,
   Calendar,
   Bed,
+  BedDouble,
   DollarSign,
   Clock,
   ArrowRight,
@@ -54,6 +55,12 @@ export default function Dashboard() {
     queryKey: ['billings'],
     queryFn: getBillingsApi,
     refetchInterval: 15000,
+  });
+
+  const { data: bookings } = useQuery({
+    queryKey: ['admin-bookings'],
+    queryFn: getAllBedBookingsApi,
+    refetchInterval: 10000,
   });
 
   const bedStats = useMemo(
@@ -93,6 +100,21 @@ export default function Dashboard() {
   // ── Live activity ticker (derived from data, in-memory rotation) ──
   const liveEvents = useMemo<ActivityEvent[]>(() => {
     const events: ActivityEvent[] = [];
+
+    // Real-time bed bookings / emergency admissions
+    if (bookings && bookings.length > 0) {
+      bookings.slice(-3).reverse().forEach((b) => {
+        events.push({
+          id: `book-${b.id}`,
+          emoji: '🛏️',
+          message: isBengali
+            ? `জরুরি সিট ভর্তি: ${b.guestName} (${b.bedType}) - বেড ${b.assignedBedNumber}`
+            : `Emergency Admission: ${b.guestName} (${b.bedType}) - Bed ${b.assignedBedNumber}`,
+          tone: 'primary',
+        });
+      });
+    }
+
     appointments?.slice(0, 5).forEach((a, i) => {
       events.push({
         id: `apt-${a.id}`,
@@ -108,12 +130,29 @@ export default function Dashboard() {
     if ((bedStats?.available ?? 0) <= 3) {
       events.push({ id: 'beds-low', emoji: '🛏️', message: 'Bed availability is low', tone: 'danger' });
     }
-    return events.slice(0, 8);
-  }, [appointments, stats, bedStats]);
+    return events.slice(0, 10);
+  }, [bookings, appointments, stats, bedStats, isBengali]);
 
   // ── Activity timeline (synthesized from real data) ──
   const timeline: TimelineItem[] = useMemo(() => {
     const items: TimelineItem[] = [];
+
+    // Emergency bookings timeline
+    if (bookings && bookings.length > 0) {
+      bookings.slice(-3).reverse().forEach((b) => {
+        items.push({
+          id: `b-tl-${b.id}`,
+          title: `${b.guestName} • Bed ${b.assignedBedNumber} (${b.bedType})`,
+          subtitle: isBengali
+            ? `ভর্তি ডিপোজিট ৳${b.paymentAmount} পরিশোধিত (${b.paymentMethod}) • টোকেন: ${b.bookingReference}`
+            : `Admission deposit ৳${b.paymentAmount} paid (${b.paymentMethod}) • Ref: ${b.bookingReference}`,
+          timestamp: b.createdDate ? new Date(b.createdDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent',
+          icon: BedDouble,
+          tone: 'info',
+        });
+      });
+    }
+
     appointments?.slice(0, 6).forEach((a) => {
       const tone: TimelineItem['tone'] =
         a.status === 'IN_CONSULTATION' ? 'warning' : a.status === 'WAITING' ? 'info' : a.status === 'COMPLETED' ? 'success' : 'neutral';
@@ -127,7 +166,7 @@ export default function Dashboard() {
       });
     });
     return items;
-  }, [appointments]);
+  }, [bookings, appointments, isBengali]);
 
   // ── Trend sparklines (last 7 days of appointments, synthetic but deterministic from length) ──
   const sparkAppts = useMemo(() => [3, 5, 4, 7, 6, 9, totalAppts || 1].slice(-7), [totalAppts]);

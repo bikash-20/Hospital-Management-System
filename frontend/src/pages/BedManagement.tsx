@@ -26,6 +26,7 @@ import {
   LayoutGrid,
   Plus,
   Trash2,
+  User,
 } from 'lucide-react';
 
 const statusConfig: Record<BedStatus, { color: string; bg: string; border: string; label: string; icon: typeof Check }> = {
@@ -37,7 +38,7 @@ const statusConfig: Record<BedStatus, { color: string; bg: string; border: strin
 export default function BedManagement() {
   const { showToast } = useToast();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, isBengali } = useLanguage();
   const queryClient = useQueryClient();
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -203,7 +204,16 @@ export default function BedManagement() {
                       </motion.div>
                     </div>
 
-                    <p className="text-sm text-surface-500 mb-4">{bed.wardName}</p>
+                    <p className="text-sm text-surface-500 mb-3">{bed.wardName}</p>
+
+                    {bed.status === 'OCCUPIED' && (
+                      <div className="mb-3 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-1.5 text-xs text-red-700 dark:text-red-300">
+                        <User className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                        <span className="truncate font-semibold">
+                          {bed.patientName || (isBengali ? 'জরুরি ভর্তি রোগী' : 'Admitted Patient')}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between">
                       <BedStatusPill status={bed.status} />

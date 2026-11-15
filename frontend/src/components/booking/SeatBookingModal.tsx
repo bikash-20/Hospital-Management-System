@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createBedBookingApi } from '@/api/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createBedBookingApi, getSeatAvailabilityApi } from '@/api/api';
 import type { BedType, BedBookingRequest, BedBookingResponse, PaymentMethod } from '@/types';
 import MfsPaymentModal from './MfsPaymentModal';
 import DigitalAdmissionReceipt from './DigitalAdmissionReceipt';
@@ -46,18 +46,42 @@ export default function SeatBookingModal({
   // Confirmed booking response
   const [confirmedBooking, setConfirmedBooking] = useState<BedBookingResponse | null>(null);
 
+  // Live dynamic seat availability query matching backend
+  const { data: seatData } = useQuery({
+    queryKey: ['seat-availability'],
+    queryFn: getSeatAvailabilityApi,
+    refetchInterval: 10000,
+  });
+
+  const getStatForType = (type: BedType) => {
+    switch (type) {
+      case 'ICU': return seatData?.icu;
+      case 'EMERGENCY': return seatData?.emergency;
+      case 'CABIN': return seatData?.cabin;
+      case 'GENERAL': return seatData?.general;
+    }
+  };
+
   const bedTypePricing: Record<BedType, { rate: number; icon: typeof Activity; desc: string }> = {
-    ICU: { rate: 5000, icon: HeartPulse, desc: isBengali ? 'ভেন্টিলেটর ও সার্বক্ষণিক কার্ডিয়াক সাপোর্ট' : 'Ventilator & continuous cardiac monitoring' },
-    EMERGENCY: { rate: 2500, icon: Activity, desc: isBengali ? 'ট্রমা কেয়ার ও তাৎক্ষণিক ট্রায়াজ বেড' : 'Immediate trauma & critical triage stabilization' },
-    CABIN: { rate: 3500, icon: Home, desc: isBengali ? 'এসি, ব্যক্তিগত বাথরুম ও রোগীর পরিচারক সুবিধা' : 'Private AC room with attendant amenities' },
-    GENERAL: { rate: 800, icon: BedDouble, desc: isBengali ? 'সাধারণ ওয়ার্ডে সার্বক্ষণিক নার্সিং কেয়ার' : 'Spacious ward with 24/7 on-call nursing' },
+    ICU: { rate: seatData?.icu?.dailyRate ?? 5000, icon: HeartPulse, desc: isBengali ? 'ভেন্টিলেটর ও সার্বক্ষণিক কার্ডিয়াক সাপোর্ট' : 'Ventilator & continuous cardiac monitoring' },
+    EMERGENCY: { rate: seatData?.emergency?.dailyRate ?? 2500, icon: Activity, desc: isBengali ? 'ট্রমা কেয়ার ও তাৎক্ষণিক ট্রায়াজ বেড' : 'Immediate trauma & critical triage stabilization' },
+    CABIN: { rate: seatData?.cabin?.dailyRate ?? 3500, icon: Home, desc: isBengali ? 'এসি, ব্যক্তিগত বাথরুম ও রোগীর পরিচারক সুবিধা' : 'Private AC room with attendant amenities' },
+    GENERAL: { rate: seatData?.general?.dailyRate ?? 800, icon: BedDouble, desc: isBengali ? 'সাধারণ ওয়ার্ডে সার্বক্ষণিক নার্সিং কেয়ার' : 'Spacious ward with 24/7 on-call nursing' },
   };
 
   const bookingMutation = useMutation({
     mutationFn: (req: BedBookingRequest) => createBedBookingApi(req),
     onSuccess: (data) => {
+      // Refresh all hospital caches across staff dashboards
       queryClient.invalidateQueries({ queryKey: ['seat-availability'] });
       queryClient.invalidateQueries({ queryKey: ['beds'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['patients'] });
+      queryClient.invalidateQueries({ queryKey: ['billing'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+      // Notify staff panels immediately
+      window.dispatchEvent(new CustomEvent('new-hospital-booking', { detail: data }));
       setConfirmedBooking(data);
       setStep('RECEIPT');
     },
@@ -160,6 +184,7 @@ export default function SeatBookingModal({
                       {(Object.keys(bedTypePricing) as BedType[]).map((type) => {
                         const Icon = bedTypePricing[type].icon;
                         const isSelected = bedType === type;
+                        const stat = getStatForType(type);
                         return (
                           <button
                             key={type}
@@ -177,8 +202,21 @@ export default function SeatBookingModal({
                                 ৳ {bedTypePricing[type].rate}
                               </span>
                             </div>
-                            <div className="font-semibold text-xs text-surface-900 dark:text-white">
-                              {type}
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-xs text-surface-900 dark:text-white">
+                                {type}
+                              </span>
+                              {stat && (
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                                  stat.available > 0
+                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                    : 'bg-amber-500/10 text-amber-500'
+                                }`}>
+                                  {stat.available > 0
+                                    ? `${stat.available} ${isBengali ? 'খালি' : 'free'}`
+                                    : (isBengali ? 'অপেক্ষমান' : 'Queue')}
+                                </span>
+                              )}
                             </div>
                             <div className="text-[10px] text-surface-400 mt-1 line-clamp-1">
                               {bedTypePricing[type].desc}
