@@ -32,13 +32,13 @@ public class AIService {
     private final AppointmentRepository appointmentRepository;
     private final BedBookingRepository bedBookingRepository;
 
-    @Value("${ai.grok.api-key:}")
+    @Value("${ai.grok.api-key:${GROK_API_KEY:}}")
     private String grokApiKey;
 
-    @Value("${ai.openrouter.api-key:}")
+    @Value("${ai.openrouter.api-key:${OPENROUTER_API_KEY:}}")
     private String openRouterApiKey;
 
-    @Value("${ai.gemini.api-key:}")
+    @Value("${ai.gemini.api-key:${GEMINI_API_KEY:}}")
     private String geminiApiKey;
 
     @Value("${ai.ollama.url:http://localhost:11434}")

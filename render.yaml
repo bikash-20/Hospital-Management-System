@@ -26,6 +26,13 @@ services:
         value: 86400000
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      # Optional AI Model API Keys for CareBridge AI
+      - key: GROK_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
       # Token that gates the manual reseed / password-reset demo endpoints.
       # Set in repo so the Blueprint recreates the service with it configured.
       - key: DEMO_RESET_TOKEN
