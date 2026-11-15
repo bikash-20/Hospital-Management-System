@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import PrintableInvoice from '@/components/PrintableInvoice';
 import { useToast } from '@/context/ToastContext';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   BillingStatusPill,
   Modal,
@@ -20,19 +21,20 @@ import {
   extractErrorMessage,
 } from '@/components/ui/primitives';
 
-const statusLabelMap: Record<BillingStatus, string> = {
-  PAID: 'Paid',
-  PARTIAL: 'Partial',
-  UNPAID: 'Unpaid',
-};
-
 export default function Billing() {
   const { showToast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<BillingStatus | ''>('');
   const [payingBill, setPayingBill] = useState<BillingType | null>(null);
   const [payAmount, setPayAmount] = useState('');
   const [printingBill, setPrintingBill] = useState<BillingType | null>(null);
+
+  const statusLabelMap: Record<BillingStatus, string> = {
+    PAID: 'Paid',
+    PARTIAL: 'Partial',
+    UNPAID: 'Unpaid',
+  };
 
   const { data: billings, isLoading } = useQuery({
     queryKey: ['billings'],
@@ -74,9 +76,11 @@ export default function Billing() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display text-surface-900 dark:text-white">Billing</h1>
+          <h1 className="text-display text-surface-900 dark:text-white">
+            {t('billingPageTitle')}
+          </h1>
           <p className="text-surface-500 dark:text-surface-400 mt-1">
-            Invoice management and payment processing
+            {t('billingPageSub')}
           </p>
         </div>
       </div>
@@ -89,7 +93,7 @@ export default function Billing() {
           </div>
           <div>
             <p className="text-2xl font-bold text-surface-900 dark:text-white font-tabular">৳{totalRevenue.toLocaleString()}</p>
-            <p className="text-xs text-surface-500">Total Collected</p>
+            <p className="text-xs text-surface-500">{t('totalCollectedLabel')}</p>
           </div>
         </div>
         <div className="card p-5 flex items-center gap-4">
@@ -98,7 +102,7 @@ export default function Billing() {
           </div>
           <div>
             <p className="text-2xl font-bold text-surface-900 dark:text-white font-tabular">৳{totalPending.toLocaleString()}</p>
-            <p className="text-xs text-surface-500">Pending Amount</p>
+            <p className="text-xs text-surface-500">{t('totalPendingLabel')}</p>
           </div>
         </div>
         <div className="card p-5 flex items-center gap-4">
@@ -107,7 +111,7 @@ export default function Billing() {
           </div>
           <div>
             <p className="text-2xl font-bold text-surface-900 dark:text-white font-tabular">{billings?.length ?? 0}</p>
-            <p className="text-xs text-surface-500">Total Invoices</p>
+            <p className="text-xs text-surface-500">{t('navBilling')}</p>
           </div>
         </div>
       </div>

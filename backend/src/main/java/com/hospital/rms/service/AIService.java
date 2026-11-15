@@ -4,12 +4,18 @@ import com.hospital.rms.dto.AIChatRequest;
 import com.hospital.rms.dto.AIChatResponse;
 import com.hospital.rms.dto.DashboardStatsResponse;
 import com.hospital.rms.dto.SeatAvailabilityResponse;
+import com.hospital.rms.entity.Appointment;
+import com.hospital.rms.entity.User;
+import com.hospital.rms.enums.AppointmentStatus;
 import com.hospital.rms.enums.BedType;
 import com.hospital.rms.enums.PaymentStatus;
+import com.hospital.rms.enums.Role;
 import com.hospital.rms.repository.AppointmentRepository;
 import com.hospital.rms.repository.BedBookingRepository;
 import com.hospital.rms.repository.BedRepository;
 import com.hospital.rms.repository.BillingRepository;
+import com.hospital.rms.repository.DoctorScheduleRepository;
+import com.hospital.rms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -31,6 +39,8 @@ public class AIService {
     private final BillingRepository billingRepository;
     private final AppointmentRepository appointmentRepository;
     private final BedBookingRepository bedBookingRepository;
+    private final UserRepository userRepository;
+    private final DoctorScheduleRepository doctorScheduleRepository;
 
     @Value("${ai.grok.api-key:${GROK_API_KEY:}}")
     private String grokApiKey;
@@ -172,6 +182,52 @@ public class AIService {
                         "• **MFS Integrations:** bKash, Nagad, Upay & Cash active. You can navigate directly to the Billing layout to settle or print invoices.",
                         rev.toPlainString(), pending);
                 }
+            }
+        }
+
+        // 3. Doctor schedule & availability queries
+        if (qLower.contains("doctor") || qLower.contains("dr.") || qLower.contains("physician") || qLower.contains("specialist") || qLower.contains("ডাক্তার") || qLower.contains("চিকিৎসক") || qLower.contains("বিশেষজ্ঞ")) {
+            List<User> doctors = userRepository.findByRole(Role.DOCTOR);
+            StringBuilder docList = new StringBuilder();
+            for (User d : doctors) {
+                if (d.isEnabled()) {
+                    docList.append("• **").append(d.getFullName()).append("** (").append(d.getUsername()).append(")\n");
+                }
+            }
+
+            if (isBengali) {
+                return "🩺 **হাসপাতালের কর্মরত বিশেষজ্ঞ চিকিৎসকবৃন্দ:**\n\n" +
+                    (docList.length() > 0 ? docList.toString() : "বর্তমানে কোনো চিকিৎসক সক্রিয় হিসেবে তালিকাভুক্ত নেই।\n") +
+                    "\nপরামর্শ ও অ্যাপয়েন্টমেন্টের জন্য সিরিয়াল নিতে পারেন বা রিসেপশনে যোগাযোগ করতে পারেন।";
+            } else {
+                return "🩺 **Active Hospital Doctors & Consultants:**\n\n" +
+                    (docList.length() > 0 ? docList.toString() : "No active doctors currently registered.\n") +
+                    "\nPatients can book appointments through the front desk or reception queue.";
+            }
+        }
+
+        // 4. Appointments & Live Queue queries
+        if (qLower.contains("appointment") || qLower.contains("queue") || qLower.contains("serial") || qLower.contains("waiting") || qLower.contains("অ্যাপয়েন্টমেন্ট") || qLower.contains("সিরিয়াল") || qLower.contains("অপেক্ষমান") || qLower.contains("রোগী")) {
+            long waitingCount = appointmentRepository.findByStatus(AppointmentStatus.WAITING).size();
+            long consultingCount = appointmentRepository.findByStatus(AppointmentStatus.IN_CONSULTATION).size();
+            long completedCount = appointmentRepository.findByStatus(AppointmentStatus.COMPLETED).size();
+
+            if (isBengali) {
+                return String.format(
+                    "⏱️ **লাইভ ওপিডি ও কনসাল্টেশন কিউ স্ট্যাটাস:**\n\n" +
+                    "• **অপেক্ষমান রোগী (Waiting):** %d জন\n" +
+                    "• **পরামর্শরত (In Consultation):** %d জন\n" +
+                    "• **সম্পন্ন পরামর্শ (Completed Today):** %d জন\n\n" +
+                    "স্মার্ট কিউ ডিসপ্লে বোর্ডে টোকেন নম্বর অনুযায়ী রোগীদের ডাকা হচ্ছে।",
+                    waitingCount, consultingCount, completedCount);
+            } else {
+                return String.format(
+                    "⏱️ **Live OPD Consultation & Queue Status:**\n\n" +
+                    "• **Patients Waiting in Queue:** %d\n" +
+                    "• **Currently In Consultation:** %d\n" +
+                    "• **Consultations Completed Today:** %d\n\n" +
+                    "Live queue tokens are tracked in real time on the digital queue monitor.",
+                    waitingCount, consultingCount, completedCount);
             }
         }
 

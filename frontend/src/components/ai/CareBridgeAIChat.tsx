@@ -22,6 +22,8 @@ import {
   Volume2,
   Upload,
   RefreshCw,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 
 interface CareBridgeAIChatProps {
@@ -35,11 +37,41 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
   const { t, language, isBengali } = useLanguage();
 
   const [isOpenInternal, setIsOpenInternal] = useState(false);
-  const isOpen = isOpenExternal !== undefined ? isOpenExternal : isOpenInternal;
+  const [isFullViewport, setIsFullViewport] = useState(false);
+
+  // Sync external state changes
+  useEffect(() => {
+    if (isOpenExternal !== undefined) {
+      setIsOpenInternal(isOpenExternal);
+    }
+  }, [isOpenExternal]);
+
+  const isOpen = isOpenInternal;
+
   const setIsOpen = (open: boolean) => {
     setIsOpenInternal(open);
     if (!open && onCloseExternal) onCloseExternal();
   };
+
+  // Window event listeners for global toggle anywhere in app
+  useEffect(() => {
+    const handleToggle = () => setIsOpenInternal((prev) => !prev);
+    const handleOpen = () => setIsOpenInternal(true);
+    const handleClose = () => {
+      setIsOpenInternal(false);
+      if (onCloseExternal) onCloseExternal();
+    };
+
+    window.addEventListener('toggle-carebridge-ai', handleToggle);
+    window.addEventListener('open-carebridge-ai', handleOpen);
+    window.addEventListener('close-carebridge-ai', handleClose);
+
+    return () => {
+      window.removeEventListener('toggle-carebridge-ai', handleToggle);
+      window.removeEventListener('open-carebridge-ai', handleOpen);
+      window.removeEventListener('close-carebridge-ai', handleClose);
+    };
+  }, [onCloseExternal]);
   const [messages, setMessages] = useState<AIChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -240,192 +272,231 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
         )}
       </div>
 
-      {/* Expandable Chat Drawer */}
+      {/* Expandable Chat Drawer or Full Viewport Workspace */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[94vw] sm:w-[440px] h-[640px] max-h-[88vh] bg-white dark:bg-[#151B26] border border-surface-200 dark:border-[#2A3441] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className={
+              isFullViewport
+                ? 'fixed inset-0 z-50 w-screen h-screen bg-white dark:bg-[#0B1017] flex flex-col overflow-hidden shadow-2xl'
+                : 'fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[94vw] sm:w-[460px] h-[660px] max-h-[88vh] bg-white dark:bg-[#151B26] border border-surface-200 dark:border-[#2A3441] rounded-2xl shadow-2xl flex flex-col overflow-hidden'
+            }
           >
-            {/* Header */}
-            <div className="px-4 py-3 bg-gradient-to-r from-primary-900 via-surface-900 to-[#151B26] text-white flex items-center justify-between border-b border-surface-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm">CareBridge AI</span>
-                    <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                      {role}
-                    </span>
+              {/* Header */}
+              <div className="px-4 py-3 sm:px-6 bg-gradient-to-r from-primary-950 via-surface-900 to-[#121824] text-white flex items-center justify-between border-b border-surface-800 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <Sparkles className="w-5 h-5" />
                   </div>
-                  <p className="text-[10px] text-surface-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Grok • OpenRouter • Gemini • Ollama
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-base tracking-tight">CareBridge AI</span>
+                      <span className="text-xs uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">
+                        {role}
+                      </span>
+                      {isFullViewport && (
+                        <span className="hidden sm:inline-block text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-300 font-mono">
+                          Full Viewport Workspace
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-surface-400 flex items-center gap-1.5 mt-0.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      Grok • OpenRouter • Gemini • Local Ollama
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsFullViewport(!isFullViewport)}
+                    title={isFullViewport ? 'Collapse to drawer mode' : 'Expand to full viewport workspace'}
+                    className="p-2 rounded-xl text-surface-400 hover:text-white hover:bg-white/10 transition-colors focus-ring"
+                    style={{ minWidth: '40px', minHeight: '40px' }}
+                  >
+                    {isFullViewport ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowSettings(true)}
+                    title={t('aiSettingsBtn')}
+                    className="p-2 rounded-xl text-surface-400 hover:text-white hover:bg-white/10 transition-colors focus-ring"
+                    style={{ minWidth: '40px', minHeight: '40px' }}
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="p-2 rounded-xl text-surface-400 hover:text-white hover:bg-white/10 transition-colors focus-ring"
+                    style={{ minWidth: '40px', minHeight: '40px' }}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setShowSettings(true)}
-                  title={t('aiSettingsBtn')}
-                  className="p-1.5 rounded-lg text-surface-400 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <Settings className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg text-surface-400 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto bg-surface-50/50 dark:bg-[#0B1017] p-4 sm:p-6">
+                <div className={`space-y-4 mx-auto ${isFullViewport ? 'max-w-4xl' : 'w-full'}`}>
+                  {messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                    >
+                      <div
+                        className={`rounded-2xl px-4 py-3 leading-relaxed shadow-sm ${
+                          isFullViewport ? 'max-w-[80%] text-sm sm:text-base' : 'max-w-[88%] text-xs sm:text-sm'
+                        } ${
+                          msg.role === 'user'
+                            ? 'bg-primary-600 text-white rounded-br-xs'
+                            : 'bg-white dark:bg-[#161E2C] text-surface-900 dark:text-surface-100 border border-surface-200 dark:border-[#273447] rounded-bl-xs'
+                        }`}
+                      >
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-surface-50/50 dark:bg-[#10151E]">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm ${
-                      msg.role === 'user'
-                        ? 'bg-primary-600 text-white rounded-br-xs'
-                        : 'bg-white dark:bg-[#1A2230] text-surface-900 dark:text-surface-100 border border-surface-200 dark:border-[#2C3748] rounded-bl-xs'
-                    }`}
-                  >
-                    <div className="whitespace-pre-wrap">{msg.content}</div>
+                        {/* Metadata & Audio Speak */}
+                        <div className="flex items-center justify-between gap-3 mt-2 text-xs opacity-75">
+                          <span>{msg.timestamp}</span>
+                          {msg.role === 'assistant' && (
+                            <div className="flex items-center gap-2">
+                              {msg.modelUsed && <span className="font-mono text-[11px]">{msg.modelUsed}</span>}
+                              <button
+                                type="button"
+                                onClick={() => handleSpeak(msg.content)}
+                                className="hover:opacity-100 p-1 hover:bg-white/10 rounded transition-all"
+                                title="Speak response"
+                              >
+                                <Volume2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-                    {/* Metadata & Audio Speak */}
-                    <div className="flex items-center justify-between gap-3 mt-1.5 text-[10px] opacity-70">
-                      <span>{msg.timestamp}</span>
-                      {msg.role === 'assistant' && (
-                        <div className="flex items-center gap-2">
-                          {msg.modelUsed && <span className="font-mono">{msg.modelUsed}</span>}
-                          <button
-                            type="button"
-                            onClick={() => handleSpeak(msg.content)}
-                            className="hover:opacity-100 transition-opacity"
-                            title="Speak"
-                          >
-                            <Volume2 className="w-3 h-3" />
-                          </button>
+                      {/* Action Suggestions */}
+                      {msg.suggestions && msg.suggestions.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2.5">
+                          {msg.suggestions.map((s, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                if (s.action === 'QUERY') handleSend(s.label);
+                                else if (s.action === 'TRIGGER_OCR') fileInputRef.current?.click();
+                                else if (s.targetUrl && onOpenBooking && s.targetUrl === '/') onOpenBooking();
+                              }}
+                              className="px-3 py-1.5 rounded-full text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all font-semibold"
+                            >
+                              {s.label}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
-                  </div>
+                  ))}
 
-                  {/* Action Suggestions */}
-                  {msg.suggestions && msg.suggestions.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {msg.suggestions.map((s, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            if (s.action === 'QUERY') handleSend(s.label);
-                            else if (s.action === 'TRIGGER_OCR') fileInputRef.current?.click();
-                            else if (s.targetUrl && onOpenBooking && s.targetUrl === '/') onOpenBooking();
-                          }}
-                          className="px-2.5 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all font-medium"
-                        >
-                          {s.label}
-                        </button>
-                      ))}
+                  {loading && (
+                    <div className="flex items-center gap-2.5 text-xs sm:text-sm text-surface-500 dark:text-surface-400 p-3 bg-surface-100/50 dark:bg-white/5 rounded-xl w-fit">
+                      <RefreshCw className="w-4 h-4 animate-spin text-primary-500" />
+                      <span>{isBengali ? 'কেয়ারব্রিজ এআই বিশ্লেষণ করছে...' : 'CareBridge AI is processing your request...'}</span>
                     </div>
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
-              ))}
+              </div>
 
-              {loading && (
-                <div className="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400 p-2">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-primary-500" />
-                  <span>{isBengali ? 'কেয়ারব্রিজ এআই ভাবছে...' : 'CareBridge AI is processing...'}</span>
+              {/* Quick Action Chips */}
+              <div className="border-t border-surface-200 dark:border-[#222C3A] bg-surface-100/60 dark:bg-[#121824] px-4 py-2 shrink-0">
+                <div className={`flex items-center gap-2 overflow-x-auto text-xs mx-auto ${isFullViewport ? 'max-w-4xl' : 'w-full'}`}>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1.5 rounded-lg bg-surface-200/80 dark:bg-[#1D2535] hover:bg-primary-50 dark:hover:bg-primary-950/30 text-surface-700 dark:text-surface-300 flex items-center gap-1.5 shrink-0 transition-all font-medium"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-primary-500" />
+                    {t('uploadRxBtn')}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSend(isBengali ? 'আইসিইউ ও ইমার্জেন্সি সিট কয়টি খালি?' : 'Check ICU & Emergency bed availability')}
+                    className="px-3 py-1.5 rounded-lg bg-surface-200/80 dark:bg-[#1D2535] hover:bg-primary-50 dark:hover:bg-primary-950/30 text-surface-700 dark:text-surface-300 shrink-0 transition-all font-medium"
+                  >
+                    {isBengali ? 'সিট পরিস্থিতি' : 'Live Beds'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSend(isBengali ? 'হাসপাতালের ডাক্তারদের তালিকা ও শিডিউল দেখাও' : 'List active doctors and their schedules')}
+                    className="px-3 py-1.5 rounded-lg bg-surface-200/80 dark:bg-[#1D2535] hover:bg-primary-50 dark:hover:bg-primary-950/30 text-surface-700 dark:text-surface-300 shrink-0 transition-all font-medium"
+                  >
+                    {isBengali ? 'ডাক্তার তালিকা' : 'Doctor Directory'}
+                  </button>
+
+                  {role === 'CASHIER' && (
+                    <button
+                      type="button"
+                      onClick={() => handleSend(isBengali ? 'আজকের মোট কালেকশন ও আনপেইড ইনভয়েস কত?' : 'Show today revenue and unpaid invoices')}
+                      className="px-3 py-1.5 rounded-lg bg-surface-200/80 dark:bg-[#1D2535] hover:bg-primary-50 dark:hover:bg-primary-950/30 text-surface-700 dark:text-surface-300 shrink-0 transition-all font-medium"
+                    >
+                      {isBengali ? 'কালেকশন সামারি' : 'Revenue Summary'}
+                    </button>
+                  )}
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+              </div>
 
-            {/* Quick Action Chips */}
-            <div className="px-3 py-1.5 bg-surface-100/60 dark:bg-[#141B26] border-t border-surface-200 dark:border-[#222C3A] flex items-center gap-1.5 overflow-x-auto text-[11px]">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="px-2.5 py-1 rounded-lg bg-surface-200/80 dark:bg-[#1D2535] hover:bg-primary-50 dark:hover:bg-primary-950/30 text-surface-700 dark:text-surface-300 flex items-center gap-1 shrink-0 transition-all"
-              >
-                <Upload className="w-3 h-3 text-primary-500" />
-                {t('uploadRxBtn')}
-              </button>
+              {/* Input Bar */}
+              <div className="p-3 sm:p-4 bg-white dark:bg-[#151B26] border-t border-surface-200 dark:border-[#2A3441] shrink-0">
+                <div className={`flex items-center gap-2 mx-auto ${isFullViewport ? 'max-w-4xl' : 'w-full'}`}>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    onChange={handleRxUpload}
+                    className="hidden"
+                  />
 
-              <button
-                type="button"
-                onClick={() => handleSend(isBengali ? 'আইসিইউ ও ইমার্জেন্সি সিট কয়টি খালি?' : 'Check ICU & Emergency bed availability')}
-                className="px-2.5 py-1 rounded-lg bg-surface-200/80 dark:bg-[#1D2535] hover:bg-primary-50 dark:hover:bg-primary-950/30 text-surface-700 dark:text-surface-300 shrink-0 transition-all"
-              >
-                {isBengali ? 'সিট পরিস্থিতি' : 'Live Beds'}
-              </button>
+                  <button
+                    type="button"
+                    onClick={handleToggleVoice}
+                    className={`p-2.5 rounded-xl transition-all ${
+                      isListening
+                        ? 'bg-red-500 text-white animate-pulse'
+                        : 'text-surface-500 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-[#1F2737]'
+                    }`}
+                    style={{ minWidth: '44px', minHeight: '44px' }}
+                    title={isListening ? t('voiceStopBtn') : t('voiceMicBtn')}
+                  >
+                    {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  </button>
 
-              {role === 'CASHIER' && (
-                <button
-                  type="button"
-                  onClick={() => handleSend(isBengali ? 'আজকের মোট কালেকশন ও আনপেইড ইনভয়েস কত?' : 'Show today revenue and unpaid invoices')}
-                  className="px-2.5 py-1 rounded-lg bg-surface-200/80 dark:bg-[#1D2535] hover:bg-primary-50 dark:hover:bg-primary-950/30 text-surface-700 dark:text-surface-300 shrink-0 transition-all"
-                >
-                  {isBengali ? 'কালেকশন সামারি' : 'Revenue Summary'}
-                </button>
-              )}
-            </div>
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                    placeholder={t('aiPlaceholder')}
+                    className="flex-1 px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                    style={{ minHeight: '44px' }}
+                  />
 
-            {/* Input Bar */}
-            <div className="p-3 bg-white dark:bg-[#151B26] border-t border-surface-200 dark:border-[#2A3441] flex items-center gap-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                onChange={handleRxUpload}
-                className="hidden"
-              />
-
-              <button
-                type="button"
-                onClick={handleToggleVoice}
-                className={`p-2 rounded-xl transition-all ${
-                  isListening
-                    ? 'bg-red-500 text-white animate-pulse'
-                    : 'text-surface-500 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-[#1F2737]'
-                }`}
-                title={isListening ? t('voiceStopBtn') : t('voiceMicBtn')}
-              >
-                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
-
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                placeholder={t('aiPlaceholder')}
-                className="flex-1 px-3 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-xs sm:text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-              />
-
-              <button
-                type="button"
-                onClick={() => handleSend()}
-                disabled={!input.trim() && !scannedRx}
-                className="p-2 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-40 text-white transition-all shadow-md shadow-primary-500/20"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-          </motion.div>
+                  <button
+                    type="button"
+                    onClick={() => handleSend()}
+                    disabled={!input.trim() && !scannedRx}
+                    className="p-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-40 text-white transition-all shadow-md shadow-primary-500/20"
+                    style={{ minWidth: '44px', minHeight: '44px' }}
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
         )}
       </AnimatePresence>
 

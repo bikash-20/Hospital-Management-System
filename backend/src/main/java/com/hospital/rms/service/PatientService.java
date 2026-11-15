@@ -23,8 +23,12 @@ public class PatientService {
 
     @Transactional
     public PatientResponse register(PatientRequest request) {
+        String cleanMobile = request.getMobileNumber() != null
+            ? request.getMobileNumber().replaceAll("[\\s-]+", "")
+            : "";
+
         // Duplicate detection: check matching mobile + DOB
-        patientRepository.findByMobileNumberAndDob(request.getMobileNumber(), request.getDob())
+        patientRepository.findByMobileNumberAndDob(cleanMobile, request.getDob())
             .ifPresent(existing -> {
                 throw new IllegalArgumentException(
                     "Duplicate patient found: " + existing.getFullName() +
@@ -36,12 +40,12 @@ public class PatientService {
 
         Patient patient = Patient.builder()
             .uhid(uhid)
-            .fullName(request.getFullName())
-            .mobileNumber(request.getMobileNumber())
+            .fullName(request.getFullName().trim())
+            .mobileNumber(cleanMobile)
             .dob(request.getDob())
             .gender(request.getGender())
-            .nid(request.getNid())
-            .address(request.getAddress())
+            .nid(request.getNid() != null ? request.getNid().trim() : null)
+            .address(request.getAddress() != null ? request.getAddress().trim() : null)
             .build();
 
         Patient saved = patientRepository.save(patient);

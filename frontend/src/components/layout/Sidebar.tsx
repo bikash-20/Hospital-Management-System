@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
+import type { TranslationKey } from '@/i18n/translations';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -25,28 +27,29 @@ import {
 
 interface NavItem {
   label: string;
+  i18nKey: TranslationKey;
   path: string;
   icon: typeof LayoutDashboard;
   roles: string[];
 }
 
 const navItems: NavItem[] = [
-  { label: 'Public Portal', path: '/public', icon: Activity, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_TECH', 'CASHIER', 'PATIENT'] },
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_TECH', 'CASHIER'] },
-  { label: 'Patients', path: '/patients', icon: Users, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
-  { label: 'Patient History', path: '/patient-history', icon: ClipboardList, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST'] },
-  { label: 'Appointments', path: '/appointments', icon: Calendar, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
-  { label: 'Consultation', path: '/consultation', icon: Stethoscope, roles: ['DOCTOR'] },
-  { label: 'Prescriptions', path: '/prescriptions', icon: FileText, roles: ['DOCTOR', 'RECEPTIONIST'] },
-  { label: 'Queue Display', path: '/queue', icon: Activity, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
-  { label: 'Lab Results', path: '/lab-results', icon: FlaskConical, roles: ['LAB_TECH', 'DOCTOR'] },
-  { label: 'Doctor Schedule', path: '/schedule', icon: CalendarClock, roles: ['DOCTOR'] },
-  { label: 'Bed Management', path: '/beds', icon: Bed, roles: ['ADMIN'] },
-  { label: 'Billing', path: '/billing', icon: Receipt, roles: ['ADMIN', 'CASHIER', 'RECEPTIONIST'] },
-  { label: 'Revenue Reports', path: '/reports', icon: BarChart3, roles: ['ADMIN', 'CASHIER'] },
-  { label: 'User Management', path: '/users', icon: UserCog, roles: ['ADMIN'] },
-  { label: 'Audit Logs', path: '/audit-logs', icon: History, roles: ['ADMIN'] },
-  { label: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
+  { label: 'Public Portal', i18nKey: 'sidebarPublic', path: '/public', icon: Activity, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_TECH', 'CASHIER', 'PATIENT'] },
+  { label: 'Dashboard', i18nKey: 'sidebarDashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_TECH', 'CASHIER'] },
+  { label: 'Patients', i18nKey: 'sidebarPatients', path: '/patients', icon: Users, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
+  { label: 'Patient History', i18nKey: 'sidebarPatientHistory', path: '/patient-history', icon: ClipboardList, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST'] },
+  { label: 'Appointments', i18nKey: 'sidebarAppointments', path: '/appointments', icon: Calendar, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
+  { label: 'Consultation', i18nKey: 'sidebarConsultation', path: '/consultation', icon: Stethoscope, roles: ['DOCTOR'] },
+  { label: 'Prescriptions', i18nKey: 'sidebarPrescriptions', path: '/prescriptions', icon: FileText, roles: ['DOCTOR', 'RECEPTIONIST'] },
+  { label: 'Queue Display', i18nKey: 'sidebarQueue', path: '/queue', icon: Activity, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
+  { label: 'Lab Results', i18nKey: 'sidebarLabResults', path: '/lab-results', icon: FlaskConical, roles: ['LAB_TECH', 'DOCTOR'] },
+  { label: 'Doctor Schedule', i18nKey: 'sidebarDoctorSchedule', path: '/schedule', icon: CalendarClock, roles: ['DOCTOR'] },
+  { label: 'Bed Management', i18nKey: 'sidebarBeds', path: '/beds', icon: Bed, roles: ['ADMIN'] },
+  { label: 'Billing', i18nKey: 'sidebarBilling', path: '/billing', icon: Receipt, roles: ['ADMIN', 'CASHIER', 'RECEPTIONIST'] },
+  { label: 'Revenue Reports', i18nKey: 'sidebarReports', path: '/reports', icon: BarChart3, roles: ['ADMIN', 'CASHIER'] },
+  { label: 'User Management', i18nKey: 'sidebarUsers', path: '/users', icon: UserCog, roles: ['ADMIN'] },
+  { label: 'Audit Logs', i18nKey: 'sidebarAudit', path: '/audit-logs', icon: History, roles: ['ADMIN'] },
+  { label: 'Settings', i18nKey: 'sidebarSettings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
 ];
 
 function useBreakpoint() {
@@ -72,6 +75,7 @@ interface SidebarProps {
 
 export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const bp = useBreakpoint();
   // userCollapsed: explicit user action on desktop; defaults to undefined so tablet auto-collapses via derivation
   const [userCollapsed, setUserCollapsed] = useState<boolean | undefined>(undefined);
@@ -196,7 +200,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                       : 'text-surface-400 hover:text-surface-200 hover:bg-white/5'
                   } ${isCollapsed ? 'justify-center px-0 py-3' : 'px-3 py-2.5'}`}
                   style={{ minHeight: '44px' }}
-                  title={isCollapsed ? item.label : undefined}
+                  title={isCollapsed ? t(item.i18nKey) : undefined}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {isActive && (
@@ -216,7 +220,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                         transition={{ duration: 0.15 }}
                         className="overflow-hidden whitespace-nowrap"
                       >
-                        {item.label}
+                        {t(item.i18nKey)}
                       </motion.span>
                     )}
                   </AnimatePresence>
@@ -255,6 +259,7 @@ function MobileSidebarContent({
   items: NavItem[];
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <>
       {/* Header */}
@@ -312,7 +317,7 @@ function MobileSidebarContent({
                     />
                   )}
                   <Icon className="w-5 h-5 shrink-0" aria-hidden="true" />
-                  <span>{item.label}</span>
+                  <span>{t(item.i18nKey)}</span>
                 </motion.div>
               )}
             </NavLink>

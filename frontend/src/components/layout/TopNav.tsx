@@ -10,6 +10,7 @@ import {
   User,
   Menu,
   Languages,
+  Sparkles,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { UserRole } from '@/types';
@@ -85,6 +86,19 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* CareBridge AI Copilot Quick Launcher */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-carebridge-ai'))}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-primary-600/10 via-emerald-600/10 to-teal-600/10 hover:from-primary-600/20 hover:to-teal-600/20 text-primary-600 dark:text-primary-400 border border-primary-500/20 text-xs font-semibold transition-all focus-ring shadow-sm"
+          style={{ minHeight: '38px' }}
+          title="Toggle CareBridge AI Copilot"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+          <span className="hidden md:inline font-semibold">CareBridge AI</span>
+        </motion.button>
+
         {/* Command Palette Trigger */}
         <CommandPalette />
 

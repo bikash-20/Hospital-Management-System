@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getDashboardStatsApi, getAppointmentsApi, getBedsApi, getBillingsApi } from '@/api/api';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
@@ -32,6 +33,7 @@ import DashboardCharts from '@/components/DashboardCharts';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t, isBengali } = useLanguage();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -76,6 +78,11 @@ export default function Dashboard() {
 
   const greeting = () => {
     const hour = new Date().getHours();
+    if (isBengali) {
+      if (hour < 12) return 'শুভ সকাল';
+      if (hour < 17) return 'শুভ দুপুর';
+      return 'শুভ সন্ধ্যা';
+    }
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
@@ -140,7 +147,7 @@ export default function Dashboard() {
           {greeting()}, {recentName}
         </h1>
         <p className="text-body text-surface-500 dark:text-surface-400 mt-1">
-          Here's what's happening at the hospital today.
+          {t('dashboardSub')}
         </p>
       </motion.div>
 
@@ -169,7 +176,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <GradientStatCard
-              label="Patients Today"
+              label={t('patientsToday')}
               value={stats?.patientsToday ?? 0}
               icon={Users}
               accent="primary"
@@ -192,12 +199,12 @@ export default function Dashboard() {
             </div>
           ) : (
             <GradientStatCard
-              label="Appointments"
+              label={t('appointmentsToday')}
               value={stats?.appointmentsToday ?? 0}
               icon={Calendar}
               accent="blue"
               spark={sparkAppts}
-              trend={{ label: `${waitingCount} waiting`, direction: 'flat' }}
+              trend={{ label: `${waitingCount} ${t('waiting')}`, direction: 'flat' }}
             />
           )}
         </StaggerItem>
@@ -214,7 +221,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <GradientStatCard
-              label="Beds Available"
+              label={t('bedsAvailable')}
               value={`${bedStats?.available ?? 0}/${bedStats?.total ?? 0}`}
               icon={Bed}
               accent="green"
@@ -243,7 +250,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <GradientStatCard
-              label="Revenue Today"
+              label={t('revenueToday')}
               value={`৳${(stats?.revenue ?? 0).toLocaleString()}`}
               icon={DollarSign}
               accent="amber"
@@ -275,19 +282,21 @@ export default function Dashboard() {
           className="lg:col-span-2 card p-5 sm:p-6"
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-heading text-surface-900 dark:text-white">Today's Appointments</h2>
+            <h2 className="text-heading text-surface-900 dark:text-white">
+              {t('todaysAppointments')}
+            </h2>
             <Link
               to="/appointments"
               className="text-sm text-primary-500 hover:text-primary-400 flex items-center gap-1 transition-colors focus-ring"
             >
-              View all <ArrowRight className="w-4 h-4" aria-hidden />
+              {t('viewAll')} <ArrowRight className="w-4 h-4" aria-hidden />
             </Link>
           </div>
 
           <div className="flex flex-wrap gap-3 mb-5">
-            <StatusBadge label="Waiting" count={waitingCount} color="amber" />
-            <StatusBadge label="Consulting" count={consultingCount} color="blue" />
-            <StatusBadge label="Completed" count={completedCount} color="green" />
+            <StatusBadge label={t('waiting')} count={waitingCount} color="amber" />
+            <StatusBadge label={t('consulting')} count={consultingCount} color="blue" />
+            <StatusBadge label={t('completed')} count={completedCount} color="green" />
           </div>
 
           {apptsLoading ? (
@@ -348,12 +357,14 @@ export default function Dashboard() {
             className="card p-5 sm:p-6"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-heading text-surface-900 dark:text-white">Bed Status</h2>
+              <h2 className="text-heading text-surface-900 dark:text-white">
+                {t('bedStatus')}
+              </h2>
               <Link
                 to="/beds"
                 className="text-sm text-primary-500 hover:text-primary-400 flex items-center gap-1 transition-colors focus-ring"
               >
-                Manage <ArrowRight className="w-4 h-4" aria-hidden />
+                {t('manage')} <ArrowRight className="w-4 h-4" aria-hidden />
               </Link>
             </div>
 
@@ -371,9 +382,9 @@ export default function Dashboard() {
               </div>
             ) : bedStats ? (
               <div className="space-y-3">
-                <BedStatRow label="Available" count={bedStats.available} total={bedStats.total} color="green" />
-                <BedStatRow label="Occupied" count={bedStats.occupied} total={bedStats.total} color="red" />
-                <BedStatRow label="Under Cleaning" count={bedStats.cleaning} total={bedStats.total} color="amber" />
+                <BedStatRow label={t('available')} count={bedStats.available} total={bedStats.total} color="green" />
+                <BedStatRow label={t('occupied')} count={bedStats.occupied} total={bedStats.total} color="red" />
+                <BedStatRow label={t('underCleaning')} count={bedStats.cleaning} total={bedStats.total} color="amber" />
               </div>
             ) : (
               <EmptyState icon={Bed} title="Bed data unavailable" />
@@ -387,12 +398,14 @@ export default function Dashboard() {
             transition={{ delay: 0.5, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="card p-5 sm:p-6"
           >
-            <h2 className="text-heading text-surface-900 dark:text-white mb-4">Quick Actions</h2>
+            <h2 className="text-heading text-surface-900 dark:text-white mb-4">
+              {t('quickActions')}
+            </h2>
             <div className="grid grid-cols-2 gap-2">
-              <QuickAction to="/patients" icon={UserPlus} label="Register" />
-              <QuickAction to="/consultation" icon={Stethoscope} label="Consult" />
-              <QuickAction to="/queue" icon={Clock} label="Queue" />
-              <QuickAction to="/billing" icon={Receipt} label="Billing" />
+              <QuickAction to="/patients" icon={UserPlus} label={t('registerAction')} />
+              <QuickAction to="/consultation" icon={Stethoscope} label={t('consultAction')} />
+              <QuickAction to="/queue" icon={Clock} label={t('queueAction')} />
+              <QuickAction to="/billing" icon={Receipt} label={t('billingAction')} />
             </div>
           </motion.div>
 

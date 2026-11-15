@@ -4,9 +4,11 @@ import {
   getAppointmentsApi,
   createAppointmentApi,
   getPatientsApi,
+  getDoctorsApi,
 } from '@/api/api';
 import type { AppointmentStatus } from '@/types';
 import { useToast } from '@/context/ToastContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 import {
@@ -22,19 +24,20 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
-const statusLabels: Record<AppointmentStatus, string> = {
-  WAITING: 'Waiting',
-  IN_CONSULTATION: 'In Consultation',
-  COMPLETED: 'Completed',
-  CANCELLED: 'Cancelled',
-};
-
 export default function Appointments() {
   const { showToast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | ''>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+  const statusLabels: Record<AppointmentStatus, string> = {
+    WAITING: t('waiting'),
+    IN_CONSULTATION: t('consulting'),
+    COMPLETED: t('completed'),
+    CANCELLED: t('cancelled'),
+  };
 
   const { data: appointments, isLoading } = useQuery({
     queryKey: ['appointments'],
@@ -44,6 +47,11 @@ export default function Appointments() {
   const { data: patients } = useQuery({
     queryKey: ['patients-all'],
     queryFn: () => getPatientsApi(),
+  });
+
+  const { data: doctors } = useQuery({
+    queryKey: ['doctors-list'],
+    queryFn: getDoctorsApi,
   });
 
   const filtered = appointments?.filter(
@@ -67,9 +75,11 @@ export default function Appointments() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-display text-surface-900 dark:text-white">Appointments</h1>
+          <h1 className="text-display text-surface-900 dark:text-white">
+            {t('appointmentsPageTitle')}
+          </h1>
           <p className="text-body text-surface-500 dark:text-surface-400 mt-1">
-            Manage patient appointments and scheduling
+            {t('appointmentsPageSub')}
           </p>
         </div>
         <button
@@ -78,7 +88,7 @@ export default function Appointments() {
           style={{ minHeight: '44px' }}
         >
           <Plus className="w-5 h-5" aria-hidden="true" />
-          New Appointment
+          {t('newAppointmentBtn')}
         </button>
       </div>
 
@@ -270,28 +280,39 @@ export default function Appointments() {
           className="p-5 space-y-4"
         >
           <div>
-            <label htmlFor="apt-patient" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Patient</label>
+            <label htmlFor="apt-patient" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+              {t('patientNameLabel')} *
+            </label>
             <select id="apt-patient" name="patientId" required className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" style={{ minHeight: '44px' }}>
-              <option value="">Select patient</option>
+              <option value="">{t('selectPatientOption')}</option>
               {patients?.map((p) => (
-                <option key={p.id} value={p.id}>{p.fullName} ({p.uhid})</option>
+                <option key={p.id} value={p.id}>{p.fullName} ({p.uhid}) - {p.mobileNumber}</option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="apt-doctor" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Doctor</label>
-            <input id="apt-doctor" name="doctorId" type="text" required className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" placeholder="Doctor ID" style={{ minHeight: '44px' }} />
+            <label htmlFor="apt-doctor" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+              {t('selectDoctorOption')} *
+            </label>
+            <select id="apt-doctor" name="doctorId" required className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" style={{ minHeight: '44px' }}>
+              <option value="">{t('selectDoctorOption')}</option>
+              {doctors?.map((d) => (
+                <option key={d.id} value={d.id}>{d.fullName} ({d.specialization || 'Consultant'})</option>
+              ))}
+            </select>
           </div>
           <div>
-            <label htmlFor="apt-date" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Date & Time</label>
+            <label htmlFor="apt-date" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">
+              {t('appointmentDateTime')}
+            </label>
             <input id="apt-date" name="appointmentDate" type="datetime-local" className="w-full px-4 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A2F38] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus-ring" style={{ minHeight: '44px' }} />
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-2.5 rounded-xl border border-surface-200 dark:border-[#2A2F38] text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-white/5 font-medium transition-all focus-ring" style={{ minHeight: '44px' }}>
-              Cancel
+              {t('cancelBtn')}
             </button>
             <button type="submit" disabled={createMutation.isPending} className="flex-1 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:bg-primary-600/50 text-white rounded-xl font-medium transition-all shadow-lg shadow-primary-600/20 focus-ring" style={{ minHeight: '44px' }}>
-              {createMutation.isPending ? 'Creating...' : 'Create'}
+              {createMutation.isPending ? t('creatingAppointmentBtn') : t('scheduleAppointmentBtn')}
             </button>
           </div>
         </form>

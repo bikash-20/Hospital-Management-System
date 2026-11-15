@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getAppointmentsApi,
   getPrescriptionsByPatientApi,
@@ -25,6 +25,7 @@ import {
 
 export default function DoctorConsultation() {
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [diagnosis, setDiagnosis] = useState('');
   const [chiefComplaints, setChiefComplaints] = useState('');
@@ -50,12 +51,16 @@ export default function DoctorConsultation() {
     mutationFn: createPrescriptionApi,
     onSuccess: () => {
       setSaveSuccess(true);
+      showToast('Prescription saved and consultation completed', 'success');
+      queryClient.invalidateQueries({ queryKey: ['today-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['patient-prescriptions'] });
       setTimeout(() => setSaveSuccess(false), 3000);
       // Reset form
       setDiagnosis('');
       setChiefComplaints('');
       setMedicines([{ name: '', dosage: '', duration: '', frequency: '' }]);
       setLabOrders([]);
+      setSelectedAppointment(null);
     },
     onError: (error) => {
       showToast(extractErrorMessage(error, 'Failed to save prescription'), 'error');

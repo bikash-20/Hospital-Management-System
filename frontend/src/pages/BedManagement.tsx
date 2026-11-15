@@ -9,6 +9,7 @@ import {
 } from '@/api/api';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import type { Bed, BedStatus } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
@@ -36,6 +37,7 @@ const statusConfig: Record<BedStatus, { color: string; bg: string; border: strin
 export default function BedManagement() {
   const { showToast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -117,9 +119,11 @@ export default function BedManagement() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
       >
         <div>
-          <h1 className="text-display text-surface-900 dark:text-white">Bed Management</h1>
+          <h1 className="text-display text-surface-900 dark:text-white">
+            {t('bedManagementPageTitle')}
+          </h1>
           <p className="text-surface-500 dark:text-surface-400 mt-1">
-            Monitor and manage bed availability across all wards
+            {t('bedManagementPageSub')}
           </p>
         </div>
         {canManageBeds && (
@@ -129,9 +133,10 @@ export default function BedManagement() {
             onClick={() => setIsAddOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium shadow-sm focus-ring"
             data-testid="add-bed-button"
+            style={{ minHeight: '44px' }}
           >
             <Plus className="w-4 h-4" />
-            Add Bed
+            {t('addBedBtn')}
           </motion.button>
         )}
       </motion.div>
@@ -140,16 +145,16 @@ export default function BedManagement() {
       {bedStats && (
         <StaggerContainer className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <StaggerItem>
-            <StatCard icon={LayoutGrid} label="Total Beds" value={bedStats.total} color="surface" />
+            <StatCard icon={LayoutGrid} label={t('navBeds')} value={bedStats.total} color="surface" />
           </StaggerItem>
           <StaggerItem>
-            <StatCard icon={Check} label="Available" value={bedStats.available} color="green" />
+            <StatCard icon={Check} label={t('available')} value={bedStats.available} color="green" />
           </StaggerItem>
           <StaggerItem>
-            <StatCard icon={X} label="Occupied" value={bedStats.occupied} color="red" />
+            <StatCard icon={X} label={t('occupied')} value={bedStats.occupied} color="red" />
           </StaggerItem>
           <StaggerItem>
-            <StatCard icon={Wind} label="Under Cleaning" value={bedStats.cleaning} color="amber" />
+            <StatCard icon={Wind} label={t('underCleaning')} value={bedStats.cleaning} color="amber" />
           </StaggerItem>
         </StaggerContainer>
       )}
