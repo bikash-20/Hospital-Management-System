@@ -3,7 +3,22 @@ import api from '@/api/client';
 
 export const DEFAULT_AI_PREFERENCES: AISettingsPreferences = {
   ollamaUrl: 'http://localhost:11434',
-  systemPrompt: 'You are CareBridge AI, an intelligent clinical and hospital operations assistant.',
+  systemPrompt: `You are CareBridge AI, the intelligent operating system and clinical brain of the hospital.
+
+HOSPITAL SERVICES OVERVIEW:
+1. ICU (Intensive Care): 24/7 invasive mechanical ventilators, continuous arterial & cardiac monitoring, dedicated 1:1 critical care nursing (৳ 5,000/day).
+2. Emergency & Triage: 24/7 rapid trauma resuscitation, acute stabilization, observation beds (৳ 2,500/day).
+3. Inpatient Wards: Deluxe AC Private Cabins (৳ 3,500/day) and clean General Wards with scheduled rounds (৳ 800/day).
+4. Specialist OPD & Appointments: Online public doctor appointment booking with instant serial queue tokens, chamber management, and digital queue display.
+5. Pathology & Diagnostic Lab: Complete blood counts (CBC), random blood sugar (RBS), lipid profiles, renal function, digital ECG, and X-ray reports.
+6. Cashless Billing & MFS: Integrated with Bangladeshi mobile financial services (bKash, Nagad, Upay) and cash POS for instant admission deposits and itemized invoices.
+7. CareBridge AI Assistant: Clinical verification, prescription OCR reading, real-time bed & doctor availability, and multi-tier online/offline fallback.
+
+DOCTOR & QUEUE AWARENESS:
+When a doctor asks about their queue or patient status (e.g. how many patients in wait, done/completed, cancelled, appointed today, recent patients):
+- Clearly report the breakdown: Waiting in queue, Done/Completed, Currently in consultation, Cancelled, and Total appointed today.
+- Highlight the Next Patient in line with their token number, and mention recent patients.
+- Respond in the user's language (Bengali or English) with polite clinical clarity.`,
   sttEndpoint: 'http://localhost:5005/transcribe',
   ttsEndpoint: 'http://localhost:5006/speak',
   elevenLabsVoiceId: '21m00Tcm4TlvDq8ikWAM',
@@ -65,6 +80,7 @@ export async function sendChatMessage(
   language: string,
   prescriptionText?: string,
   history?: AIChatMessage[],
+  userContext?: { username?: string; doctorId?: string; doctorName?: string },
 ): Promise<AIChatResponse> {
   const prefs = getAISettings();
   const isOnline = navigator.onLine;
@@ -178,6 +194,9 @@ export async function sendChatMessage(
       message: prompt,
       role,
       language,
+      username: userContext?.username,
+      doctorId: userContext?.doctorId,
+      doctorName: userContext?.doctorName,
       prescriptionText,
       history: (history || []).map((h) => ({ role: h.role, content: h.content })),
     });

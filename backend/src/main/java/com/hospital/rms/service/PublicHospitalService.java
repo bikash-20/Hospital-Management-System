@@ -2,18 +2,23 @@ package com.hospital.rms.service;
 
 import com.hospital.rms.dto.BedBookingRequest;
 import com.hospital.rms.dto.BedBookingResponse;
+import com.hospital.rms.dto.PublicAppointmentRequest;
+import com.hospital.rms.dto.PublicAppointmentResponse;
 import com.hospital.rms.dto.SeatAvailabilityResponse;
+import com.hospital.rms.entity.Appointment;
 import com.hospital.rms.entity.AuditLog;
 import com.hospital.rms.entity.Bed;
 import com.hospital.rms.entity.BedBooking;
 import com.hospital.rms.entity.Billing;
 import com.hospital.rms.entity.Patient;
 import com.hospital.rms.entity.User;
+import com.hospital.rms.enums.AppointmentStatus;
 import com.hospital.rms.enums.BedStatus;
 import com.hospital.rms.enums.BedType;
 import com.hospital.rms.enums.BookingStatus;
 import com.hospital.rms.enums.PaymentStatus;
 import com.hospital.rms.enums.Role;
+import com.hospital.rms.repository.AppointmentRepository;
 import com.hospital.rms.repository.AuditLogRepository;
 import com.hospital.rms.repository.BedBookingRepository;
 import com.hospital.rms.repository.BedRepository;
@@ -22,11 +27,14 @@ import com.hospital.rms.repository.PatientRepository;
 import com.hospital.rms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -45,6 +53,8 @@ public class PublicHospitalService {
     private final SequenceService sequenceService;
     private final BillingRepository billingRepository;
     private final AuditLogRepository auditLogRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional(readOnly = true)
     public SeatAvailabilityResponse getSeatAvailability() {
@@ -240,6 +250,114 @@ public class PublicHospitalService {
             case CABIN -> BigDecimal.valueOf(3500.00);
             default -> BigDecimal.valueOf(800.00);
         };
+    }
+
+    @Transactional
+    public PublicAppointmentResponse createAppointment(PublicAppointmentRequest request) {
+        String cleanPhone = request.getPatientPhone() != null
+            ? request.getPatientPhone().replaceAll("[\\s-]+", "")
+            : "";
+
+        // Check if patient exists by phone or auto-register new patient in hospital system
+        Optional<Patient> existingPatient = patientRepository.findByMobileNumber(cleanPhone).stream().findFirst();
+        Patient patient;
+        if (existingPatient.isPresent()) {
+            patient = existingPatient.get();
+        } else {
+            String uhid = generateUhid();
+            int age = request.getPatientAge() > 0 ? request.getPatientAge() : 30;
+            LocalDate estimatedDob = LocalDate.now().minusYears(age);
+            patient = Patient.builder()
+                .uhid(uhid)
+                .fullName(request.getPatientName() != null && !request.getPatientName().isBlank() ? request.getPatientName().trim() : "OPD Patient")
+                .mobileNumber(cleanPhone)
+                .dob(estimatedDob)
+                .gender(request.getPatientGender() != null ? request.getPatientGender().toUpperCase() : "MALE")
+                .nid(request.getPatientNid() != null && !request.getPatientNid().isBlank() ? request.getPatientNid().trim() : null)
+                .address("Online Doctor Appointment")
+                .build();
+            patient = patientRepository.save(patient);
+            log.info("Auto-registered new patient {} ({}) from public appointment portal", patient.getFullName(), uhid);
+        }
+
+        // Verify selected doctor
+        User doctor = userRepository.findById(request.getDoctorId())
+            .orElseThrow(() -> new IllegalArgumentException("Doctor not found: " + request.getDoctorId()));
+
+        // Token allocation: next sequential token for this doctor on the appointment date
+        LocalDate day = request.getAppointmentDate().toLocalDate();
+        LocalDateTime dayStart = day.atStartOfDay();
+        LocalDateTime dayEnd = day.atTime(LocalTime.MAX);
+
+        int maxToken = appointmentRepository.findMaxTokenForDoctorOnDay(doctor.getId(), dayStart, dayEnd);
+        String sequenceKey = "appointment:" + doctor.getId() + ":" + day;
+        long nextToken = sequenceService.next(sequenceKey, maxToken);
+
+        Appointment appointment = Appointment.builder()
+            .patient(patient)
+            .doctor(doctor)
+            .appointmentDate(request.getAppointmentDate())
+            .tokenNumber(Math.toIntExact(nextToken))
+            .status(AppointmentStatus.WAITING)
+            .build();
+
+        Appointment saved = appointmentRepository.save(appointment);
+
+        // Broadcast real-time queue update to doctor dashboard via WebSocket
+        try {
+            messagingTemplate.convertAndSend("/topic/queue/" + doctor.getId(),
+                appointmentRepository.findByDoctorIdAndAppointmentDateBetween(doctor.getId(), dayStart, dayEnd));
+        } catch (Exception ex) {
+            log.warn("Could not broadcast appointment WebSocket update: {}", ex.getMessage());
+        }
+
+        // AuditLog
+        try {
+            AuditLog audit = AuditLog.builder()
+                .entityName("Appointment")
+                .operation("CREATE")
+                .entityId(saved.getId().toString())
+                .oldValues(null)
+                .newValues(String.format("Public Appointment: %s booked with Dr. %s (Token #%d)",
+                    patient.getFullName(), doctor.getFullName(), saved.getTokenNumber()))
+                .userId("PUBLIC_GUEST")
+                .userName("CareBridge Public Portal")
+                .build();
+            auditLogRepository.save(audit);
+        } catch (Exception ex) {
+            log.warn("Could not write audit log for appointment: {}", ex.getMessage());
+        }
+
+        return PublicAppointmentResponse.builder()
+            .id(saved.getId())
+            .tokenNumber(saved.getTokenNumber())
+            .appointmentDate(saved.getAppointmentDate())
+            .status(saved.getStatus())
+            .doctorId(doctor.getId())
+            .doctorName(doctor.getFullName())
+            .patientId(patient.getId())
+            .patientUhid(patient.getUhid())
+            .patientName(patient.getFullName())
+            .patientPhone(cleanPhone)
+            .patientAge(request.getPatientAge())
+            .patientGender(patient.getGender())
+            .symptoms(request.getSymptoms())
+            .createdDate(saved.getCreatedDate())
+            .qrData("CAREBRIDGE-APPT:" + saved.getId() + ":" + doctor.getId() + ":" + saved.getTokenNumber())
+            .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SeatAvailabilityResponse.DoctorInfo> getActiveDoctors() {
+        return userRepository.findByRole(Role.DOCTOR).stream()
+            .map(d -> SeatAvailabilityResponse.DoctorInfo.builder()
+                .id(d.getId().toString())
+                .name(d.getFullName())
+                .email(d.getEmail())
+                .specialization("General Medicine & Clinical Specialist")
+                .available(d.isEnabled())
+                .build())
+            .toList();
     }
 
     private BedBookingResponse toResponse(BedBooking b) {

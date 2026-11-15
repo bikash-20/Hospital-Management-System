@@ -311,3 +311,33 @@ export interface PrescriptionExtractedData {
   hashKey?: string;
 }
 
+export interface PublicAppointmentRequest {
+  patientName: string;
+  patientPhone: string;
+  patientAge: number;
+  patientGender: string;
+  patientNid?: string;
+  doctorId: string;
+  appointmentDate: string; // ISO string
+  symptoms?: string;
+}
+
+export interface PublicAppointmentResponse {
+  id: string;
+  tokenNumber: number;
+  appointmentDate: string;
+  status: AppointmentStatus;
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  patientUhid: string;
+  patientName: string;
+  patientPhone: string;
+  patientAge: number;
+  patientGender: string;
+  symptoms?: string;
+  createdDate: string;
+  qrData: string;
+}
+
+

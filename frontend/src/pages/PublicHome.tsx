@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { getSeatAvailabilityApi } from '@/api/api';
 import type { BedType } from '@/types';
 import SeatBookingModal from '@/components/booking/SeatBookingModal';
+import DoctorAppointmentModal from '@/components/booking/DoctorAppointmentModal';
 import CareBridgeAIChat from '@/components/ai/CareBridgeAIChat';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -21,6 +22,8 @@ import {
   LogIn,
   Languages,
   Download,
+  Stethoscope,
+  Calendar,
 } from 'lucide-react';
 
 export default function PublicHome() {
@@ -29,6 +32,8 @@ export default function PublicHome() {
 
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedBedType, setSelectedBedType] = useState<BedType>('ICU');
+  const [doctorApptModalOpen, setDoctorApptModalOpen] = useState(false);
+  const [selectedDoctorForModal, setSelectedDoctorForModal] = useState<string>('');
   const [aiChatOpen, setAiChatOpen] = useState(false);
 
   const { data: seatData } = useQuery({
@@ -122,6 +127,20 @@ export default function PublicHome() {
               <span>{isBengali ? 'অ্যাপ ডাউনলোড' : 'Install App'}</span>
             </button>
 
+            {/* Book Doctor Appointment Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDoctorForModal('');
+                setDoctorApptModalOpen(true);
+              }}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/25 hover:bg-blue-500/20 transition-all shadow-sm"
+              title="Book Doctor Serial"
+            >
+              <Stethoscope className="w-3.5 h-3.5" />
+              <span>{isBengali ? 'ডাক্তার সিরিয়াল' : 'Book Doctor'}</span>
+            </button>
+
             {/* Language Switcher */}
             <button
               type="button"
@@ -197,6 +216,18 @@ export default function PublicHome() {
             >
               <HeartPulse className="w-4 h-4" />
               <span>{t('ctaBookBed')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDoctorForModal('');
+                setDoctorApptModalOpen(true);
+              }}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-xl shadow-blue-600/25 flex items-center gap-2 transition-all"
+            >
+              <Calendar className="w-4 h-4" />
+              <span>{isBengali ? 'ডাক্তার অ্যাপয়েন্টমেন্ট নিন' : 'Book Doctor Appointment'}</span>
             </button>
 
             <button
@@ -295,6 +326,84 @@ export default function PublicHome() {
         </div>
       </section>
 
+      {/* Specialist Doctors & Chamber Queue Section */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200 dark:border-[#21262D]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-8">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-surface-900 dark:text-white flex items-center gap-2">
+              <Stethoscope className="w-5 h-5 text-blue-500" />
+              {isBengali ? 'বিশেষজ্ঞ চিকিৎসক চেম্বার ও ওপিডি সিরিয়াল' : 'Specialist Doctor Chambers & OPD Queue'}
+            </h2>
+            <p className="text-xs sm:text-sm text-surface-500 dark:text-surface-400 mt-1">
+              {isBengali
+                ? 'হাসপাতালের বিশেষজ্ঞ ডাক্তার নির্বাচন করে অনলাইনে সরাসরি চেম্বার সিরিয়াল টোকেন নিন'
+                : 'Select a consulting specialist and book an instant queue serial token online'}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedDoctorForModal('');
+              setDoctorApptModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+          >
+            <Calendar className="w-4 h-4" />
+            <span>{isBengali ? 'নতুন সিরিয়াল নিন' : 'Book New Serial'}</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {(seatData?.activeDoctors || []).map((doc) => (
+            <div
+              key={doc.id}
+              className="bg-white dark:bg-[#161B22] border border-surface-200 dark:border-[#21262D] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                    <Stethoscope className="w-5 h-5" />
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    {isBengali ? 'চেম্বার খোলা' : 'Chamber Open'}
+                  </span>
+                </div>
+
+                <h3 className="font-bold text-base text-surface-900 dark:text-white">
+                  {doc.name}
+                </h3>
+                <p className="text-xs text-primary-600 dark:text-primary-400 font-medium mt-0.5">
+                  {doc.specialization}
+                </p>
+                <p className="text-xs text-surface-500 mt-2">
+                  {doc.email}
+                </p>
+              </div>
+
+              <div className="pt-4 mt-4 border-t border-surface-100 dark:border-[#21262D] flex items-center justify-between">
+                <div className="text-xs text-surface-500 flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-blue-500" />
+                  <span>{isBengali ? 'প্রতিদিন ১০:০০ - ০৮:০০' : 'Daily 10:00 - 08:00'}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDoctorForModal(doc.id);
+                    setDoctorApptModalOpen(true);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1"
+                >
+                  <span>{isBengali ? 'সিরিয়াল নিন' : 'Book Serial'}</span>
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Feature Highlights: Free AI Health Services & Hospital Management */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200 dark:border-[#21262D]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -352,6 +461,12 @@ export default function PublicHome() {
         isOpen={bookingModalOpen}
         onClose={() => setBookingModalOpen(false)}
         defaultBedType={selectedBedType}
+      />
+
+      <DoctorAppointmentModal
+        isOpen={doctorApptModalOpen}
+        onClose={() => setDoctorApptModalOpen(false)}
+        defaultDoctorId={selectedDoctorForModal}
       />
 
       <CareBridgeAIChat

@@ -16,6 +16,9 @@ public class AIChatRequest {
     private String message;
     private String role; // ADMIN, CASHIER, DOCTOR, RECEPTIONIST, PATIENT, GUEST
     private String language; // en, bn
+    private String username;
+    private String doctorId;
+    private String doctorName;
     private String currentRoute;
     private String prescriptionText;
     private List<ChatMessage> history;

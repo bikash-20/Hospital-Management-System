@@ -164,7 +164,11 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
         ? `Patient: ${scannedRx.patientName}\nMedicines: ${scannedRx.medicines.map((m) => m.name).join(', ')}\nAdvice: ${scannedRx.advice}`
         : undefined;
 
-      const res = await sendChatMessage(promptToSend, role, language, prescText, messages);
+      const res = await sendChatMessage(promptToSend, role, language, prescText, messages, {
+        username: user?.username,
+        doctorId: user?.id,
+        doctorName: user?.fullName,
+      });
 
       const assistantMsgId = `msg-${Date.now() + 1}`;
       const assistantMsg: AIChatMessage = {

@@ -16,6 +16,8 @@ import type {
   SeatAvailabilityResponse,
   BedBookingRequest,
   BedBookingResponse,
+  PublicAppointmentRequest,
+  PublicAppointmentResponse,
   AIChatResponse,
 } from '@/types';
 
@@ -541,6 +543,16 @@ export async function getBedBookingApi(reference: string): Promise<BedBookingRes
 
 export async function getAllBedBookingsApi(): Promise<BedBookingResponse[]> {
   const { data } = await api.get<BedBookingResponse[]>('/public/admin/bookings');
+  return data;
+}
+
+export async function createPublicAppointmentApi(req: PublicAppointmentRequest): Promise<PublicAppointmentResponse> {
+  const { data } = await api.post<PublicAppointmentResponse>('/public/appointments', req);
+  return data;
+}
+
+export async function getPublicDoctorsApi(): Promise<SeatAvailabilityResponse['activeDoctors']> {
+  const { data } = await api.get<SeatAvailabilityResponse['activeDoctors']>('/public/doctors');
   return data;
 }
 

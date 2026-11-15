@@ -73,8 +73,8 @@ public class AIService {
         String role = request.getRole() != null ? request.getRole().toUpperCase() : "GUEST";
         boolean isBengali = "bn".equalsIgnoreCase(request.getLanguage());
 
-        // Gather real-time metrics for grounding
-        Map<String, Object> liveMetrics = gatherLiveMetrics(role);
+        // Gather real-time metrics for grounding (including queue, doctors, beds, billing)
+        Map<String, Object> liveMetrics = gatherLiveMetrics(request);
 
         // Check if query is about prescription analysis or medication
         String prescText = request.getPrescriptionText() != null ? request.getPrescriptionText().toUpperCase() : "";
@@ -102,9 +102,11 @@ public class AIService {
             .build();
     }
 
-    private Map<String, Object> gatherLiveMetrics(String role) {
+    private Map<String, Object> gatherLiveMetrics(AIChatRequest request) {
         Map<String, Object> metrics = new HashMap<>();
+        String role = request.getRole() != null ? request.getRole().toUpperCase() : "GUEST";
         try {
+            // Live Bed Availability
             SeatAvailabilityResponse availability = publicHospitalService.getSeatAvailability();
             metrics.put("icuAvailable", availability.getIcu().getAvailable());
             metrics.put("icuTotal", availability.getIcu().getTotal());
@@ -116,12 +118,112 @@ public class AIService {
             metrics.put("cabinTotal", availability.getCabin().getTotal());
             metrics.put("totalAvailableBeds", availability.getTotalAvailable());
 
-            if ("ADMIN".equals(role) || "CASHIER".equals(role)) {
-                DashboardStatsResponse stats = dashboardService.getStats();
-                metrics.put("revenueToday", stats.getRevenue());
-                metrics.put("pendingBills", stats.getPendingBills());
-                metrics.put("patientsToday", stats.getPatientsToday());
-                metrics.put("appointmentsToday", stats.getAppointmentsToday());
+            // General Dashboard Stats
+            DashboardStatsResponse stats = dashboardService.getStats();
+            metrics.put("revenueToday", stats.getRevenue());
+            metrics.put("pendingBills", stats.getPendingBills());
+            metrics.put("patientsToday", stats.getPatientsToday());
+            metrics.put("appointmentsToday", stats.getAppointmentsToday());
+
+            // Live OPD Appointments & Queue Breakdown (Today)
+            LocalDate today = LocalDate.now(HOSPITAL_ZONE);
+            LocalDateTime dayStart = today.atStartOfDay();
+            LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
+            List<Appointment> todayAppts = appointmentRepository.findByAppointmentDateBetween(dayStart, dayEnd);
+
+            long totalAppointed = todayAppts.size();
+            long waitingCount = todayAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.WAITING).count();
+            long consultingCount = todayAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.IN_CONSULTATION).count();
+            long completedCount = todayAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.COMPLETED).count();
+            long cancelledCount = todayAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.CANCELLED).count();
+
+            metrics.put("totalAppointedToday", totalAppointed);
+            metrics.put("waitingCount", waitingCount);
+            metrics.put("consultingCount", consultingCount);
+            metrics.put("completedCount", completedCount);
+            metrics.put("cancelledCount", cancelledCount);
+
+            // Recent hospital patients summary
+            List<String> recentPatientSummaries = todayAppts.stream()
+                .sorted((a, b) -> Integer.compare(
+                    b.getTokenNumber() != null ? b.getTokenNumber() : 0,
+                    a.getTokenNumber() != null ? a.getTokenNumber() : 0
+                ))
+                .limit(5)
+                .map(a -> String.format("Token #%d: %s (%s) — Dr. %s",
+                    a.getTokenNumber() != null ? a.getTokenNumber() : 0,
+                    a.getPatient() != null ? a.getPatient().getFullName() : "Patient",
+                    a.getStatus().name(),
+                    a.getDoctor() != null ? a.getDoctor().getFullName() : "Consultant"))
+                .toList();
+            metrics.put("recentPatients", recentPatientSummaries);
+
+            // Doctor-specific Queue Matching
+            User matchedDoctor = null;
+            if (request.getDoctorId() != null && !request.getDoctorId().isBlank()) {
+                try {
+                    matchedDoctor = userRepository.findById(UUID.fromString(request.getDoctorId())).orElse(null);
+                } catch (Exception ignored) {}
+            }
+            if (matchedDoctor == null && request.getUsername() != null && !request.getUsername().isBlank()) {
+                matchedDoctor = userRepository.findByUsername(request.getUsername()).filter(u -> u.getRole() == Role.DOCTOR).orElse(null);
+            }
+            if (matchedDoctor == null && "DOCTOR".equals(role)) {
+                if (request.getDoctorName() != null && !request.getDoctorName().isBlank()) {
+                    String dName = request.getDoctorName().toLowerCase();
+                    matchedDoctor = userRepository.findByRole(Role.DOCTOR).stream()
+                        .filter(d -> d.getFullName().toLowerCase().contains(dName))
+                        .findFirst().orElse(null);
+                }
+                if (matchedDoctor == null) {
+                    matchedDoctor = userRepository.findByRole(Role.DOCTOR).stream().findFirst().orElse(null);
+                }
+            }
+
+            if (matchedDoctor != null) {
+                final UUID docId = matchedDoctor.getId();
+                metrics.put("doctorName", matchedDoctor.getFullName());
+                List<Appointment> docAppts = todayAppts.stream()
+                    .filter(a -> a.getDoctor() != null && docId.equals(a.getDoctor().getId()))
+                    .sorted(Comparator.comparingInt(a -> a.getTokenNumber() != null ? a.getTokenNumber() : 0))
+                    .toList();
+
+                long docTotal = docAppts.size();
+                long docWaiting = docAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.WAITING).count();
+                long docConsulting = docAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.IN_CONSULTATION).count();
+                long docCompleted = docAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.COMPLETED).count();
+                long docCancelled = docAppts.stream().filter(a -> a.getStatus() == AppointmentStatus.CANCELLED).count();
+
+                metrics.put("docTotal", docTotal);
+                metrics.put("docWaiting", docWaiting);
+                metrics.put("docConsulting", docConsulting);
+                metrics.put("docCompleted", docCompleted);
+                metrics.put("docCancelled", docCancelled);
+
+                // Next patient in line
+                Optional<Appointment> nextApt = docAppts.stream()
+                    .filter(a -> a.getStatus() == AppointmentStatus.WAITING)
+                    .findFirst();
+                nextApt.ifPresent(a -> metrics.put("docNextPatient", String.format("Token #%d: %s (UHID: %s)",
+                    a.getTokenNumber(),
+                    a.getPatient() != null ? a.getPatient().getFullName() : "Patient",
+                    a.getPatient() != null ? a.getPatient().getUhid() : "N/A")));
+
+                // Recently consulted patient
+                Optional<Appointment> recentCompletedApt = docAppts.stream()
+                    .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
+                    .reduce((first, second) -> second);
+                recentCompletedApt.ifPresent(a -> metrics.put("docRecentCompleted", String.format("Token #%d: %s",
+                    a.getTokenNumber(),
+                    a.getPatient() != null ? a.getPatient().getFullName() : "Patient")));
+
+                List<String> docQueueList = docAppts.stream()
+                    .map(a -> String.format("Token #%d: %s [%s]",
+                        a.getTokenNumber(),
+                        a.getPatient() != null ? a.getPatient().getFullName() : "Patient",
+                        a.getStatus().name()))
+                    .toList();
+                metrics.put("docQueueList", docQueueList);
             }
         } catch (Exception e) {
             log.warn("Could not retrieve all live metrics for AI context: {}", e.getMessage());
@@ -161,7 +263,126 @@ public class AIService {
             }
         }
 
-        // 2. Cashier / Financial queries
+        // 2. Queue, Waiting, Completed, Cancelled, Appointed, Recent Patient Inquiries
+        if (qLower.contains("wait") || qLower.contains("done") || qLower.contains("cancel") || qLower.contains("appoint") || qLower.contains("recent") || qLower.contains("queue") || qLower.contains("serial") || qLower.contains("patient") || qLower.contains("রোগী") || qLower.contains("সিরিয়াল") || qLower.contains("অপেক্ষমান") || qLower.contains("বাতিল") || qLower.contains("শেষ")) {
+            // Check if asking about a doctor's specific queue
+            if (metrics.containsKey("doctorName")) {
+                String docName = (String) metrics.get("doctorName");
+                long docWaiting = ((Number) metrics.getOrDefault("docWaiting", 0)).longValue();
+                long docCompleted = ((Number) metrics.getOrDefault("docCompleted", 0)).longValue();
+                long docConsulting = ((Number) metrics.getOrDefault("docConsulting", 0)).longValue();
+                long docCancelled = ((Number) metrics.getOrDefault("docCancelled", 0)).longValue();
+                long docTotal = ((Number) metrics.getOrDefault("docTotal", 0)).longValue();
+                String nextPatient = (String) metrics.getOrDefault("docNextPatient", isBengali ? "লাইনে কোনো রোগী নেই" : "No patient waiting");
+                String recentCompleted = (String) metrics.getOrDefault("docRecentCompleted", isBengali ? "আজ এখনও কোনো রোগী শেষ হয়নি" : "None yet");
+                List<?> queueList = (List<?>) metrics.getOrDefault("docQueueList", List.of());
+
+                StringBuilder queueSb = new StringBuilder();
+                for (Object item : queueList) {
+                    queueSb.append("• ").append(item).append("\n");
+                }
+
+                if (isBengali) {
+                    return String.format(
+                        "👨‍⚕️ **ডাক্তার %s — আপনার আজকের লাইভ সিরিয়াল ও ওপিডি রোগীর পরিসংখ্যান:**\n\n" +
+                        "• **অপেক্ষমান রোগী (In Wait):** %d জন\n" +
+                        "• **পরামর্শ সম্পন্ন (Done / Completed):** %d জন\n" +
+                        "• **চলমান পরামর্শ (In Consultation):** %d জন\n" +
+                        "• **বাতিল অ্যাপয়েন্টমেন্ট (Cancelled):** %d জন\n" +
+                        "• **আজকের মোট নির্ধারিত রোগী (Total Appointed):** %d জন\n\n" +
+                        "🎯 **পরবর্তী সিরিয়াল (Next in line):** %s\n" +
+                        "✅ **সর্বশেষ সম্পন্ন রোগী:** %s\n\n" +
+                        (queueSb.length() > 0 ? "📋 **রোগীদের সিরিয়াল ক্রম:**\n" + queueSb : ""),
+                        docName, docWaiting, docCompleted, docConsulting, docCancelled, docTotal, nextPatient, recentCompleted);
+                } else {
+                    return String.format(
+                        "👨‍⚕️ **Dr. %s — Live Patient Queue & Consultation Status (Today):**\n\n" +
+                        "• **Patients in Wait (Waiting):** %d patients\n" +
+                        "• **Consultations Done (Completed):** %d patients\n" +
+                        "• **Currently in Consultation:** %d patient(s)\n" +
+                        "• **Cancelled Appointments:** %d patient(s)\n" +
+                        "• **Total Appointed Today:** %d patients\n\n" +
+                        "🎯 **Next Patient in Line:** %s\n" +
+                        "✅ **Recently Completed Patient:** %s\n\n" +
+                        (queueSb.length() > 0 ? "📋 **Queue Token Sequence:**\n" + queueSb : ""),
+                        docName, docWaiting, docCompleted, docConsulting, docCancelled, docTotal, nextPatient, recentCompleted);
+                }
+            } else {
+                // Hospital-wide appointment & queue breakdown
+                long waiting = ((Number) metrics.getOrDefault("waitingCount", 0)).longValue();
+                long consulting = ((Number) metrics.getOrDefault("consultingCount", 0)).longValue();
+                long completed = ((Number) metrics.getOrDefault("completedCount", 0)).longValue();
+                long cancelled = ((Number) metrics.getOrDefault("cancelledCount", 0)).longValue();
+                long total = ((Number) metrics.getOrDefault("totalAppointedToday", 0)).longValue();
+                List<?> recentList = (List<?>) metrics.getOrDefault("recentPatients", List.of());
+
+                StringBuilder recentSb = new StringBuilder();
+                for (Object item : recentList) {
+                    recentSb.append("• ").append(item).append("\n");
+                }
+
+                if (isBengali) {
+                    return String.format(
+                        "⏱️ **হাসপাতাল ওপিডি লাইভ সিরিয়াল ও রোগী পরিসংখ্যান (আজকের দিন):**\n\n" +
+                        "• **অপেক্ষমান রোগী (In Wait):** %d জন\n" +
+                        "• **পরামর্শ সম্পন্ন (Done / Completed):** %d জন\n" +
+                        "• **পরামর্শরত (In Consultation):** %d জন\n" +
+                        "• **বাতিল অ্যাপয়েন্টমেন্ট (Cancelled):** %d জন\n" +
+                        "• **মোট নির্ধারিত অ্যাপয়েন্টমেন্ট (Total Appointed Today):** %d জন\n\n" +
+                        (recentSb.length() > 0 ? "📋 **সাম্প্রতিক রোগী (Recent Patients):**\n" + recentSb : ""),
+                        waiting, completed, consulting, cancelled, total);
+                } else {
+                    return String.format(
+                        "⏱️ **Hospital-Wide Live OPD Queue & Patient Status (Today):**\n\n" +
+                        "• **Patients in Wait (Waiting):** %d patients\n" +
+                        "• **Consultations Done (Completed):** %d patients\n" +
+                        "• **Currently In Consultation:** %d patients\n" +
+                        "• **Cancelled Appointments:** %d patients\n" +
+                        "• **Total Appointed Today:** %d patients\n\n" +
+                        (recentSb.length() > 0 ? "📋 **Recent Patients in Queue:**\n" + recentSb : ""),
+                        waiting, completed, consulting, cancelled, total);
+                }
+            }
+        }
+
+        // 3. Hospital Services & Overview inquiry
+        if (qLower.contains("service") || qLower.contains("facility") || qLower.contains("facilities") || qLower.contains("department") || qLower.contains("what can you do") || qLower.contains("সেবা") || qLower.contains("সার্ভিস") || qLower.contains("সুবিধা") || qLower.contains("বিভাগ")) {
+            if (isBengali) {
+                return "🏥 **কেয়ারব্রিজ এআই — সম্পূর্ণ হাসপাতাল ও স্বাস্থ্যসেবা পোর্টফোলিও:**\n\n" +
+                    "১. **আইসিইউ ও ক্রিটিক্যাল কেয়ার (ICU):**\n" +
+                    "   • ইনভেসিভ ভেন্টিলেটর, আর্টারিয়াল মনিটরিং ও সার্বক্ষণিক কার্ডিয়াক সাপোর্ট (ভাড়া: ৳ ৫,০০০/দিন)।\n\n" +
+                    "২. **জরুরি বিভাগ ও ট্রমা ট্রায়াজ (Emergency):**\n" +
+                    "   • ২৪/৭ তাৎক্ষণিক ট্রমা রেসাসিটেশন ও পর্যবেক্ষণ বেড (ভাড়া: ৳ ২,৫০০/দিন)।\n\n" +
+                    "৩. **ইনপেশেন্ট কেবিন ও সাধারণ ওয়ার্ড:**\n" +
+                    "   • শীতাতপ নিয়ন্ত্রিত প্রাইভেট কেবিন (৳ ৩,৫০০/দিন) ও পরিষ্কার জেনারেল ওয়ার্ড (৳ ৮০০/দিন)।\n\n" +
+                    "৪. **বিশেষজ্ঞ ডাক্তার অ্যাপয়েন্টমেন্ট ও ওপিডি:**\n" +
+                    "   • পাবলিক পোর্টাল থেকে সরাসরি বিশেষজ্ঞ ডাক্তার নির্বাচন ও ডিজিটাল টোকেনসহ তাৎক্ষণিক সিরিয়াল বুকিং।\n\n" +
+                    "৫. **প্যাথলজি ও ডায়াগনস্টিক ল্যাব:**\n" +
+                    "   • রক্ত, প্রস্রাব, বায়োকেমিস্ট্রি, ইসিজি ও এক্স-রে ডিজিটাল রিপোর্ট অটোমেশন।\n\n" +
+                    "৬. **ডিজিটাল বিলিং ও এমএফএস পেমেন্ট:**\n" +
+                    "   • বিকাশ (bKash), নগদ (Nagad), উপায় (Upay) ও ক্যাশ সমন্বিত স্বয়ংক্রিয় ভাউচার।\n\n" +
+                    "৭. **কেয়ারব্রিজ এআই ব্রেইন:**\n" +
+                    "   • প্রেসক্রিপশন স্ক্যানার (OCR), ক্লিনিকাল ভেরিফিকেশন (RAG) ও অফলাইন ওলামা (Ollama) ব্যাকআপ।";
+            } else {
+                return "🏥 **CareBridge AI — Comprehensive Hospital Services & Capabilities:**\n\n" +
+                    "1. **Intensive Care Unit (ICU):**\n" +
+                    "   • 24/7 invasive ventilator, arterial line monitoring & critical care nursing (৳ 5,000/day).\n\n" +
+                    "2. **Emergency & Trauma Stabilization:**\n" +
+                    "   • Rapid acute resuscitation and 24/7 emergency triage beds (৳ 2,500/day).\n\n" +
+                    "3. **Inpatient Cabins & General Ward:**\n" +
+                    "   • Deluxe private AC cabins (৳ 3,500/day) and hygienic general ward beds (৳ 800/day).\n\n" +
+                    "4. **Outpatient (OPD) & Public Doctor Appointments:**\n" +
+                    "   • Real-time online specialist appointment reservations with instant digital token generation.\n\n" +
+                    "5. **Pathology & Diagnostic Laboratory:**\n" +
+                    "   • Hematology, Biochemistry, ECG, and Radiology digital lab reporting.\n\n" +
+                    "6. **Billing, POS & MFS Integration:**\n" +
+                    "   • Instant cashless mobile finance via bKash, Nagad, Upay, credit cards, and cash desk.\n\n" +
+                    "7. **CareBridge AI Clinical Assistant:**\n" +
+                    "   • Dual online/offline engine, prescription OCR, medication safety RAG, and queue intelligence.";
+            }
+        }
+
+        // 4. Cashier / Financial queries
         if ("CASHIER".equals(role) || "ADMIN".equals(role)) {
             if (qLower.contains("revenue") || qLower.contains("unpaid") || qLower.contains("bill") || qLower.contains("টাকা") || qLower.contains("বিল") || qLower.contains("কালেকশন")) {
                 BigDecimal rev = (BigDecimal) metrics.getOrDefault("revenueToday", BigDecimal.ZERO);
@@ -185,7 +406,7 @@ public class AIService {
             }
         }
 
-        // 3. Doctor schedule & availability queries
+        // 5. Doctor schedule & roster queries
         if (qLower.contains("doctor") || qLower.contains("dr.") || qLower.contains("physician") || qLower.contains("specialist") || qLower.contains("ডাক্তার") || qLower.contains("চিকিৎসক") || qLower.contains("বিশেষজ্ঞ")) {
             List<User> doctors = userRepository.findByRole(Role.DOCTOR);
             StringBuilder docList = new StringBuilder();
@@ -203,31 +424,6 @@ public class AIService {
                 return "🩺 **Active Hospital Doctors & Consultants:**\n\n" +
                     (docList.length() > 0 ? docList.toString() : "No active doctors currently registered.\n") +
                     "\nPatients can book appointments through the front desk or reception queue.";
-            }
-        }
-
-        // 4. Appointments & Live Queue queries
-        if (qLower.contains("appointment") || qLower.contains("queue") || qLower.contains("serial") || qLower.contains("waiting") || qLower.contains("অ্যাপয়েন্টমেন্ট") || qLower.contains("সিরিয়াল") || qLower.contains("অপেক্ষমান") || qLower.contains("রোগী")) {
-            long waitingCount = appointmentRepository.findByStatus(AppointmentStatus.WAITING).size();
-            long consultingCount = appointmentRepository.findByStatus(AppointmentStatus.IN_CONSULTATION).size();
-            long completedCount = appointmentRepository.findByStatus(AppointmentStatus.COMPLETED).size();
-
-            if (isBengali) {
-                return String.format(
-                    "⏱️ **লাইভ ওপিডি ও কনসাল্টেশন কিউ স্ট্যাটাস:**\n\n" +
-                    "• **অপেক্ষমান রোগী (Waiting):** %d জন\n" +
-                    "• **পরামর্শরত (In Consultation):** %d জন\n" +
-                    "• **সম্পন্ন পরামর্শ (Completed Today):** %d জন\n\n" +
-                    "স্মার্ট কিউ ডিসপ্লে বোর্ডে টোকেন নম্বর অনুযায়ী রোগীদের ডাকা হচ্ছে।",
-                    waitingCount, consultingCount, completedCount);
-            } else {
-                return String.format(
-                    "⏱️ **Live OPD Consultation & Queue Status:**\n\n" +
-                    "• **Patients Waiting in Queue:** %d\n" +
-                    "• **Currently In Consultation:** %d\n" +
-                    "• **Consultations Completed Today:** %d\n\n" +
-                    "Live queue tokens are tracked in real time on the digital queue monitor.",
-                    waitingCount, consultingCount, completedCount);
             }
         }
 
@@ -254,7 +450,23 @@ public class AIService {
 
     private List<AIChatResponse.ActionSuggestion> generateSuggestions(String role, boolean isBengali) {
         List<AIChatResponse.ActionSuggestion> list = new ArrayList<>();
-        if ("CASHIER".equals(role)) {
+        if ("DOCTOR".equals(role)) {
+            list.add(new AIChatResponse.ActionSuggestion(
+                isBengali ? "আজকের সিরিয়াল ও রোগী স্ট্যাটাস" : "Today's Queue & Patient Status",
+                "QUERY",
+                "How many patients are in wait, done, cancel, and who are the recent patients?"
+            ));
+            list.add(new AIChatResponse.ActionSuggestion(
+                isBengali ? "পরবর্তী সিরিয়াল রোগী" : "Next Patient in Line",
+                "QUERY",
+                "Who is the next waiting patient for me?"
+            ));
+            list.add(new AIChatResponse.ActionSuggestion(
+                isBengali ? "হাসপাতালের সকল সেবা ও বেড" : "All Hospital Services & Beds",
+                "QUERY",
+                "Tell me about all hospital services and current bed availability"
+            ));
+        } else if ("CASHIER".equals(role)) {
             list.add(new AIChatResponse.ActionSuggestion(isBengali ? "আজকের পেন্ডিং বিল দেখুন" : "View Unpaid Invoices", "NAVIGATE", "/billing"));
             list.add(new AIChatResponse.ActionSuggestion(isBengali ? "কালেকশন রিপোর্ট" : "Collection Summary", "QUERY", "Show today's total revenue breakdown"));
         } else if ("ADMIN".equals(role)) {
@@ -262,7 +474,7 @@ public class AIService {
             list.add(new AIChatResponse.ActionSuggestion(isBengali ? "রেভিনিউ রিপোর্ট" : "Revenue Reports", "NAVIGATE", "/reports"));
         } else {
             list.add(new AIChatResponse.ActionSuggestion(isBengali ? "খালি সিট দেখুন" : "Check Available Beds", "QUERY", "How many ICU and Emergency seats are available right now?"));
-            list.add(new AIChatResponse.ActionSuggestion(isBengali ? "সিট বুকিং করুন" : "Book a Bed / Seat", "NAVIGATE", "/"));
+            list.add(new AIChatResponse.ActionSuggestion(isBengali ? "ডাক্তার সিরিয়াল নিন" : "Book Doctor Appointment", "NAVIGATE", "/"));
             list.add(new AIChatResponse.ActionSuggestion(isBengali ? "প্রেসক্রিপশন বিশ্লেষণ" : "Upload Prescription", "TRIGGER_OCR", ""));
         }
         return list;
