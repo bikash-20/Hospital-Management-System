@@ -130,10 +130,10 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('open-pwa-install-banner'))}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 transition-all shadow-sm"
+              className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 transition-all shadow-sm"
               title="Install CareBridge AI App"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-4 h-4" />
               <span>{isBengali ? 'অ্যাপ ডাউনলোড' : 'Install App'}</span>
             </button>
 
@@ -144,10 +144,10 @@ export default function PublicHome() {
                 setSelectedDoctorForModal('');
                 setDoctorApptModalOpen(true);
               }}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/25 hover:bg-blue-500/20 transition-all shadow-sm"
+              className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/25 hover:bg-blue-500/20 transition-all shadow-sm"
               title="Book Doctor Serial"
             >
-              <Stethoscope className="w-3.5 h-3.5" />
+              <Stethoscope className="w-4 h-4" />
               <span>{isBengali ? 'ডাক্তার সিরিয়াল' : 'Book Doctor'}</span>
             </button>
 
@@ -155,9 +155,9 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-surface-200 dark:border-[#30363D] hover:bg-surface-100 dark:hover:bg-[#21262D] transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium border border-surface-200 dark:border-[#30363D] hover:bg-surface-100 dark:hover:bg-[#21262D] transition-colors"
             >
-              <Languages className="w-3.5 h-3.5" />
+              <Languages className="w-4 h-4" />
               <span>{language === 'en' ? 'বাংলা' : 'English'}</span>
             </button>
 
@@ -165,18 +165,18 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-surface-100 dark:bg-[#21262D] hover:bg-surface-200 dark:hover:bg-[#30363D] text-xs font-semibold text-surface-800 dark:text-surface-200 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-100 dark:bg-[#21262D] hover:bg-surface-200 dark:hover:bg-[#30363D] text-xs sm:text-sm font-semibold text-surface-800 dark:text-surface-200 transition-colors"
             >
-              <LogIn className="w-3.5 h-3.5" />
+              <LogIn className="w-4 h-4" />
               <span>{t('navLogin')}</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleOpenBooking('ICU')}
-              className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-md shadow-primary-600/20 transition-all"
+              className="hidden sm:flex items-center gap-1.5 px-4.5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-primary-600/20 transition-all"
             >
-              <HeartPulse className="w-3.5 h-3.5" />
+              <HeartPulse className="w-4 h-4" />
               <span>{t('ctaBookBed')}</span>
             </button>
           </div>
@@ -202,9 +202,9 @@ export default function PublicHome() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-primary-50/90 dark:bg-primary-950/60 backdrop-blur-sm text-primary-700 dark:text-primary-300 border border-primary-200/80 dark:border-primary-800"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-primary-50/90 dark:bg-primary-950/60 backdrop-blur-sm text-primary-700 dark:text-primary-300 border border-primary-200/80 dark:border-primary-800"
           >
-            <Sparkles className="w-3.5 h-3.5 text-primary-500 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-primary-500 animate-pulse" />
             <span>{t('heroBadge')}</span>
           </motion.div>
 
@@ -221,7 +221,7 @@ export default function PublicHome() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-sm sm:text-base text-surface-600 dark:text-surface-300 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-surface-600 dark:text-surface-300 max-w-3xl mx-auto leading-relaxed"
           >
             {t('heroSubtitle')}
           </motion.p>
@@ -230,14 +230,14 @@ export default function PublicHome() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-3 pt-3"
+            className="flex flex-wrap items-center justify-center gap-3.5 pt-3"
           >
             <button
               type="button"
               onClick={() => handleOpenBooking('EMERGENCY')}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-700 hover:to-emerald-700 text-white font-semibold text-sm shadow-xl shadow-primary-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-700 hover:to-emerald-700 text-white font-bold text-sm sm:text-base shadow-xl shadow-primary-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
             >
-              <HeartPulse className="w-4 h-4" />
+              <HeartPulse className="w-5 h-5" />
               <span>{t('ctaBookBed')}</span>
             </button>
 
@@ -247,18 +247,18 @@ export default function PublicHome() {
                 setSelectedDoctorForModal('');
                 setDoctorApptModalOpen(true);
               }}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-xl shadow-blue-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm sm:text-base shadow-xl shadow-blue-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
             >
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-5 h-5" />
               <span>{isBengali ? 'ডাক্তার অ্যাপয়েন্টমেন্ট নিন' : 'Book Doctor Appointment'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setAiChatOpen(true)}
-              className="px-5 py-3 rounded-xl bg-white/80 hover:bg-white dark:bg-[#1C2128]/85 dark:hover:bg-[#262C36] backdrop-blur-md text-surface-800 dark:text-surface-200 font-semibold text-sm border border-surface-200 dark:border-[#30363D] flex items-center gap-2 transition-all hover:scale-[1.02] shadow-sm"
+              className="px-5 py-3.5 rounded-xl bg-white/80 hover:bg-white dark:bg-[#1C2128]/85 dark:hover:bg-[#262C36] backdrop-blur-md text-surface-800 dark:text-surface-200 font-bold text-sm sm:text-base border border-surface-200 dark:border-[#30363D] flex items-center gap-2 transition-all hover:scale-[1.02] shadow-sm"
             >
-              <Bot className="w-4 h-4 text-primary-500" />
+              <Bot className="w-5 h-5 text-primary-500" />
               <span>{t('ctaTalkAI')}</span>
             </button>
           </motion.div>
@@ -269,17 +269,17 @@ export default function PublicHome() {
       <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-8">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-surface-900 dark:text-white flex items-center gap-2">
-              <Activity className="w-5 h-5 text-emerald-500" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-surface-900 dark:text-white flex items-center gap-2.5">
+              <Activity className="w-6 h-6 text-emerald-500" />
               {t('seatStatusTitle')}
             </h2>
-            <p className="text-xs sm:text-sm text-surface-500 dark:text-surface-400 mt-1">
+            <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">
               {t('seatStatusSub')}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400 bg-white/80 dark:bg-[#161B22]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-surface-200 dark:border-[#30363D]">
-            <Clock className="w-3.5 h-3.5 text-primary-500" />
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-surface-500 dark:text-surface-400 bg-white/80 dark:bg-[#161B22]/85 backdrop-blur-md px-3.5 py-2 rounded-lg border border-surface-200 dark:border-[#30363D]">
+            <Clock className="w-4 h-4 text-primary-500" />
             <span>{isBengali ? '১০ সেকেন্ড পর পর স্বয়ংক্রিয় আপডেট' : 'Auto-refreshed every 10s'}</span>
           </div>
         </div>
@@ -300,34 +300,34 @@ export default function PublicHome() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-surface-100 dark:bg-[#21262D] flex items-center justify-center text-primary-500">
-                      <Icon className="w-5 h-5" />
+                    <div className="w-11 h-11 rounded-xl bg-surface-100 dark:bg-[#21262D] flex items-center justify-center text-primary-500">
+                      <Icon className="w-6 h-6" />
                     </div>
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${card.badgeColor}`}>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${card.badgeColor}`}>
                       {card.rate} {t('perDay')}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold text-surface-900 dark:text-white mb-1">
+                  <h3 className="text-lg sm:text-xl font-bold text-surface-900 dark:text-white mb-1.5">
                     {card.title}
                   </h3>
-                  <p className="text-xs text-surface-500 dark:text-surface-400 mb-4 leading-relaxed">
+                  <p className="text-sm text-surface-600 dark:text-surface-300 mb-4 leading-relaxed">
                     {card.desc}
                   </p>
                 </div>
 
                 <div className="space-y-3 pt-3 border-t border-surface-100 dark:border-[#21262D]">
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between text-sm">
                     <span className="text-surface-500 font-medium">
                       {isBengali ? 'খালি সিট' : 'Available Seats'}:
                     </span>
-                    <span className={`font-mono font-bold text-sm ${isAvailable ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    <span className={`font-mono font-bold text-base ${isAvailable ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                       {available} / {total}
                     </span>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="w-full bg-surface-100 dark:bg-[#21262D] rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-surface-100 dark:bg-[#21262D] rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${isAvailable ? 'bg-emerald-500' : 'bg-rose-500'}`}
                       style={{ width: `${total > 0 ? (available / total) * 100 : 0}%` }}
@@ -337,10 +337,10 @@ export default function PublicHome() {
                   <button
                     type="button"
                     onClick={() => handleOpenBooking(card.type)}
-                    className="w-full py-2.5 px-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                    className="w-full py-3 px-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all hover:scale-[1.01]"
                   >
                     <span>{t('bookThisSeat')}</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </motion.div>
@@ -353,11 +353,11 @@ export default function PublicHome() {
       <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200/70 dark:border-[#21262D]">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-8">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-surface-900 dark:text-white flex items-center gap-2">
-              <Stethoscope className="w-5 h-5 text-blue-500" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-surface-900 dark:text-white flex items-center gap-2.5">
+              <Stethoscope className="w-6 h-6 text-blue-500" />
               {isBengali ? 'বিশেষজ্ঞ চিকিৎসক চেম্বার ও ওপিডি সিরিয়াল' : 'Specialist Doctor Chambers & OPD Queue'}
             </h2>
-            <p className="text-xs sm:text-sm text-surface-500 dark:text-surface-400 mt-1">
+            <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">
               {isBengali
                 ? 'হাসপাতালের বিশেষজ্ঞ ডাক্তার নির্বাচন করে অনলাইনে সরাসরি চেম্বার সিরিয়াল টোকেন নিন'
                 : 'Select a consulting specialist and book an instant queue serial token online'}
@@ -370,7 +370,7 @@ export default function PublicHome() {
               setSelectedDoctorForModal('');
               setDoctorApptModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition-all"
           >
             <Calendar className="w-4 h-4" />
             <span>{isBengali ? 'নতুন সিরিয়াল নিন' : 'Book New Serial'}</span>
@@ -385,28 +385,28 @@ export default function PublicHome() {
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                    <Stethoscope className="w-5 h-5" />
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                    <Stethoscope className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                     {isBengali ? 'চেম্বার খোলা' : 'Chamber Open'}
                   </span>
                 </div>
 
-                <h3 className="font-bold text-base text-surface-900 dark:text-white">
+                <h3 className="font-bold text-lg text-surface-900 dark:text-white">
                   {doc.name}
                 </h3>
-                <p className="text-xs text-primary-600 dark:text-primary-400 font-medium mt-0.5">
+                <p className="text-sm text-primary-600 dark:text-primary-400 font-semibold mt-0.5">
                   {doc.specialization}
                 </p>
-                <p className="text-xs text-surface-500 mt-2">
+                <p className="text-xs sm:text-sm text-surface-500 mt-2">
                   {doc.email}
                 </p>
               </div>
 
               <div className="pt-4 mt-4 border-t border-surface-100 dark:border-[#21262D] flex items-center justify-between">
-                <div className="text-xs text-surface-500 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-blue-500" />
+                <div className="text-xs sm:text-sm text-surface-500 flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-blue-500" />
                   <span>{isBengali ? 'প্রতিদিন ১০:০০ - ০৮:০০' : 'Daily 10:00 - 08:00'}</span>
                 </div>
 
@@ -416,10 +416,10 @@ export default function PublicHome() {
                     setSelectedDoctorForModal(doc.id);
                     setDoctorApptModalOpen(true);
                   }}
-                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1"
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition-all flex items-center gap-1.5"
                 >
                   <span>{isBengali ? 'সিরিয়াল নিন' : 'Book Serial'}</span>
-                  <ChevronRight className="w-3 h-3" />
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -431,13 +431,13 @@ export default function PublicHome() {
       <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200/70 dark:border-[#21262D]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-6 rounded-2xl bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border border-surface-200 dark:border-[#21262D]">
-            <div className="w-10 h-10 rounded-xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center mb-4">
-              <Bot className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center mb-4">
+              <Bot className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-surface-900 dark:text-white text-base mb-2">
+            <h3 className="font-bold text-surface-900 dark:text-white text-lg mb-2">
               {isBengali ? 'ফ্রি এআই স্বাস্থ্য সহকারী' : 'Free AI Health Assistant'}
             </h3>
-            <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">
+            <p className="text-sm text-surface-600 dark:text-surface-300 leading-relaxed">
               {isBengali
                 ? 'যে কেউ প্রেসক্রিপশন ছবি আপলোড করে ঔষধের ডোজ, খাবারের সতর্কতা ও পার্শ্বপ্রতিক্রিয়া পরীক্ষা করতে পারেন।'
                 : 'Upload prescriptions to extract dosages, drug interactions, contraindications, and dietary warnings for free.'}
@@ -445,13 +445,13 @@ export default function PublicHome() {
           </div>
 
           <div className="p-6 rounded-2xl bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border border-surface-200 dark:border-[#21262D]">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+              <ShieldCheck className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-surface-900 dark:text-white text-base mb-2">
+            <h3 className="font-bold text-surface-900 dark:text-white text-lg mb-2">
               {isBengali ? 'স্বয়ংক্রিয় জরুরি ভর্তি' : 'Automated Seat Allocation'}
             </h3>
-            <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">
+            <p className="text-sm text-surface-600 dark:text-surface-300 leading-relaxed">
               {isBengali
                 ? 'সিট খালি থাকা মাত্রই সিস্টেম রোগী ও ডাক্তারের জন্য তাৎক্ষণিক ভর্তি নিশ্চিত করে ডিজিটাল ভাউচার তৈরি করে।'
                 : 'Direct synchronization between patient booking, hospital inventory, and instant digital voucher generation.'}
@@ -459,13 +459,13 @@ export default function PublicHome() {
           </div>
 
           <div className="p-6 rounded-2xl bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border border-surface-200 dark:border-[#21262D]">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
-              <UserCheck className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+              <UserCheck className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-surface-900 dark:text-white text-base mb-2">
+            <h3 className="font-bold text-surface-900 dark:text-white text-lg mb-2">
               {isBengali ? 'সম্পূর্ণ হাসপাতাল অপারেশন' : 'Full Staff Workspace'}
             </h3>
-            <p className="text-xs text-surface-500 dark:text-surface-400 leading-relaxed">
+            <p className="text-sm text-surface-600 dark:text-surface-300 leading-relaxed">
               {isBengali
                 ? 'অ্যাডমিন, ক্যাশিয়ার, ডাক্তার ও নার্সিং স্টাফদের জন্য পৃথক এআই লেআউট ও সমন্বিত অপারেশন ব্যবস্থাপনা।'
                 : 'Role-dedicated AI copilot layouts for Admin, Cashier, Doctor, and Receptionist with audit logs and billing.'}

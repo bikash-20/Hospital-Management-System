@@ -176,18 +176,18 @@ export default function DoctorAppointmentModal({
         >
           {/* Header */}
           <div className="p-6 border-b border-surface-200 dark:border-[#273447] flex items-center justify-between bg-surface-50/50 dark:bg-[#0E1520]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 flex items-center justify-center">
-                <Stethoscope className="w-5 h-5" />
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
+                <Stethoscope className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-surface-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-lg sm:text-xl font-bold text-surface-900 dark:text-white flex items-center gap-2.5">
                   {isBengali ? 'বিশেষজ্ঞ ডাক্তার অ্যাপয়েন্টমেন্ট বুকিং' : 'Book Specialist Doctor Appointment'}
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
                     OPD QUEUE
                   </span>
                 </h3>
-                <p className="text-xs text-surface-500 dark:text-surface-400">
+                <p className="text-xs sm:text-sm text-surface-500 dark:text-surface-400 mt-0.5">
                   {isBengali ? 'তাৎক্ষণিক সিরিয়াল টোকেন ও ডিজিটাল প্রেসক্রিপশন প্রস্তুতি' : 'Instant serial token with automated doctor queue registration'}
                 </p>
               </div>
@@ -209,7 +209,7 @@ export default function DoctorAppointmentModal({
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 {formError && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs rounded-xl flex items-center gap-2">
+                  <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm rounded-xl flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {formError}
                   </div>
@@ -217,10 +217,10 @@ export default function DoctorAppointmentModal({
 
                 {/* Doctor Selector */}
                 <div>
-                  <label className="block text-xs font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wider mb-2.5">
+                  <label className="block text-xs sm:text-sm font-bold text-surface-800 dark:text-surface-200 uppercase tracking-wider mb-3">
                     {isBengali ? 'পরামর্শক বিশেষজ্ঞ নির্বাচন করুন *' : 'Select Consulting Specialist *'}
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {doctors.map((doc) => {
                       const isSelected = selectedDoctorId === doc.id;
                       return (
@@ -228,30 +228,30 @@ export default function DoctorAppointmentModal({
                           key={doc.id}
                           type="button"
                           onClick={() => setSelectedDoctorId(doc.id)}
-                          className={`p-3.5 rounded-2xl border text-left transition-all relative flex items-start gap-3 ${
+                          className={`p-4 rounded-2xl border text-left transition-all relative flex items-start gap-3.5 ${
                             isSelected
                               ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 ring-2 ring-primary-500/25'
                               : 'border-surface-200 dark:border-[#273447] hover:bg-surface-50 dark:hover:bg-[#1A2332]'
                           }`}
                         >
-                          <div className="w-9 h-9 rounded-xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
-                            <Stethoscope className="w-4 h-4" />
+                          <div className="w-10 h-10 rounded-xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
+                            <Stethoscope className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs sm:text-sm text-surface-900 dark:text-white truncate">
+                              <span className="font-bold text-sm sm:text-base text-surface-900 dark:text-white truncate">
                                 {doc.name}
                               </span>
                               {isSelected && (
                                 <CheckCircle2 className="w-4 h-4 text-primary-500 shrink-0" />
                               )}
                             </div>
-                            <div className="text-[11px] text-surface-500 mt-0.5 truncate">
+                            <div className="text-xs sm:text-sm text-surface-500 dark:text-surface-400 mt-0.5 truncate">
                               {doc.specialization}
                             </div>
-                            <div className="mt-1 flex items-center gap-1.5 text-[10px]">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            <div className="mt-1.5 flex items-center gap-1.5 text-xs">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
                                 {isBengali ? 'চেম্বার খোলা' : 'Chamber Active'}
                               </span>
                             </div>
@@ -264,15 +264,15 @@ export default function DoctorAppointmentModal({
 
                 {/* Date & Shift Schedule */}
                 <div className="space-y-3">
-                  <label className="block text-xs font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wider">
+                  <label className="block text-xs sm:text-sm font-bold text-surface-800 dark:text-surface-200 uppercase tracking-wider">
                     {isBengali ? 'অ্যাপয়েন্টমেন্টের দিন ও শিফট *' : 'Appointment Schedule & Shift *'}
                   </label>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2.5">
                     <button
                       type="button"
                       onClick={() => setDateOption('TODAY')}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                         dateOption === 'TODAY'
                           ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
                           : 'border-surface-200 dark:border-[#273447] text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-white/5'
@@ -284,7 +284,7 @@ export default function DoctorAppointmentModal({
                     <button
                       type="button"
                       onClick={() => setDateOption('TOMORROW')}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                         dateOption === 'TOMORROW'
                           ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
                           : 'border-surface-200 dark:border-[#273447] text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-white/5'
@@ -296,7 +296,7 @@ export default function DoctorAppointmentModal({
                     <button
                       type="button"
                       onClick={() => setDateOption('CUSTOM')}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                         dateOption === 'CUSTOM'
                           ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
                           : 'border-surface-200 dark:border-[#273447] text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-white/5'
@@ -310,13 +310,13 @@ export default function DoctorAppointmentModal({
                         type="date"
                         value={customDate}
                         onChange={(e) => setCustomDate(e.target.value)}
-                        className="px-3 py-1.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-xs text-surface-900 dark:text-white"
+                        className="px-3.5 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-sm text-surface-900 dark:text-white"
                       />
                     )}
                   </div>
 
                   {/* Time Slots */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1.5">
                     {timeSlots.map((slot) => {
                       const isSelected = selectedTimeSlot === slot.time;
                       return (
@@ -324,13 +324,13 @@ export default function DoctorAppointmentModal({
                           key={slot.time}
                           type="button"
                           onClick={() => setSelectedTimeSlot(slot.time)}
-                          className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                          className={`px-3.5 py-2.5 rounded-xl border text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
                             isSelected
                               ? 'bg-emerald-500/15 border-emerald-500 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30'
                               : 'border-surface-200 dark:border-[#273447] text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-[#1A2332]'
                           }`}
                         >
-                          <Clock className="w-3.5 h-3.5" />
+                          <Clock className="w-4 h-4" />
                           <span>{slot.label}</span>
                         </button>
                       );
@@ -339,10 +339,10 @@ export default function DoctorAppointmentModal({
                 </div>
 
                 {/* Patient Information */}
-                <div className="space-y-4 pt-2 border-t border-surface-200/60 dark:border-[#273447]/60">
+                <div className="space-y-4 pt-3 border-t border-surface-200/60 dark:border-[#273447]/60">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {isBengali ? 'রোগীর পূর্ণ নাম *' : 'Patient Full Name *'}
                       </label>
                       <input
@@ -351,12 +351,12 @@ export default function DoctorAppointmentModal({
                         value={patientName}
                         onChange={(e) => setPatientName(e.target.value)}
                         placeholder="E.g. Mohammed Rahman"
-                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {isBengali ? 'যোগাযোগের মোবাইল নম্বর (+৮৮০) *' : 'Mobile Number (+880) *'}
                       </label>
                       <input
@@ -365,14 +365,14 @@ export default function DoctorAppointmentModal({
                         value={patientPhone}
                         onChange={(e) => setPatientPhone(e.target.value)}
                         placeholder="017XXXXXXXX"
-                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {isBengali ? 'বয়স' : 'Age'}
                       </label>
                       <input
@@ -381,18 +381,18 @@ export default function DoctorAppointmentModal({
                         max={120}
                         value={patientAge}
                         onChange={(e) => setPatientAge(Number(e.target.value))}
-                        className="w-full px-3.5 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {isBengali ? 'লিঙ্গ' : 'Gender'}
                       </label>
                       <select
                         value={patientGender}
                         onChange={(e) => setPatientGender(e.target.value)}
-                        className="w-full px-3.5 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       >
                         <option value="MALE">{isBengali ? 'পুরুষ' : 'Male'}</option>
                         <option value="FEMALE">{isBengali ? 'নারী' : 'Female'}</option>
@@ -401,7 +401,7 @@ export default function DoctorAppointmentModal({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {isBengali ? 'জাতীয় পরিচয়পত্র (ঐচ্ছিক)' : 'NID / BRC (Optional)'}
                       </label>
                       <input
@@ -409,37 +409,37 @@ export default function DoctorAppointmentModal({
                         value={patientNid}
                         onChange={(e) => setPatientNid(e.target.value)}
                         placeholder="NID Number"
-                        className="w-full px-3.5 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                    <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                       {isBengali ? 'রোগের প্রধান লক্ষণ বা চেকআপের কারণ' : 'Symptoms or Primary Reason for Visit'}
                     </label>
                     <textarea
-                      rows={2}
+                      rows={3}
                       value={symptoms}
                       onChange={(e) => setSymptoms(e.target.value)}
                       placeholder={isBengali ? 'যেমন: জ্বর, সর্দি, পেটে ব্যথা, বা রুটিন হেলথ চেকআপ...' : 'E.g. Fever, chronic cough, regular diabetes review...'}
-                      className="w-full px-3.5 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none"
+                      className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#273447] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none"
                     />
                   </div>
                 </div>
 
                 {/* Footer Submit */}
-                <div className="pt-4 border-t border-surface-200 dark:border-[#273447] flex items-center justify-between">
-                  <div className="text-xs text-surface-500 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+                <div className="pt-4 border-t border-surface-200 dark:border-[#273447] flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="text-xs sm:text-sm text-surface-500 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-primary-500" />
                     <span>{isBengali ? 'স্বয়ংক্রিয় টোকেন ও ওপিডি কিউ সিঙ্ক' : 'Instant serial token & real-time queue sync'}</span>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button
                       type="button"
                       onClick={handleModalClose}
-                      className="px-4 py-2.5 rounded-xl border border-surface-200 dark:border-[#273447] text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-white/5 text-xs font-semibold transition-colors"
+                      className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl border border-surface-200 dark:border-[#273447] text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-white/5 text-sm sm:text-base font-semibold transition-colors"
                     >
                       {isBengali ? 'বাতিল' : 'Cancel'}
                     </button>
@@ -447,13 +447,13 @@ export default function DoctorAppointmentModal({
                     <button
                       type="submit"
                       disabled={appointmentMutation.isPending}
-                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold shadow-lg shadow-primary-600/25 transition-all disabled:opacity-50"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-bold shadow-lg shadow-primary-600/25 transition-all hover:scale-[1.01] disabled:opacity-50"
                     >
                       {appointmentMutation.isPending ? (
                         <span>{isBengali ? 'সিরিয়াল নির্ধারণ হচ্ছে...' : 'Confirming Serial...'}</span>
                       ) : (
                         <>
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-5 h-5" />
                           <span>{isBengali ? 'সিরিয়াল নিশ্চিত করুন' : 'Confirm Appointment'}</span>
                         </>
                       )}

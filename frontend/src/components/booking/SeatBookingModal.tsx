@@ -141,22 +141,22 @@ export default function SeatBookingModal({
           >
             {/* Header */}
             <div className="px-6 py-4 border-b border-surface-100 dark:border-[#2A3441] flex items-center justify-between bg-surface-50/50 dark:bg-[#111820]">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-primary-600/10 text-primary-600 dark:text-primary-400 flex items-center justify-center">
-                  <BedDouble className="w-4 h-4" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-600/10 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
+                  <BedDouble className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-surface-900 dark:text-white">
+                  <h3 className="text-lg sm:text-xl font-bold text-surface-900 dark:text-white">
                     {step === 'RECEIPT' ? t('receiptTitle') : t('bookingModalTitle')}
                   </h3>
-                  <p className="text-xs text-surface-500 dark:text-surface-400">
+                  <p className="text-xs sm:text-sm text-surface-500 dark:text-surface-400 mt-0.5">
                     {step === 'RECEIPT' ? t('receiptSubtitle') : t('bookingModalSub')}
                   </p>
                 </div>
               </div>
               <button
                 onClick={handleModalClose}
-                className="p-1.5 rounded-lg text-surface-400 hover:text-surface-700 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+                className="p-2 rounded-xl text-surface-400 hover:text-surface-700 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -169,7 +169,7 @@ export default function SeatBookingModal({
               ) : (
                 <form onSubmit={handleProceedToPayment} className="space-y-6">
                   {formError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs rounded-xl flex items-center gap-2">
+                    <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm rounded-xl flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0" />
                       {formError}
                     </div>
@@ -177,7 +177,7 @@ export default function SeatBookingModal({
 
                   {/* Bed Category Selector */}
                   <div>
-                    <label className="block text-xs font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wider mb-2">
+                    <label className="block text-xs sm:text-sm font-bold text-surface-800 dark:text-surface-200 uppercase tracking-wider mb-2.5">
                       {t('selectedCategoryLabel')}
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -190,7 +190,7 @@ export default function SeatBookingModal({
                             key={type}
                             type="button"
                             onClick={() => setBedType(type)}
-                            className={`p-3 rounded-xl border text-left transition-all relative ${
+                            className={`p-3.5 rounded-xl border text-left transition-all relative ${
                               isSelected
                                 ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 ring-2 ring-primary-500/20'
                                 : 'border-surface-200 dark:border-[#2A3441] hover:bg-surface-50 dark:hover:bg-[#1A2230]'
@@ -198,16 +198,16 @@ export default function SeatBookingModal({
                           >
                             <div className="flex items-center justify-between mb-1.5">
                               <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400'}`} />
-                              <span className="text-xs font-bold text-surface-900 dark:text-white">
+                              <span className="text-sm font-extrabold text-surface-900 dark:text-white">
                                 ৳ {bedTypePricing[type].rate}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="font-semibold text-xs text-surface-900 dark:text-white">
+                              <span className="font-bold text-xs sm:text-sm text-surface-900 dark:text-white">
                                 {type}
                               </span>
                               {stat && (
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                                <span className={`text-xs px-2 py-0.5 rounded font-mono font-bold ${
                                   stat.available > 0
                                     ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                                     : 'bg-amber-500/10 text-amber-500'
@@ -218,7 +218,7 @@ export default function SeatBookingModal({
                                 </span>
                               )}
                             </div>
-                            <div className="text-[10px] text-surface-400 mt-1 line-clamp-1">
+                            <div className="text-xs text-surface-500 dark:text-surface-400 mt-1 line-clamp-1 leading-normal">
                               {bedTypePricing[type].desc}
                             </div>
                           </button>
@@ -230,7 +230,7 @@ export default function SeatBookingModal({
                   {/* Patient Details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {t('patientNameLabel')} *
                       </label>
                       <input
@@ -239,12 +239,12 @@ export default function SeatBookingModal({
                         value={guestName}
                         onChange={(e) => setGuestName(e.target.value)}
                         placeholder="E.g. Mohammed Rahman"
-                        className="w-full px-3 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {t('patientPhoneLabel')} *
                       </label>
                       <input
@@ -253,13 +253,13 @@ export default function SeatBookingModal({
                         value={guestPhone}
                         onChange={(e) => setGuestPhone(e.target.value)}
                         placeholder="017XXXXXXXX"
-                        className="w-full px-3 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <div>
-                        <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                        <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                           {t('patientAgeLabel')}
                         </label>
                         <input
@@ -268,17 +268,17 @@ export default function SeatBookingModal({
                           max={120}
                           value={guestAge}
                           onChange={(e) => setGuestAge(Number(e.target.value))}
-                          className="w-full px-3 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                          className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                        <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                           {t('patientGenderLabel')}
                         </label>
                         <select
                           value={guestGender}
                           onChange={(e) => setGuestGender(e.target.value)}
-                          className="w-full px-3 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                          className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                         >
                           <option value="MALE">{t('genderMale')}</option>
                           <option value="FEMALE">{t('genderFemale')}</option>
@@ -288,7 +288,7 @@ export default function SeatBookingModal({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                      <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                         {t('patientNidLabel')}
                       </label>
                       <input
@@ -296,48 +296,48 @@ export default function SeatBookingModal({
                         value={guestNid}
                         onChange={(e) => setGuestNid(e.target.value)}
                         placeholder="NID / BRC Number"
-                        className="w-full px-3 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                       />
                     </div>
                   </div>
 
                   {/* Medical Symptoms */}
                   <div>
-                    <label className="block text-xs font-medium text-surface-700 dark:text-surface-300 mb-1">
+                    <label className="block text-sm font-semibold text-surface-800 dark:text-surface-200 mb-1.5">
                       {t('symptomsLabel')}
                     </label>
                     <textarea
-                      rows={2}
+                      rows={3}
                       value={symptoms}
                       onChange={(e) => setSymptoms(e.target.value)}
                       placeholder={t('symptomsPlaceholder')}
-                      className="w-full px-3 py-2 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-sm text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none"
+                      className="w-full px-3.5 py-2.5 bg-surface-50 dark:bg-[#111820] border border-surface-200 dark:border-[#2A3441] rounded-xl text-base text-surface-900 dark:text-white placeholder:text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none"
                     />
                   </div>
 
                   {/* Pricing Summary & Submit */}
-                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-surface-100 dark:border-[#2A3441]">
+                  <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-surface-100 dark:border-[#2A3441]">
                     <div>
-                      <span className="text-xs text-surface-500">{isBengali ? 'প্রারম্ভিক ডিপোজিট' : 'Standard Deposit'}:</span>
-                      <div className="text-lg font-bold text-surface-900 dark:text-white">
+                      <span className="text-sm font-medium text-surface-500 dark:text-surface-400">{isBengali ? 'প্রারম্ভিক ডিপোজিট' : 'Standard Deposit'}:</span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-surface-900 dark:text-white">
                         ৳ {bedTypePricing[bedType].rate.toLocaleString()}
-                        <span className="text-xs font-normal text-surface-400 ml-1">{t('perDay')}</span>
+                        <span className="text-sm font-normal text-surface-400 ml-1.5">{t('perDay')}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                       <button
                         type="button"
                         onClick={handleModalClose}
-                        className="flex-1 sm:flex-none px-4 py-2.5 text-sm text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white transition-colors"
+                        className="flex-1 sm:flex-none px-5 py-2.5 text-sm sm:text-base font-semibold text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-white transition-colors"
                       >
                         {t('closeBtn')}
                       </button>
                       <button
                         type="submit"
-                        className="flex-1 sm:flex-none px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-primary-500/20 flex items-center justify-center gap-2 transition-all"
+                        className="flex-1 sm:flex-none px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm sm:text-base font-bold shadow-md shadow-primary-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
                       >
-                        <CreditCard className="w-4 h-4" />
+                        <CreditCard className="w-5 h-5" />
                         {t('nextToPayment')}
                       </button>
                     </div>
