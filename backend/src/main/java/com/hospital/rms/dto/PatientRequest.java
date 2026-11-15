@@ -15,7 +15,7 @@ public class PatientRequest {
     @NotBlank @Pattern(regexp = "^[+]?[0-9\\s-]{10,20}$", message = "Mobile must be a valid 10-15 digit phone number")
     private String mobileNumber;
 
-    @NotNull @Past
+    @NotNull @PastOrPresent(message = "Date of birth cannot be in the future")
     private LocalDate dob;
 
     @NotBlank

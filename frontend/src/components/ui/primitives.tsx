@@ -100,7 +100,14 @@ export function LabStatusPill({ status }: { status: string }) {
  * ========================================================================= */
 
 interface AxiosLikeError {
-  response?: { data?: { message?: string; errors?: Record<string, string> } };
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+      error?: string;
+      errors?: Record<string, string>;
+    };
+  };
   message?: string;
 }
 
@@ -109,7 +116,16 @@ export function extractErrorMessage(err: unknown, fallback = 'Something went wro
   if (e?.response?.data?.errors) {
     return Object.values(e.response.data.errors).join(', ');
   }
-  return e?.response?.data?.message || e?.message || fallback;
+  if (e?.response?.data?.message) {
+    return e.response.data.message;
+  }
+  if (e?.response?.status === 403) {
+    return 'Access denied: Session expired or insufficient permissions. Please log in again.';
+  }
+  if (e?.response?.status === 401) {
+    return 'Your session has expired. Please sign in again.';
+  }
+  return e?.message || fallback;
 }
 
 /* ============================================================================

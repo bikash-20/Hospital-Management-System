@@ -51,7 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                org.springframework.security.core.context.SecurityContext context =
+                    SecurityContextHolder.createEmptyContext();
+                context.setAuthentication(authentication);
+                SecurityContextHolder.setContext(context);
             }
         }
 
@@ -66,14 +69,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // curl-based testing). Fall back to the httpOnly access cookie, which
         // is how the SPA browser frontend authenticates.
         String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (!StringUtils.hasText(bearerToken)) {
+            bearerToken = request.getHeader("authorization");
+        }
+        if (StringUtils.hasText(bearerToken)) {
+            if (bearerToken.startsWith("Bearer ") || bearerToken.startsWith("bearer ")) {
+                return bearerToken.substring(7).trim();
+            }
+            return bearerToken.trim();
         }
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
                 if (ACCESS_COOKIE.equals(c.getName()) && StringUtils.hasText(c.getValue())) {
-                    return c.getValue();
+                    return c.getValue().trim();
                 }
             }
         }

@@ -1,4 +1,4 @@
-import api from './client';
+import api, { setAuthTokens, clearAuthTokens } from './client';
 import type {
   Patient,
   Appointment,
@@ -180,6 +180,9 @@ function safeJsonParse<T>(value: string | null, fallback: T): T {
 // ===== Auth API =====
 export async function loginApi(username: string, password: string): Promise<{ user: User }> {
   const { data } = await api.post<BackendLoginResponse>('/auth/login', { username, password });
+  if (data.accessToken) {
+    setAuthTokens(data.accessToken, data.refreshToken);
+  }
   const user: User = {
     id: data.username, // backend doesn't return UUID for user yet
     username: data.username,
@@ -206,10 +209,14 @@ export async function getCurrentUserApi(): Promise<User> {
 }
 
 /**
- * Logout — revokes both tokens server-side and clears the cookies.
+ * Logout — revokes both tokens server-side and clears cookies and local tokens.
  */
 export async function logoutApi(): Promise<void> {
-  await api.post('/auth/logout', {});
+  try {
+    await api.post('/auth/logout', {});
+  } finally {
+    clearAuthTokens();
+  }
 }
 
 /**

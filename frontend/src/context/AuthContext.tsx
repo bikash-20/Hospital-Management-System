@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 import type { ReactNode } from 'react';
 import type { User, UserRole } from '@/types';
 import { loginApi, getCurrentUserApi, logoutApi } from '@/api/api';
+import { clearAuthTokens } from '@/api/client';
 
 interface AuthContextType {
   user: User | null;
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const me = await getCurrentUserApi();
       setUser(me);
     } catch {
+      clearAuthTokens();
       setUser(null);
     } finally {
       setIsBootstrapping(false);

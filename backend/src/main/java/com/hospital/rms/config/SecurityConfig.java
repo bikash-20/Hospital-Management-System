@@ -18,7 +18,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -36,14 +39,48 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(request -> {
                 var config = new org.springframework.web.cors.CorsConfiguration();
-                config.setAllowedOriginPatterns(List.of(allowedOrigins.split(",")));
+                List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+                // Guarantee common deployment patterns match even if env vars are partially set
+                if (!origins.contains("*") && !origins.contains("https://*.onrender.com")) {
+                    origins.add("https://*.onrender.com");
+                }
+                if (!origins.contains("https://*.vercel.app")) {
+                    origins.add("https://*.vercel.app");
+                }
+                if (!origins.contains("http://localhost:5173")) {
+                    origins.add("http://localhost:5173");
+                }
+                if (!origins.contains("http://localhost:3000")) {
+                    origins.add("http://localhost:3000");
+                }
+                if (!origins.contains("http://127.0.0.1:5173")) {
+                    origins.add("http://127.0.0.1:5173");
+                }
+                config.setAllowedOriginPatterns(origins);
                 config.addAllowedMethod("*");
                 config.addAllowedHeader("*");
+                config.addExposedHeader("Authorization");
+                config.addExposedHeader("Set-Cookie");
                 config.setAllowCredentials(true);
                 return config;
             }))
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"UNAUTHORIZED\",\"message\":\"Authentication required. Please log in.\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"FORBIDDEN\",\"message\":\"Access denied. Insufficient permissions.\"}");
+                })
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
@@ -58,12 +95,7 @@ public class SecurityConfig {
             )
             // In Spring Security 6/7 with STATELESS sessions, AnonymousAuthenticationFilter
             // forcibly overwrites the SecurityContext with an anonymous Authentication whenever
-            // it runs. Our JWT filter used to be installed BEFORE UsernamePasswordAuthenticationFilter
-            // (and thus before AnonymousAuthenticationFilter), so the auth we set was silently
-            // replaced with "anonymous" by the very next filter — AuthorizationFilter then
-            // saw an anonymous user and returned 403 on every authenticated POST.
-            //
-            // Installing the JWT filter AFTER AnonymousAuthenticationFilter means we are the
+            // it runs. Installing the JWT filter AFTER AnonymousAuthenticationFilter means we are the
             // last auth-establishing filter before AuthorizationFilter runs, so the context
             // we set is the one the authorization check sees.
             .addFilterAfter(jwtAuthFilter, org.springframework.security.web.authentication.AnonymousAuthenticationFilter.class);
