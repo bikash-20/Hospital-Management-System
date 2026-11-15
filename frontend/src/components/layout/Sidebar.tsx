@@ -31,6 +31,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  { label: 'Public Portal', path: '/public', icon: Activity, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_TECH', 'CASHIER', 'PATIENT'] },
   { label: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST', 'LAB_TECH', 'CASHIER'] },
   { label: 'Patients', path: '/patients', icon: Users, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
   { label: 'Patient History', path: '/patient-history', icon: ClipboardList, roles: ['ADMIN', 'DOCTOR', 'RECEPTIONIST'] },
@@ -164,8 +165,10 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
               transition={{ duration: 0.2 }}
               className="overflow-hidden whitespace-nowrap"
             >
-              <h2 className="text-sm font-bold text-white">CareBridge</h2>
-              <p className="text-[10px] text-surface-500 uppercase tracking-wider">RMS</p>
+              <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
+                CareBridge <span className="text-primary-400">AI</span>
+              </h2>
+              <p className="text-[10px] text-emerald-400 uppercase tracking-wider font-semibold">Intelligent Hospital</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -261,8 +264,10 @@ function MobileSidebarContent({
             <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm font-bold text-white truncate">CareBridge</h2>
-            <p className="text-[10px] text-surface-500 uppercase tracking-wider">RMS</p>
+            <h2 className="text-sm font-bold text-white truncate flex items-center gap-1">
+              CareBridge <span className="text-primary-400">AI</span>
+            </h2>
+            <p className="text-[10px] text-emerald-400 uppercase tracking-wider font-semibold">Intelligent Hospital</p>
           </div>
         </div>
         <motion.button

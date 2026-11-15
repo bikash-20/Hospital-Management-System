@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sun,
@@ -8,6 +9,7 @@ import {
   ChevronDown,
   User,
   Menu,
+  Languages,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { UserRole } from '@/types';
@@ -20,6 +22,7 @@ const roleLabels: Record<UserRole, string> = {
   RECEPTIONIST: 'Receptionist',
   LAB_TECH: 'Lab Technician',
   CASHIER: 'Cashier',
+  PATIENT: 'Patient',
 };
 
 const roleBadgeColors: Record<UserRole, string> = {
@@ -28,6 +31,7 @@ const roleBadgeColors: Record<UserRole, string> = {
   RECEPTIONIST: 'bg-emerald-500/12 text-emerald-400 border-emerald-500/25',
   LAB_TECH: 'bg-purple-500/12 text-purple-400 border-purple-500/25',
   CASHIER: 'bg-amber-500/12 text-amber-400 border-amber-500/25',
+  PATIENT: 'bg-teal-500/12 text-teal-400 border-teal-500/25',
 };
 
 interface TopNavProps {
@@ -37,6 +41,7 @@ interface TopNavProps {
 export default function TopNav({ onMenuToggle }: TopNavProps) {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { language, toggleLanguage } = useLanguage();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +87,18 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Command Palette Trigger */}
         <CommandPalette />
+
+        {/* Language toggle */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={toggleLanguage}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-white/5 border border-surface-200 dark:border-[#1E2E40] transition-colors"
+          title="Switch language"
+        >
+          <Languages className="w-4 h-4" />
+          <span>{language === 'en' ? 'বাংলা' : 'EN'}</span>
+        </motion.button>
 
         {/* Theme toggle */}
         <motion.button

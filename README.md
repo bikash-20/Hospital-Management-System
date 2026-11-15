@@ -1,26 +1,41 @@
-# CareBridge RMS live link: https://hospital-management-system-eta-nine.vercel.app/
-<img width="1334" height="915" alt="image" src="https://github.com/user-attachments/assets/e68331b2-d31d-47a5-96eb-ee0be1d0a34f" />
+# CareBridge AI — Intelligent Hospital Operating System
+**Live Link:** https://hospital-management-system-eta-nine.vercel.app/
 
+<img width="1334" height="915" alt="CareBridge AI" src="https://github.com/user-attachments/assets/e68331b2-d31d-47a5-96eb-ee0be1d0a34f" />
 
-> Student portfolio project. The live-demo deployment is intentionally a low-cost free-tier setup and must not be used with real patient data.
+> **CareBridge AI** is a personal AI-driven hospital operating system designed for clinics and regional healthcare centers. Built with a **dual online & offline architecture**, it unifies patient triage, automated seat/bed allocation, free patient health services via prescription OCR & RAG, and an intelligent copilot for hospital administration.
 
-## Current Deployment Plan
+---
 
-- Frontend: deploy `frontend/` to Vercel. Set `VITE_API_URL` to the deployed Render API URL.
-- Backend: deploy `backend/` to Render's free web service using `render.yaml` and `backend/Dockerfile`.
-- Database: use the existing Supabase PostgreSQL connection string through Render environment variables.
-- Schema: production uses Flyway migrations and `ddl-auto=validate`.
-- CORS: set `CORS_ALLOWED_ORIGINS` to the exact Vercel URL.
-- Redis, multiple backend instances, and a reverse proxy are intentionally excluded from the demo.
-- CI/CD: `.github/workflows/ci-cd.yml` tests both applications on every pull request and triggers a Render deployment after a successful push to `main`.
+## 🌟 Key Capabilities
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the free-tier design and the larger production architecture, and [LOAD_TESTING.md](LOAD_TESTING.md) for the local Docker benchmark.
+### 1. Dual Online & Offline AI Engine
+* **Multi-Tier Model Cascading**:
+  1. **xAI Grok** (`grok-2`, `grok-beta`)
+  2. **OpenRouter Free Tier** (Llama 3.3, Mistral)
+  3. **Google Gemini** (`gemini-2.5-flash`, `gemini-1.5-flash`)
+  4. **Local Offline Ollama** (`http://localhost:11434`, e.g., Llama 3 / Mistral)
+* **Voice AI (STT & TTS)**:
+  * Speech-to-Text via local Whisper endpoint (`http://localhost:5005/transcribe`) & Web Speech API.
+  * Text-to-Speech via ElevenLabs free voice ID (`21m00Tcm4TlvDq8ikWAM`), local Piper endpoint (`http://localhost:5006/speak`), & Web Speech synthesis.
 
-For local Docker with PostgreSQL defaults, use `docker compose --env-file /dev/null up -d --build`. The `--env-file /dev/null` flag prevents a local `.env` Supabase connection from being used accidentally.
+### 2. Free AI Health Services & Prescription RAG
+* **Public Exploration Without Login**: Non-registered visitors can explore hospital capabilities and monitor live bed capacity.
+* **Prescription OCR & Hash-Key Clinical RAG**: Patients can upload prescription photos to instantly extract medications, dosage schedules, precautions, and dietary warnings.
+* **Instant Q&A**: Ask health and medication questions in natural language with automatic clinical grounding.
 
-**CareBridge Resource Management System** — a full-stack hospital operations platform for clinics and regional hospitals in South/Southeast Asia.
+### 3. Real-Time Seat & Bed Tracking & Auto-Booking
+* **Live Availability Inventory**: Real-time status for **ICU**, **Emergency**, **General Ward**, and **Private Cabins**.
+* **Automated Admission & Receipt**: Instant bed availability check; if a seat is open, the system auto-confirms admission and produces a printable **Digital Admission Receipt** with token numbers and QR validation.
+* **Local MFS Payment Gateway**: Integrated demo deposit verification for **bKash (বিকাশ)**, **Nagad (নগদ)**, and **Upay (উপায়)**.
 
-Built to replace paper-based workflows with a unified digital system covering patient registration, doctor consultations, prescriptions, lab orders, billing, bed management, and real-time queue display.
+### 4. Role-Specific AI Staff Workspaces
+* The same underlying AI engineering dynamically configures its system prompt, live database tools, and quick actions for every role:
+  * **Admin**: Real-time bed occupancy, ICU loads, hospital revenue, doctor rosters.
+  * **Cashier**: Paid revenue collections, unpaid billing invoices, MFS transaction settlements.
+  * **Doctor**: OPD queue loads, drug dosage checks, patient visit history.
+  * **Receptionist**: Admission triage, token allocation, patient check-ins.
+* **Bilingual English & Bengali (বাংলা)**: Complete UI and AI translation toggle.
 
 ---
 

@@ -1,6 +1,6 @@
-# CareBridge RMS Architecture
+# CareBridge AI Architecture
 
-This document separates the architecture used by the free student demo from the architecture I would deploy for a larger hospital. The demo is intentionally small and inexpensive; it is not a claim that free hosting provides production availability or compliance guarantees.
+This document describes the architecture of **CareBridge AI** — an intelligent hospital operating system built for dual online (cloud) and local offline operation, featuring cascading AI models, live bed/ICU tracking, prescription OCR & RAG, and automated admission triage.
 
 ## Current Free-Tier Demo
 

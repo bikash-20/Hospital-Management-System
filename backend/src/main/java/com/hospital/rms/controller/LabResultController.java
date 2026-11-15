@@ -2,6 +2,8 @@ package com.hospital.rms.controller;
 
 import com.hospital.rms.dto.LabResultRequest;
 import com.hospital.rms.dto.LabResultResponse;
+import com.hospital.rms.entity.User;
+import com.hospital.rms.repository.UserRepository;
 import com.hospital.rms.service.LabResultService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +22,20 @@ import java.util.UUID;
 public class LabResultController {
 
     private final LabResultService labResultService;
+    private final UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<LabResultResponse> createLabResult(
             @Valid @RequestBody LabResultRequest request,
             Authentication authentication) {
-        UUID userId = UUID.fromString(authentication.getName());
+        UUID userId;
+        try {
+            userId = UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            userId = userRepository.findByUsername(authentication.getName())
+                .map(User::getId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + authentication.getName()));
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(labResultService.createLabResult(request, userId));
     }

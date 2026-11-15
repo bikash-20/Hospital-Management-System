@@ -3,7 +3,11 @@ export type PatientGender = 'MALE' | 'FEMALE' | 'OTHER';
 export type AppointmentStatus = 'WAITING' | 'IN_CONSULTATION' | 'COMPLETED' | 'CANCELLED';
 export type BillingStatus = 'UNPAID' | 'PARTIAL' | 'PAID';
 export type BedStatus = 'AVAILABLE' | 'OCCUPIED' | 'UNDER_CLEANING';
-export type UserRole = 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST' | 'LAB_TECH' | 'CASHIER';
+export type BedType = 'ICU' | 'EMERGENCY' | 'GENERAL' | 'CABIN';
+export type UserRole = 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST' | 'LAB_TECH' | 'CASHIER' | 'PATIENT';
+export type Language = 'en' | 'bn';
+export type BookingStatus = 'CONFIRMED' | 'PENDING' | 'CANCELLED' | 'ADMITTED';
+export type PaymentMethod = 'BKASH' | 'NAGAD' | 'UPAY' | 'CASH';
 
 // ===== Core Entities =====
 export interface Patient {
@@ -183,3 +187,124 @@ export interface DailyRevenue {
   revenue: number;
   invoiceCount: number;
 }
+
+// ===== CareBridge AI & Seat Availability =====
+export interface BedTypeStat {
+  type: BedType;
+  available: number;
+  total: number;
+  occupied: number;
+  dailyRate: number;
+}
+
+export interface DoctorInfo {
+  id: string;
+  name: string;
+  email: string;
+  specialization: string;
+  available: boolean;
+}
+
+export interface SeatAvailabilityResponse {
+  icu: BedTypeStat;
+  emergency: BedTypeStat;
+  general: BedTypeStat;
+  cabin: BedTypeStat;
+  totalBeds: number;
+  totalAvailable: number;
+  activeDoctors: DoctorInfo[];
+}
+
+export interface BedBookingRequest {
+  guestName: string;
+  guestPhone: string;
+  guestNid?: string;
+  guestGender: string;
+  guestAge: number;
+  bedType: BedType;
+  paymentMethod: PaymentMethod;
+  paymentTrxId: string;
+  paymentAmount?: number;
+  symptoms?: string;
+  notes?: string;
+}
+
+export interface BedBookingResponse {
+  id: string;
+  bookingReference: string;
+  uhid: string;
+  guestName: string;
+  guestPhone: string;
+  guestNid?: string;
+  guestGender: string;
+  guestAge: number;
+  bedType: BedType;
+  status: BookingStatus;
+  assignedBedId?: string;
+  assignedBedNumber: string;
+  assignedWard: string;
+  dailyRate: number;
+  paymentMethod: string;
+  paymentTrxId: string;
+  paymentAmount: number;
+  paymentStatus: string;
+  symptoms?: string;
+  notes?: string;
+  createdDate: string;
+  qrData: string;
+}
+
+// ===== AI Assistant & RAG =====
+export interface ActionSuggestion {
+  label: string;
+  action: 'NAVIGATE' | 'QUERY' | 'TRIGGER_OCR';
+  targetUrl?: string;
+}
+
+export interface AIChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+  modelUsed?: string;
+  isOffline?: boolean;
+  hashMatch?: boolean;
+  suggestions?: ActionSuggestion[];
+}
+
+export interface AIChatResponse {
+  reply: string;
+  modelUsed: string;
+  isOffline: boolean;
+  hashMatch: boolean;
+  suggestions?: ActionSuggestion[];
+  liveMetrics?: Record<string, unknown>;
+}
+
+export interface AISettingsPreferences {
+  ollamaUrl: string;
+  systemPrompt: string;
+  sttEndpoint: string;
+  ttsEndpoint: string;
+  elevenLabsVoiceId?: string;
+  grokApiKey?: string;
+  openRouterApiKey?: string;
+  geminiApiKey?: string;
+}
+
+export interface PrescriptionExtractedData {
+  patientName?: string;
+  age?: string;
+  date?: string;
+  diagnosis?: string;
+  medicines: Array<{
+    name: string;
+    dosage?: string;
+    duration?: string;
+    frequency?: string;
+    purpose?: string;
+  }>;
+  advice?: string;
+  hashKey?: string;
+}
+

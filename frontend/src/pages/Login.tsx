@@ -122,9 +122,9 @@ export default function Login() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-5xl font-bold text-white mb-3 tracking-tight"
+            className="text-5xl font-bold text-white mb-3 tracking-tight flex items-center justify-center gap-2"
           >
-            CareBridge
+            CareBridge <span className="text-primary-400">AI</span>
           </motion.h1>
 
           <motion.div
@@ -133,7 +133,7 @@ export default function Login() {
             transition={{ delay: 0.5, duration: 0.5 }}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/15 border border-primary-500/30 text-primary-200 text-xs font-semibold uppercase tracking-widest mb-6"
           >
-            <Sparkles className="w-3.5 h-3.5" /> Resource Management System
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Intelligent Hospital Operating System
           </motion.div>
 
           <motion.p
@@ -208,8 +208,8 @@ export default function Login() {
               <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-10 h-10" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">CareBridge</h1>
-              <p className="text-surface-400 text-sm">RMS</p>
+              <h1 className="text-2xl font-bold text-white">CareBridge <span className="text-primary-400">AI</span></h1>
+              <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Hospital System</p>
             </div>
           </motion.div>
 
@@ -219,8 +219,15 @@ export default function Login() {
             transition={{ delay: 0.2 }}
             className="text-center mb-8"
           >
-            <h2 className="text-2xl font-bold text-white mb-2">Welcome back</h2>
-            <p className="text-surface-400">Sign in to your account</p>
+            <h2 className="text-2xl font-bold text-white mb-1">Staff Portal Login</h2>
+            <p className="text-surface-400 text-sm mb-3">Sign in with clinical or admin credentials</p>
+            <button
+              type="button"
+              onClick={() => navigate('/public')}
+              className="inline-flex items-center gap-1.5 text-xs text-primary-400 hover:text-primary-300 font-medium hover:underline"
+            >
+              ← Return to Public Hospital Live Tracker & Bed Booking
+            </button>
           </motion.div>
 
           {/* Error */}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import CareBridgeAIChat from '@/components/ai/CareBridgeAIChat';
 
 export default function DashboardLayout() {
   const { isAuthenticated } = useAuth();
@@ -32,6 +33,9 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Global AI Assistant across all role layouts */}
+      <CareBridgeAIChat />
     </div>
   );
 }

@@ -5,5 +5,6 @@ public enum Role {
     DOCTOR,
     RECEPTIONIST,
     LAB_TECH,
-    CASHIER
+    CASHIER,
+    PATIENT
 }

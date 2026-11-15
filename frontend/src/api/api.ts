@@ -13,6 +13,10 @@ import type {
   DoctorSchedule,
   LabResult,
   RevenueReport,
+  SeatAvailabilityResponse,
+  BedBookingRequest,
+  BedBookingResponse,
+  AIChatResponse,
 } from '@/types';
 
 // ===== Backend Response Types (what the API actually returns) =====
@@ -518,3 +522,36 @@ export async function getRevenueByDateRangeApi(start: string, end: string): Prom
   const { data } = await api.get<RevenueReport>('/reports/revenue/range', { params: { start, end } });
   return data;
 }
+
+// ===== CareBridge AI Public & Booking APIs =====
+export async function getSeatAvailabilityApi(): Promise<SeatAvailabilityResponse> {
+  const { data } = await api.get<SeatAvailabilityResponse>('/public/availability');
+  return data;
+}
+
+export async function createBedBookingApi(req: BedBookingRequest): Promise<BedBookingResponse> {
+  const { data } = await api.post<BedBookingResponse>('/public/bookings', req);
+  return data;
+}
+
+export async function getBedBookingApi(reference: string): Promise<BedBookingResponse> {
+  const { data } = await api.get<BedBookingResponse>(`/public/bookings/${reference}`);
+  return data;
+}
+
+export async function getAllBedBookingsApi(): Promise<BedBookingResponse[]> {
+  const { data } = await api.get<BedBookingResponse[]>('/public/admin/bookings');
+  return data;
+}
+
+export async function chatAIApi(payload: {
+  message: string;
+  role?: string;
+  language?: string;
+  prescriptionText?: string;
+  history?: Array<{ role: string; content: string }>;
+}): Promise<AIChatResponse> {
+  const { data } = await api.post<AIChatResponse>('/ai/chat', payload);
+  return data;
+}
+

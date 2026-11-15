@@ -4,7 +4,9 @@ import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ToastProvider } from '@/context/ToastContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import PublicHome from '@/pages/PublicHome';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
 import PatientRegistration from '@/pages/PatientRegistration';
@@ -35,17 +37,27 @@ const queryClient = new QueryClient({
 function ProtectedRoute({ children, roles }: { children: ReactNode; roles?: string[] }) {
   const { isAuthenticated, user } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (roles && user && !roles.includes(user.role)) return <Navigate to="/" replace />;
+  if (roles && user && !roles.includes(user.role)) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
 function AnimatedRoutes() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        {/* Public routes accessible to everyone without login */}
+        <Route path="/public" element={<PublicHome />} />
         <Route path="/login" element={<Login />} />
+        
+        {/* Root Route: public portal for guests, redirects to dashboard for logged in staff */}
+        <Route
+          path="/"
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <PublicHome />}
+        />
+
         <Route
           element={
             <ProtectedRoute>
@@ -53,7 +65,7 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/patients" element={<ProtectedRoute roles={['ADMIN', 'RECEPTIONIST', 'DOCTOR']}><PatientRegistration /></ProtectedRoute>} />
           <Route path="/appointments" element={<ProtectedRoute roles={['ADMIN', 'RECEPTIONIST', 'DOCTOR']}><Appointments /></ProtectedRoute>} />
           <Route path="/consultation" element={<ProtectedRoute roles={['DOCTOR']}><DoctorConsultation /></ProtectedRoute>} />
@@ -62,7 +74,6 @@ function AnimatedRoutes() {
           <Route path="/beds" element={<ProtectedRoute roles={['ADMIN']}><BedManagement /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute roles={['ADMIN', 'CASHIER', 'RECEPTIONIST']}><Billing /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute roles={['ADMIN']}><Settings /></ProtectedRoute>} />
-          {/* New Routes */}
           <Route path="/audit-logs" element={<ProtectedRoute roles={['ADMIN']}><AuditLogs /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute roles={['ADMIN']}><UserManagement /></ProtectedRoute>} />
           <Route path="/schedule" element={<ProtectedRoute roles={['DOCTOR']}><DoctorSchedule /></ProtectedRoute>} />
@@ -80,13 +91,15 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <AnimatedRoutes />
-            </BrowserRouter>
-          </AuthProvider>
-        </ToastProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <BrowserRouter>
+                <AnimatedRoutes />
+              </BrowserRouter>
+            </AuthProvider>
+          </ToastProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

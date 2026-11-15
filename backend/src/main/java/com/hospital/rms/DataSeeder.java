@@ -175,11 +175,32 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private Bed createBed(String number, String ward, BedStatus status) {
-        return Bed.builder().bedNumber(number).wardName(ward).status(status).build();
+        return createBed(number, ward, status, null);
     }
 
     private Bed createBed(String number, String ward, BedStatus status, Patient patient) {
-        return Bed.builder().bedNumber(number).wardName(ward).status(status).patient(patient).build();
+        com.hospital.rms.enums.BedType type = com.hospital.rms.enums.BedType.GENERAL;
+        java.math.BigDecimal rate = java.math.BigDecimal.valueOf(800.00);
+
+        if (ward.toUpperCase().contains("ICU") || number.toUpperCase().contains("ICU")) {
+            type = com.hospital.rms.enums.BedType.ICU;
+            rate = java.math.BigDecimal.valueOf(5000.00);
+        } else if (ward.toUpperCase().contains("EMERGENCY") || number.toUpperCase().contains("EM")) {
+            type = com.hospital.rms.enums.BedType.EMERGENCY;
+            rate = java.math.BigDecimal.valueOf(2500.00);
+        } else if (ward.toUpperCase().contains("CABIN") || number.toUpperCase().contains("P-")) {
+            type = com.hospital.rms.enums.BedType.CABIN;
+            rate = java.math.BigDecimal.valueOf(3500.00);
+        }
+
+        return Bed.builder()
+            .bedNumber(number)
+            .wardName(ward)
+            .bedType(type)
+            .dailyRate(rate)
+            .status(status)
+            .patient(patient)
+            .build();
     }
 
     private Appointment createAppointment(Patient patient, User doctor,
