@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
-import { Printer, CheckCircle, Hospital, User, Phone, BedDouble, CreditCard, ShieldCheck } from 'lucide-react';
+import { Printer, CheckCircle, User, Phone, BedDouble, CreditCard, ShieldCheck } from 'lucide-react';
 import type { BedBookingResponse } from '@/types';
 
 interface DigitalAdmissionReceiptProps {
@@ -35,9 +35,9 @@ export default function DigitalAdmissionReceipt({ booking, onDone }: DigitalAdmi
         </div>
 
         {/* Hospital Branding Header */}
-        <div className="flex items-center gap-3 border-b border-surface-200 dark:border-[#2A3441] pb-5 mb-5">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-600 to-emerald-600 flex items-center justify-center text-white shadow-md">
-            <Hospital className="w-6 h-6" />
+        <div className="flex items-center gap-3.5 border-b border-surface-200 dark:border-[#2A3441] pb-5 mb-5">
+          <div className="w-13 h-13 rounded-2xl overflow-hidden shadow-md shadow-emerald-500/20 border border-emerald-500/30 shrink-0">
+            <img src="/carebridge-logo.png" alt="CareBridge AI Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-surface-900 dark:text-white flex items-center gap-2">

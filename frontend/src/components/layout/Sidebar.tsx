@@ -157,8 +157,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
     >
       {/* Logo */}
       <div className="p-4 flex items-center gap-3 border-b border-[#1E2E40] min-h-[64px]">
-        <div className="p-1 bg-white/95 rounded-xl shrink-0">
-          <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />
+        <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md shadow-emerald-500/20 shrink-0 border border-emerald-500/30">
+          <img src="/carebridge-logo.png" alt="CareBridge AI logo" className="w-full h-full object-cover" />
         </div>
         <AnimatePresence>
           {!isCollapsed && (
@@ -265,8 +265,8 @@ function MobileSidebarContent({
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-[#1E2E40] min-h-[64px]">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-1 bg-white/95 rounded-xl shrink-0">
-            <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-7 h-7" />
+          <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md shadow-emerald-500/20 shrink-0 border border-emerald-500/30">
+            <img src="/carebridge-logo.png" alt="CareBridge AI logo" className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
             <h2 className="text-sm font-bold text-white truncate flex items-center gap-1">

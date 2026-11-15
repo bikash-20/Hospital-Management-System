@@ -11,6 +11,7 @@ import {
   Menu,
   Languages,
   Sparkles,
+  Download,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { UserRole } from '@/types';
@@ -97,6 +98,19 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
         >
           <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
           <span className="hidden md:inline font-semibold">CareBridge AI</span>
+        </motion.button>
+
+        {/* PWA Install Trigger */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => window.dispatchEvent(new CustomEvent('open-pwa-install-banner'))}
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 transition-all shadow-sm"
+          style={{ minHeight: '38px' }}
+          title="Install CareBridge AI App"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span className="hidden xl:inline">{language === 'bn' ? 'অ্যাপ ইনস্টল' : 'Install App'}</span>
         </motion.button>
 
         {/* Command Palette Trigger */}

@@ -112,8 +112,8 @@ export default function Login() {
                 animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               />
-              <div className="relative p-4 bg-primary-500/20 rounded-2xl backdrop-blur-sm border border-primary-500/30 ring-1 ring-primary-400/20">
-                <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-16 h-16" />
+              <div className="relative w-24 h-24 rounded-3xl overflow-hidden shadow-2xl shadow-emerald-500/30 border-2 border-emerald-400/40">
+                <img src="/carebridge-logo.png" alt="CareBridge AI logo" className="w-full h-full object-cover" />
               </div>
             </div>
           </motion.div>
@@ -204,8 +204,8 @@ export default function Login() {
             transition={{ delay: 0.1 }}
             className="lg:hidden flex items-center gap-3 mb-8 justify-center"
           >
-            <div className="p-3 bg-primary-500/20 rounded-xl border border-primary-500/30">
-              <img src="/openhospital-logo.svg" alt="CareBridge medical logo" className="w-10 h-10" />
+            <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20 border border-emerald-500/30">
+              <img src="/carebridge-logo.png" alt="CareBridge AI logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">CareBridge <span className="text-primary-400">AI</span></h1>

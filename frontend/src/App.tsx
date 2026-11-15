@@ -23,6 +23,7 @@ import DoctorSchedule from '@/pages/DoctorSchedule';
 import LabResults from '@/pages/LabResults';
 import RevenueReports from '@/pages/RevenueReports';
 import PatientVisitHistory from '@/pages/PatientVisitHistory';
+import PWAInstallBanner from '@/components/pwa/PWAInstallBanner';
 import type { ReactNode } from 'react';
 
 const queryClient = new QueryClient({
@@ -95,6 +96,7 @@ export default function App() {
           <ToastProvider>
             <AuthProvider>
               <BrowserRouter>
+                <PWAInstallBanner />
                 <AnimatedRoutes />
               </BrowserRouter>
             </AuthProvider>

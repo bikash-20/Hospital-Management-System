@@ -20,6 +20,7 @@ import {
   ChevronRight,
   LogIn,
   Languages,
+  Download,
 } from 'lucide-react';
 
 export default function PublicHome() {
@@ -94,8 +95,8 @@ export default function PublicHome() {
       <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#161B22]/80 backdrop-blur-md border-b border-surface-200 dark:border-[#21262D]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-primary-500/20">
-              <Bot className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-emerald-500/20 shrink-0 border border-emerald-500/30">
+              <img src="/carebridge-logo.png" alt="CareBridge AI logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -109,7 +110,18 @@ export default function PublicHome() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* PWA Install Trigger */}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-pwa-install-banner'))}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 transition-all shadow-sm"
+              title="Install CareBridge AI App"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>{isBengali ? 'অ্যাপ ডাউনলোড' : 'Install App'}</span>
+            </button>
+
             {/* Language Switcher */}
             <button
               type="button"
