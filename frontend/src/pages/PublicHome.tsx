@@ -7,6 +7,7 @@ import type { BedType } from '@/types';
 import SeatBookingModal from '@/components/booking/SeatBookingModal';
 import DoctorAppointmentModal from '@/components/booking/DoctorAppointmentModal';
 import CareBridgeAIChat from '@/components/ai/CareBridgeAIChat';
+import hospitalNightBg from '@/assets/carebridge-hospital-night.jpg';
 import { useNavigate } from 'react-router-dom';
 import {
   HeartPulse,
@@ -99,15 +100,16 @@ export default function PublicHome() {
       {/* Ambient Hospital Center Campus Night Background (Fixed Wallpaper Layer) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img
-          src="/carebridge-hospital-night.jpg"
+          src={hospitalNightBg}
           alt="CareBridge Medical Center Campus"
-          className="w-full h-full object-cover object-center opacity-15 dark:opacity-25 scale-105 filter blur-[0.5px]"
+          className="w-full h-full object-cover object-center opacity-85 dark:opacity-80 scale-100 filter brightness-100 contrast-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/95 to-surface-50 dark:from-[#0D1117]/85 dark:via-[#0D1117]/90 dark:to-[#0D1117]" />
+        {/* Soft atmospheric gradient ensuring all sections, text, and cards pop with crystal clarity while keeping the hospital campus clearly visible */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/50 to-surface-50/80 dark:from-[#0D1117]/50 dark:via-[#0D1117]/45 dark:to-[#0D1117]/75" />
       </div>
 
       {/* Public Header / Navigation */}
-      <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#161B22]/80 backdrop-blur-md border-b border-surface-200 dark:border-[#21262D]">
+      <header className="sticky top-0 z-30 bg-white/75 dark:bg-[#161B22]/75 backdrop-blur-md border-b border-surface-200/60 dark:border-[#21262D]/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-emerald-500/20 shrink-0 border border-emerald-500/30">
@@ -183,28 +185,28 @@ export default function PublicHome() {
         </div>
       </header>
 
-      {/* Hero Section with Dedicated Hospital Campus Visual */}
-      <section className="relative overflow-hidden pt-14 pb-20 px-4 sm:px-6 lg:px-8 border-b border-surface-200/70 dark:border-[#21262D]/80">
+      {/* Hero Section with Prominent Night Hospital Campus Visual */}
+      <section className="relative overflow-hidden pt-16 pb-24 px-4 sm:px-6 lg:px-8 border-b border-surface-200/50 dark:border-[#21262D]/60 min-h-[480px] flex items-center justify-center">
         {/* Dedicated Hero Campus Night Imagery Accent */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <img
-            src="/carebridge-hospital-night.jpg"
+            src={hospitalNightBg}
             alt="CareBridge Medical Center Campus"
-            className="w-full h-full object-cover object-top opacity-20 dark:opacity-40 scale-100 filter brightness-95 contrast-105"
+            className="w-full h-full object-cover object-center opacity-85 dark:opacity-80 scale-100 filter brightness-95 contrast-105"
           />
-          {/* Gradients to gently blend image edges into background while ensuring 100% text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-surface-50 via-surface-50/75 to-surface-50/90 dark:from-[#0D1117] dark:via-[#0D1117]/80 dark:to-[#0D1117]/85" />
-          <div className="absolute inset-0 bg-gradient-to-r from-surface-50/95 via-transparent to-surface-50/95 dark:from-[#0D1117]/90 dark:via-transparent dark:to-[#0D1117]/90" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[320px] bg-primary-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Subtle soft dark gradient overlay ensuring contrast while leaving the hospital fully visible */}
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-50/40 via-transparent to-surface-50/30 dark:from-[#0D1117]/40 dark:via-transparent dark:to-[#0D1117]/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface-50/50 via-transparent to-surface-50/50 dark:from-[#0D1117]/50 dark:via-transparent dark:to-[#0D1117]/50" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[280px] bg-primary-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto text-center space-y-5">
+        <div className="relative z-10 max-w-5xl mx-auto text-center space-y-6">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-primary-50/90 dark:bg-primary-950/60 backdrop-blur-sm text-primary-700 dark:text-primary-300 border border-primary-200/80 dark:border-primary-800"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-primary-950/70 dark:bg-primary-950/80 backdrop-blur-md text-primary-300 border border-primary-500/40 shadow-lg"
           >
-            <Sparkles className="w-4 h-4 text-primary-500 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
             <span>{t('heroBadge')}</span>
           </motion.div>
 
@@ -212,19 +214,21 @@ export default function PublicHome() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-surface-900 dark:text-white leading-tight drop-shadow-sm"
+            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-surface-900 dark:text-white leading-tight drop-shadow-lg"
           >
             {t('heroTitle')}
           </motion.h1>
 
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-surface-600 dark:text-surface-300 max-w-3xl mx-auto leading-relaxed"
+            className="max-w-3xl mx-auto"
           >
-            {t('heroSubtitle')}
-          </motion.p>
+            <p className="text-base sm:text-lg text-surface-800 dark:text-surface-100 font-medium leading-relaxed drop-shadow-md bg-white/75 dark:bg-black/50 backdrop-blur-md px-5 py-3 rounded-2xl border border-surface-200/60 dark:border-white/10 shadow-lg">
+              {t('heroSubtitle')}
+            </p>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -235,7 +239,7 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={() => handleOpenBooking('EMERGENCY')}
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-700 hover:to-emerald-700 text-white font-bold text-sm sm:text-base shadow-xl shadow-primary-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-700 hover:to-emerald-700 text-white font-bold text-sm sm:text-base shadow-xl shadow-primary-600/30 flex items-center gap-2 transition-all hover:scale-[1.02]"
             >
               <HeartPulse className="w-5 h-5" />
               <span>{t('ctaBookBed')}</span>
@@ -247,7 +251,7 @@ export default function PublicHome() {
                 setSelectedDoctorForModal('');
                 setDoctorApptModalOpen(true);
               }}
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm sm:text-base shadow-xl shadow-blue-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm sm:text-base shadow-xl shadow-blue-600/30 flex items-center gap-2 transition-all hover:scale-[1.02]"
             >
               <Calendar className="w-5 h-5" />
               <span>{isBengali ? 'ডাক্তার অ্যাপয়েন্টমেন্ট নিন' : 'Book Doctor Appointment'}</span>
@@ -256,7 +260,7 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={() => setAiChatOpen(true)}
-              className="px-5 py-3.5 rounded-xl bg-white/80 hover:bg-white dark:bg-[#1C2128]/85 dark:hover:bg-[#262C36] backdrop-blur-md text-surface-800 dark:text-surface-200 font-bold text-sm sm:text-base border border-surface-200 dark:border-[#30363D] flex items-center gap-2 transition-all hover:scale-[1.02] shadow-sm"
+              className="px-5 py-3.5 rounded-xl bg-white/90 hover:bg-white dark:bg-[#1C2128]/90 dark:hover:bg-[#262C36] backdrop-blur-md text-surface-900 dark:text-white font-bold text-sm sm:text-base border border-surface-200 dark:border-[#30363D] flex items-center gap-2 transition-all hover:scale-[1.02] shadow-md"
             >
               <Bot className="w-5 h-5 text-primary-500" />
               <span>{t('ctaTalkAI')}</span>

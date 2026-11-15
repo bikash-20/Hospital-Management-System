@@ -18,6 +18,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import hospitalNightBg from '@/assets/carebridge-hospital-night.jpg';
 
 const trustMetrics: { label: string; value: string; icon: LucideIcon }[] = [
   { label: 'Avg. wait time', value: '−42%', icon: Activity },
@@ -84,13 +85,13 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
         <div className="absolute inset-0 pointer-events-none">
           <img
-            src="/carebridge-hospital-night.jpg"
+            src={hospitalNightBg}
             alt="CareBridge Hospital Campus"
-            className="w-full h-full object-cover opacity-20 mix-blend-luminosity filter blur-[0.5px]"
+            className="w-full h-full object-cover opacity-75 filter brightness-105 contrast-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0D1117]/80 via-[#0D1117]/85 to-[#0D1117]/95" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0D1117] via-[#0D1117]/50 to-[#0D1117]/35" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-600/15 to-primary-800/5" />
 
         {/* Animated background orbs */}
         <motion.div
