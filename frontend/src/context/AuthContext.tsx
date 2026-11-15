@@ -6,6 +6,7 @@ import { loginApi, getCurrentUserApi, logoutApi } from '@/api/api';
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isBootstrapping: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   hasRole: (...roles: UserRole[]) => boolean;
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   /**
    * Bootstrap the auth state by calling /api/auth/me. Succeeds if the browser
@@ -28,6 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(me);
     } catch {
       setUser(null);
+    } finally {
+      setIsBootstrapping(false);
     }
   }, []);
 
@@ -63,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated: !!user,
+        isBootstrapping,
         login,
         logout,
         hasRole,

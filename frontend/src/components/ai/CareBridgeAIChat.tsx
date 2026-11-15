@@ -649,7 +649,23 @@ export default function CareBridgeAIChat({ onOpenBooking, isOpenExternal, onClos
 
                 <div>
                   <label className="text-xs font-mono font-medium tracking-wider text-surface-400">
-                    {t('ttsEndpointLabel')}
+                    ELEVENLABS VOICE ID
+                  </label>
+                  <input
+                    type="text"
+                    value={preferences.elevenLabsVoiceId || 'EXAVITQu4vr4xnSDxMaL'}
+                    onChange={(e) => setPreferences({ ...preferences, elevenLabsVoiceId: e.target.value })}
+                    placeholder="EXAVITQu4vr4xnSDxMaL"
+                    className="w-full px-3.5 py-2 bg-[#161D27] border border-[#2C3647] rounded-xl text-xs font-mono text-white focus:outline-none focus:ring-2 focus:ring-primary-500 mt-1"
+                  />
+                  <div className="text-[10px] text-surface-500 font-mono mt-1">
+                    Default: EXAVITQu4vr4xnSDxMaL (Render server or client ElevenLabs)
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-mono font-medium tracking-wider text-surface-400">
+                    {t('ttsEndpointLabel')} (Local Piper)
                   </label>
                   <input
                     type="text"

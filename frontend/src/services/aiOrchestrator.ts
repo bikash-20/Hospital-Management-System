@@ -21,7 +21,7 @@ When a doctor asks about their queue or patient status (e.g. how many patients i
 - Respond in the user's language (Bengali or English) with polite clinical clarity.`,
   sttEndpoint: 'http://localhost:5005/transcribe',
   ttsEndpoint: 'http://localhost:5006/speak',
-  elevenLabsVoiceId: '21m00Tcm4TlvDq8ikWAM',
+  elevenLabsVoiceId: 'EXAVITQu4vr4xnSDxMaL',
 };
 
 const KATEX_MATH_REMINDER = '\n\nA LATEX MATH-FORMATTING REMINDER: When mentioning dosages, vital calculations, or equations, format them using LaTeX math delimiters ($...$ for inline, $$...$$ for display) so they render with KaTeX.';

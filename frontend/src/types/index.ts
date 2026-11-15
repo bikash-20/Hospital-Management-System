@@ -290,6 +290,7 @@ export interface AISettingsPreferences {
   sttEndpoint: string;
   ttsEndpoint: string;
   elevenLabsVoiceId?: string;
+  elevenLabsApiKey?: string;
   grokApiKey?: string;
   openRouterApiKey?: string;
   geminiApiKey?: string;

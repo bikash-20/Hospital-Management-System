@@ -24,6 +24,8 @@ import LabResults from '@/pages/LabResults';
 import RevenueReports from '@/pages/RevenueReports';
 import PatientVisitHistory from '@/pages/PatientVisitHistory';
 import PWAInstallBanner from '@/components/pwa/PWAInstallBanner';
+import ServerWakeupBanner from '@/components/common/ServerWakeupBanner';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 import type { ReactNode } from 'react';
 
 const queryClient = new QueryClient({
@@ -36,7 +38,22 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ children, roles }: { children: ReactNode; roles?: string[] }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isBootstrapping } = useAuth();
+
+  if (isBootstrapping) {
+    return (
+      <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center p-6 text-center text-white">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-4">
+          <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <h3 className="font-bold text-base text-white mb-1">Authenticating with Cloud Server...</h3>
+        <p className="text-xs text-surface-400 max-w-sm">
+          Please wait ~30s if the free tier instance is spinning up from sleep mode.
+        </p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (roles && user && !roles.includes(user.role)) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
@@ -44,7 +61,7 @@ function ProtectedRoute({ children, roles }: { children: ReactNode; roles?: stri
 
 function AnimatedRoutes() {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isBootstrapping } = useAuth();
 
   return (
     <AnimatePresence mode="wait">
@@ -53,10 +70,18 @@ function AnimatedRoutes() {
         <Route path="/public" element={<PublicHome />} />
         <Route path="/login" element={<Login />} />
         
-        {/* Root Route: public portal for guests, redirects to dashboard for logged in staff */}
+        {/* Root Route: public portal for guests, redirects to dashboard for logged in staff once verified */}
         <Route
           path="/"
-          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <PublicHome />}
+          element={
+            isBootstrapping ? (
+              <PublicHome />
+            ) : isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <PublicHome />
+            )
+          }
         />
 
         <Route
@@ -90,19 +115,22 @@ function AnimatedRoutes() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <LanguageProvider>
-          <ToastProvider>
-            <AuthProvider>
-              <BrowserRouter>
-                <PWAInstallBanner />
-                <AnimatedRoutes />
-              </BrowserRouter>
-            </AuthProvider>
-          </ToastProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <LanguageProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <BrowserRouter>
+                  <ServerWakeupBanner />
+                  <PWAInstallBanner />
+                  <AnimatedRoutes />
+                </BrowserRouter>
+              </AuthProvider>
+            </ToastProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

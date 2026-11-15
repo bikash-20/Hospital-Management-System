@@ -36,8 +36,61 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="margin: 0; background-color: #0D1117; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <div id="root">
+      <div id="initial-preloader" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #151E2B 0%, #0D1117 70%); color: #F0F6FC; padding: 24px; box-sizing: border-box; text-align: center;">
+        <style>
+          @keyframes cb-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 1; filter: drop-shadow(0 0 25px rgba(16, 185, 129, 0.45)); } }
+          @keyframes cb-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+          @keyframes cb-progress { 0% { width: 5%; } 50% { width: 70%; } 100% { width: 95%; } }
+          .cb-loader-ring { width: 52px; height: 52px; border: 3px solid rgba(16, 185, 129, 0.15); border-top: 3px solid #10B981; border-radius: 50%; animation: cb-spin 1s linear infinite; margin: 0 auto; }
+        </style>
+        
+        <div style="position: relative; margin-bottom: 24px;">
+          <div style="width: 88px; height: 88px; border-radius: 24px; overflow: hidden; border: 2px solid rgba(16, 185, 129, 0.4); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25); animation: cb-pulse 2.4s ease-in-out infinite; margin: 0 auto;">
+            <img src="/carebridge-logo.png" alt="CareBridge AI" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'" />
+          </div>
+        </div>
+
+        <h1 style="font-size: 26px; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px;">
+          CareBridge <span style="color: #10B981;">AI</span>
+        </h1>
+        <p style="font-size: 13px; font-weight: 600; color: #8B949E; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 28px 0;">
+          Intelligent Hospital Operating System
+        </p>
+
+        <div class="cb-loader-ring" style="margin-bottom: 22px;"></div>
+
+        <div style="max-width: 440px; background: rgba(22, 27, 34, 0.85); border: 1px solid #30363D; border-radius: 16px; padding: 18px 20px; box-shadow: 0 12px 28px rgba(0,0,0,0.4);">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600; color: #58A6FF; margin-bottom: 8px;">
+            <span>Connecting to Cloud Services</span>
+            <span id="cb-timer" style="font-family: monospace; font-size: 13px; background: rgba(88, 166, 255, 0.15); padding: 2px 7px; border-radius: 6px;">0s</span>
+          </div>
+
+          <p style="font-size: 12px; line-height: 1.6; color: #8B949E; margin: 0 0 14px 0;">
+            <strong style="color: #F0F6FC;">Render Free Tier Notice:</strong> When idle, cloud servers sleep to conserve resources. Waking up typically takes <strong style="color: #34D399;">~30-50 seconds</strong>. Please stay on this page.
+          </p>
+
+          <div style="width: 100%; height: 6px; background: #21262D; border-radius: 999px; overflow: hidden;">
+            <div style="height: 100%; background: linear-gradient(90deg, #10B981, #06B6D4); border-radius: 999px; animation: cb-progress 35s ease-out forwards;"></div>
+          </div>
+        </div>
+
+        <script>
+          (function() {
+            var start = Date.now();
+            var timerEl = document.getElementById('cb-timer');
+            if (timerEl) {
+              var interval = setInterval(function() {
+                var elapsed = Math.floor((Date.now() - start) / 1000);
+                timerEl.textContent = elapsed + 's';
+                if (elapsed > 90) clearInterval(interval);
+              }, 1000);
+            }
+          })();
+        </script>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
