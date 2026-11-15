@@ -95,7 +95,17 @@ export default function PublicHome() {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-[#0D1117] text-surface-900 dark:text-surface-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-surface-50 dark:bg-[#0D1117] text-surface-900 dark:text-surface-100 flex flex-col font-sans relative overflow-x-hidden selection:bg-primary-500/30">
+      {/* Ambient Hospital Center Campus Night Background (Fixed Wallpaper Layer) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <img
+          src="/carebridge-hospital-night.jpg"
+          alt="CareBridge Medical Center Campus"
+          className="w-full h-full object-cover object-center opacity-15 dark:opacity-25 scale-105 filter blur-[0.5px]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/95 to-surface-50 dark:from-[#0D1117]/85 dark:via-[#0D1117]/90 dark:to-[#0D1117]" />
+      </div>
+
       {/* Public Header / Navigation */}
       <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#161B22]/80 backdrop-blur-md border-b border-surface-200 dark:border-[#21262D]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -173,13 +183,26 @@ export default function PublicHome() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-16 px-4 sm:px-6 lg:px-8 border-b border-surface-200 dark:border-[#21262D]">
-        <div className="max-w-5xl mx-auto text-center space-y-5">
+      {/* Hero Section with Dedicated Hospital Campus Visual */}
+      <section className="relative overflow-hidden pt-14 pb-20 px-4 sm:px-6 lg:px-8 border-b border-surface-200/70 dark:border-[#21262D]/80">
+        {/* Dedicated Hero Campus Night Imagery Accent */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <img
+            src="/carebridge-hospital-night.jpg"
+            alt="CareBridge Medical Center Campus"
+            className="w-full h-full object-cover object-top opacity-20 dark:opacity-40 scale-100 filter brightness-95 contrast-105"
+          />
+          {/* Gradients to gently blend image edges into background while ensuring 100% text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-50 via-surface-50/75 to-surface-50/90 dark:from-[#0D1117] dark:via-[#0D1117]/80 dark:to-[#0D1117]/85" />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface-50/95 via-transparent to-surface-50/95 dark:from-[#0D1117]/90 dark:via-transparent dark:to-[#0D1117]/90" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[320px] bg-primary-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto text-center space-y-5">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-primary-50/90 dark:bg-primary-950/60 backdrop-blur-sm text-primary-700 dark:text-primary-300 border border-primary-200/80 dark:border-primary-800"
           >
             <Sparkles className="w-3.5 h-3.5 text-primary-500 animate-pulse" />
             <span>{t('heroBadge')}</span>
@@ -189,7 +212,7 @@ export default function PublicHome() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-surface-900 dark:text-white leading-tight"
+            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-surface-900 dark:text-white leading-tight drop-shadow-sm"
           >
             {t('heroTitle')}
           </motion.h1>
@@ -212,7 +235,7 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={() => handleOpenBooking('EMERGENCY')}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-700 hover:to-emerald-700 text-white font-semibold text-sm shadow-xl shadow-primary-600/25 flex items-center gap-2 transition-all"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-700 hover:to-emerald-700 text-white font-semibold text-sm shadow-xl shadow-primary-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
             >
               <HeartPulse className="w-4 h-4" />
               <span>{t('ctaBookBed')}</span>
@@ -224,7 +247,7 @@ export default function PublicHome() {
                 setSelectedDoctorForModal('');
                 setDoctorApptModalOpen(true);
               }}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-xl shadow-blue-600/25 flex items-center gap-2 transition-all"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-xl shadow-blue-600/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
             >
               <Calendar className="w-4 h-4" />
               <span>{isBengali ? 'ডাক্তার অ্যাপয়েন্টমেন্ট নিন' : 'Book Doctor Appointment'}</span>
@@ -233,7 +256,7 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={() => setAiChatOpen(true)}
-              className="px-5 py-3 rounded-xl bg-surface-100 hover:bg-surface-200 dark:bg-[#1C2128] dark:hover:bg-[#262C36] text-surface-800 dark:text-surface-200 font-semibold text-sm border border-surface-200 dark:border-[#30363D] flex items-center gap-2 transition-all"
+              className="px-5 py-3 rounded-xl bg-white/80 hover:bg-white dark:bg-[#1C2128]/85 dark:hover:bg-[#262C36] backdrop-blur-md text-surface-800 dark:text-surface-200 font-semibold text-sm border border-surface-200 dark:border-[#30363D] flex items-center gap-2 transition-all hover:scale-[1.02] shadow-sm"
             >
               <Bot className="w-4 h-4 text-primary-500" />
               <span>{t('ctaTalkAI')}</span>
@@ -243,7 +266,7 @@ export default function PublicHome() {
       </section>
 
       {/* Real-time Seat Availability Cards */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-surface-900 dark:text-white flex items-center gap-2">
@@ -255,7 +278,7 @@ export default function PublicHome() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400 bg-surface-100 dark:bg-[#161B22] px-3 py-1.5 rounded-lg border border-surface-200 dark:border-[#30363D]">
+          <div className="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400 bg-white/80 dark:bg-[#161B22]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-surface-200 dark:border-[#30363D]">
             <Clock className="w-3.5 h-3.5 text-primary-500" />
             <span>{isBengali ? '১০ সেকেন্ড পর পর স্বয়ংক্রিয় আপডেট' : 'Auto-refreshed every 10s'}</span>
           </div>
@@ -273,7 +296,7 @@ export default function PublicHome() {
               <motion.div
                 key={card.type}
                 whileHover={{ y: -4 }}
-                className={`bg-white dark:bg-[#161B22] border ${card.borderColor} rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between`}
+                className={`bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border ${card.borderColor} rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col justify-between`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -327,7 +350,7 @@ export default function PublicHome() {
       </section>
 
       {/* Specialist Doctors & Chamber Queue Section */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200 dark:border-[#21262D]">
+      <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200/70 dark:border-[#21262D]">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-surface-900 dark:text-white flex items-center gap-2">
@@ -358,7 +381,7 @@ export default function PublicHome() {
           {(seatData?.activeDoctors || []).map((doc) => (
             <div
               key={doc.id}
-              className="bg-white dark:bg-[#161B22] border border-surface-200 dark:border-[#21262D] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+              className="bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border border-surface-200 dark:border-[#21262D] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -405,9 +428,9 @@ export default function PublicHome() {
       </section>
 
       {/* Feature Highlights: Free AI Health Services & Hospital Management */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200 dark:border-[#21262D]">
+      <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full border-t border-surface-200/70 dark:border-[#21262D]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#161B22] border border-surface-200 dark:border-[#21262D]">
+          <div className="p-6 rounded-2xl bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border border-surface-200 dark:border-[#21262D]">
             <div className="w-10 h-10 rounded-xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center mb-4">
               <Bot className="w-5 h-5" />
             </div>
@@ -421,7 +444,7 @@ export default function PublicHome() {
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#161B22] border border-surface-200 dark:border-[#21262D]">
+          <div className="p-6 rounded-2xl bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border border-surface-200 dark:border-[#21262D]">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
               <ShieldCheck className="w-5 h-5" />
             </div>
@@ -435,7 +458,7 @@ export default function PublicHome() {
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#161B22] border border-surface-200 dark:border-[#21262D]">
+          <div className="p-6 rounded-2xl bg-white/90 dark:bg-[#161B22]/90 backdrop-blur-md border border-surface-200 dark:border-[#21262D]">
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
               <UserCheck className="w-5 h-5" />
             </div>
@@ -452,7 +475,7 @@ export default function PublicHome() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-6 border-t border-surface-200 dark:border-[#21262D] text-center text-xs text-surface-500">
+      <footer className="relative z-10 mt-auto py-6 border-t border-surface-200/70 dark:border-[#21262D] text-center text-xs text-surface-500">
         <p>CareBridge AI • Personal Intelligent Hospital Management System</p>
       </footer>
 

@@ -80,8 +80,16 @@ export default function Login() {
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
       />
 
-      {/* Left side - Branding */}
+      {/* Left side - Branding with Hospital Campus Night Atmosphere */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
+        <div className="absolute inset-0 pointer-events-none">
+          <img
+            src="/carebridge-hospital-night.jpg"
+            alt="CareBridge Hospital Campus"
+            className="w-full h-full object-cover opacity-20 mix-blend-luminosity filter blur-[0.5px]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0D1117]/80 via-[#0D1117]/85 to-[#0D1117]/95" />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 to-primary-800/10" />
 
         {/* Animated background orbs */}
